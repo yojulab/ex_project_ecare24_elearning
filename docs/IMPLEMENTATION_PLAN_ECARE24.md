@@ -1,6 +1,6 @@
 # [구현 계획서] ecare24 환자 질환별 전문간병사 자격과정 통합 플랫폼
 
-- **문서 번호**: ECARE24-IMPL-2026-001 (Rev. 0.1 Draft)
+- **문서 번호**: ECARE24-IMPL-2026-001 (Rev. 0.2 Draft)
 - **작성일자**: 2026. 10. 12
 - **근거 문서**:
   - PRD: [TASK_SPECIFICATION_ECARE24.md](./TASK_SPECIFICATION_ECARE24.md) (ECARE24-SOW-2026-001 Rev. 1.2)
@@ -60,13 +60,13 @@ PRD §9 기능 ID를 기준으로 담당 모듈·화면·테스트를 1:1 매핑
 
 | # | 항목 | PRD 내 상충 내용 | 권고안 |
 | :---: | :--- | :--- | :--- |
-| G1 | 필수 이수시간 | §2.2 "이론40+실기20+실습20=80h" vs §5 `courses.required_hours` 예시 "60시간" | 질환군별 `theory/practical/practicum_hours` 3컬럼 분리, 기본값 40/20/20 |
+| G1 | 필수 이수시간 | §2.2 "이론40+실기20+실습20=80h" vs §5 `courses.required_hours` 예시 "60시간" | ✅ **확정**: 질환군별 차등. `theory/practical/practicum_hours` 3컬럼 분리, 값은 §12.2 편성표(Phase 0-6)에서 질환군마다 확정 |
 | G2 | 자격번호 포맷 | §2.2 `EC24-2026-NEURO-XXXXX` vs §10 `EC24-2026-XXXX` | `EC24-{YYYY}-{질환코드4~6자}-{5자리 시퀀스}` 로 통일 (질환군별 연도 시퀀스) |
 | G3 | 진도 기준 | 응시조건 "진도율 80%" — 교안/실기 각각인지 합산인지 불명확 | **Step1·Step2 각각 80% 이상 AND 실습일지 승인 AND 필수시간 충족** |
 | G4 | 백엔드 모듈 수 | "8대 모듈"이라 하나 9개 나열(payments 포함) | 9개 + 보강 모듈(progress, practicum, eligibility, notifications, cti-gateway, media-assets) 확정 |
-| G5 | Admin 프레임워크/ENV | Vite/Next 혼용, ENV는 `NEXT_PUBLIC_*` | **결정 필요**: Admin=Vite SPA 권고(내부망·SEO 불필요) → `VITE_*` 접두어로 변경 |
-| G6 | User 프레임워크 | Next.js / Vite 미확정 | **Next.js 권고**: 공개 진위조회(`/verify`), 16개 질환 소개 페이지 SEO·SSR 필요 |
-| G7 | 모바일 빌드 방식 | "Expo or RN CLI" + `android/`·`ios/` 폴더 | **Expo(Prebuild/Dev Client)** 권고: OTA, FCM, 파일시스템 캐싱 모듈 활용. `android/ios`는 prebuild 생성물로 취급 |
+| G5 | Admin 프레임워크/ENV | Vite/Next 혼용, ENV는 `NEXT_PUBLIC_*` | ✅ **확정**: Vite + React 18+ + Ant Design → ENV 접두어 `VITE_*`로 변경 |
+| G6 | User 프레임워크 | Next.js / Vite 미확정 | ✅ **확정**: Next.js 14+ App Router + Tailwind CSS (공개 진위조회 `/verify`·질환 소개 SEO/SSR) |
+| G7 | 모바일 빌드 방식 | "Expo or RN CLI" + `android/`·`ios/` 폴더 | ✅ **확정**: Expo SDK 51+ + Expo Router (Prebuild/Dev Client, FCM·오프라인 캐싱). `android/ios`는 prebuild 생성물로 취급 |
 
 ### 2.2 DDL 누락 테이블 (ERD에는 있으나 DDL 미정의 또는 기능상 필수)
 
@@ -152,10 +152,13 @@ flowchart LR
 
 | 등급 | 기준 | 사용처 | 이수시간 인정 |
 | :---: | :--- | :--- | :---: |
-| **A** | 질환 병태생리·Red Flag·응급대처 직접 관련 (예: 1.3 뇌졸중 전조증상, 3.6 협심증 강의 시리즈) | Step 1 교안 챕터 하단 "전문의 참고강의" | 권고: **불인정**(참고) — 정책 결정 필요 |
+| **A** | 질환 병태생리·Red Flag·응급대처 직접 관련 (예: 1.3 뇌졸중 전조증상, 3.6 협심증 강의 시리즈) | Step 1 교안 챕터 하단 "전문의 참고강의" | ✅ **확정: Step 1 이론시간 인정** (§12.3 안전장치 적용) |
 | **B** | 생활관리·식단·운동, 1분 쇼츠 | 간병24TV 탭, 숏폼 스와이프, 무료 퍼널 | 불인정 |
 | **C** | 질환 관련이나 간병 직무 연관 낮음 | 질환 라이브러리 | 불인정 |
 | **X** | 오분류, 채용·홍보·병원 안내 | 제외 | — |
+
+> [!NOTE]
+> **이수시간 인정 결정 반영**: 사용자 결정에 따라 큐레이션 A등급 전문의 영상은 Step 1 이론 이수시간으로 인정합니다(B/C등급은 불인정 유지). 인정 시간 산정 기준, 상한선(Cap), 가용성 감사 및 안전장치는 [§12.3 확정 사항](#123-확정-사항--snubh-영상-이수시간-인정과-안전장치)을 엄격히 적용합니다.
 
 > [!IMPORTANT]
 > PRD Step 2의 "체위 변경, 튜브/카테터 위생, 흡인 보조, 연하 재활 보조 4K 실습 영상"은 SNUBH 자료로 충족되지 않는다. **질환군별 자체 실기 촬영 목록(Shot List)** 을 별도 산출물로 기획해야 하며, 이것이 콘텐츠 측 크리티컬 패스다 (§3.5).
@@ -434,7 +437,7 @@ PASS/NICE 실연동, PG 결제·환불, CTI 벤더 어댑터, 카카오 알림�
 | :---: | :--- | :--- | :--- |
 | R1 | 민간자격 표기: PRD의 `[정상 인증 / 보건복지부-직능원 등록]` 문구는 국가·공인자격 오인 소지 | 규정 위반·신뢰도 | 자격기본법상 민간자격 표시 의무 문구(등록번호, 국가자격 아님 등)로 대체 — **법무 확인 필요** |
 | R2 | 의료행위 경계: 석션·튜브 관리 등은 의료인 업무와 경계가 모호 | 법적·안전 | 교안·영상을 "의료진 지시 하 보조/관찰·보고" 중심으로 서술, 법무·간호 자문 |
-| R3 | 제3자 YouTube 콘텐츠: 플레이어 기능 제한(배속 제한 등)·유료 상품 내 사용 | 정책 위반 | 공식 임베드만 사용, SNUBH 영상은 이수시간·배속 통제 대상에서 제외, 필요 시 병원 측 이용 협의 |
+| R3 | 제3자 YouTube 콘텐츠: 플레이어 기능 제한(배속 제한 등)·유료 상품 내 사용 | 정책 위반 | 공식 임베드만 사용. **SNUBH 이수 인정 확정에 따라 병원 측 서면 이용 협의를 Phase 1 착수 전 필수 선행(블로커)로 격상**. 협의 불발 시 인정 대상을 자체 제작 영상으로 대체하는 폴백 유지 |
 | R4 | 웹 DRM 한계: 캡처 방지는 웹에서 완전 차단 불가 | 콘텐츠 유출 | 동적 워터마크(이름·ID·시각) + 서명 URL 만료로 추적성 확보 |
 | R5 | 4주 일정 | 품질 저하 | §9 Phase 분리, Mock 우선 |
 | R6 | 실버 사용자 본인인증 이탈 | 전환율 | 간편인증 우선 노출, 콜센터 보조 가이드 |
@@ -444,13 +447,78 @@ PASS/NICE 실연동, PG 결제·환불, CTI 벤더 어댑터, 카카오 알림�
 
 ## 12. 의사결정 요청 사항 (Open Questions)
 
-1. **프레임워크**: User=Next.js, Admin=Vite SPA, Mobile=Expo 권고안 승인 여부 (G5–G7)
-2. **이수시간**: 질환군 공통 40/20/20h로 할지, 질환군별 차등할지 (G1)
-3. **SNUBH 영상 이수 인정 여부**: 참고강의(불인정) 권고안 승인 여부 (§3.3)
-4. **MVP 질환군 범위**: 4주 내 16개 전부 메타·화면 오픈 + 실 콘텐츠는 우선 5개 군만 탑재하는 안 승인 여부
-5. **정규시험 형식**: 실기 시뮬레이션 문항(CASE_STUDY) 비중, 과목 구성(예: 질환이해/간병실무/응급·안전)
-6. **CTI 벤더·알림톡 대행사**: 선정 일정
-7. **Phase 0 산출물 착수 순서**: 0-1(DDL)·0-6(커리큘럼) 우선 권고
+### 12.1 확정 사항 — 기술 스택 및 모노레포 (Rev 0.2)
+
+| 타겟 | 확정 스택 |
+| :--- | :--- |
+| `frontend_user/` | Next.js 14+ (App Router), Tailwind CSS, TanStack Query, Zustand |
+| `frontend_admin/` | Vite + React 18+, Ant Design |
+| `mobileApp/` | React Native + Expo SDK 51+, Expo Router |
+| `packages/types` | 공통 TS 타입(OpenAPI 생성 DTO, enum: `StepType`, `CertStatus`, 사유코드 등) |
+| `packages/utils` | 공통 순수 로직(자격번호 포맷, 진도 구간 합산, 과락/합격 계산, 마스킹, 이수시간 환산) |
+| 빌드 오케스트레이션 | **Turborepo** (+ 패키지 매니저 workspaces) |
+
+```text
+ecare24/
+├── turbo.json · package.json(workspaces) · .env.example
+├── frontend_user/  frontend_admin/  mobileApp/  backend/  tests/
+├── packages/
+│   ├── types/      # 앱 간 단일 타입 소스 (backend OpenAPI → 생성)
+│   └── utils/      # 클라이언트·서버 공용 순수 함수 (UI 의존성 금지)
+└── docs/
+```
+
+- **파이프라인**: `types` → `utils` → 각 앱 순서로 `build/lint/test` 캐시 (`turbo run --filter`).
+- **경계 규칙**: `packages/*`는 React/Node 전용 API 미사용(웹·RN·Nest 모두 import 가능). 채점·자격판정 **정답 로직의 단일 소스는 backend**이며, `utils` 사본은 UI 사전 안내용(서버 재검증 필수).
+- **ENV**: Admin=`VITE_*`, User=`NEXT_PUBLIC_*`, Mobile=`EXPO_PUBLIC_*`. 비밀값은 앱 번들에 포함 금지(YouTube API 키는 backend 전용 — PRD의 `NEXT_PUBLIC_YOUTUBE_API_KEY` 제거).
+- **영향**: §9 Sprint1 Day 3·5 스캐폴딩에 Turborepo 초기화 및 `packages/*` 생성이 포함됨. PRD §4.2 폴더 구조에 `packages/` 추가(변경 승인 이력으로 기록).
+
+### 12.2 확정 사항 — 질환군별 차등 이수시간
+
+- 모든 질환군은 `theory_hours / practical_hours / practicum_hours` 개별 값을 가진다 (PRD 예시 40/20/20은 **참고 기준값**일 뿐).
+- 산정 근거 가이드(Phase 0-6 편성표에서 질환군별 확정, 간호 자문 필수): 의료 의존도·시술 복잡도가 높은 군(예: 05 소화기=피딩/PEG/장루, 06 비뇨=폴리, 11 중환자, 16 응급기도)은 **실기·실습 비중 상향**, 인지·정신·호스피스 군은 **이론·커뮤니케이션 비중 상향**.
+- 응시자격(§5.1)은 `course.*_hours` 질환군별 값을 참조. `utils`의 환산 함수와 backend 판정이 동일 입력 테스트 벡터를 공유.
+- 질환군별 값 변경 이력은 `course_versions`(또는 `courses.version`)로 관리 — 수강 시작 시점 버전 고정(소급 적용 금지).
+
+### 12.3 확정 사항 — SNUBH 영상 이수시간 인정과 안전장치
+
+이수 인정이 확정됨에 따라, 인정이 **감사 가능**하도록 아래 규칙을 적용한다. (아래 수치는 제안값이며 Phase 0-8 운영규정에서 최종 확정)
+
+1. **인정 범위**: 큐레이션 **A등급**만, **Step 1 이론시간**에만 가산. 실기·실습시간은 자체 제작 영상·실습일지로만 충족.
+2. **상한(Cap)**: 질환군별 `snubh_credit_cap_hours` 컬럼 신설. 제안: 해당 군 `theory_hours`의 **50% 이내** (교안 학습이 외부 영상으로 대체되지 않도록).
+3. **시간 산정**: 영상 길이가 아닌 **서버가 검증한 실시청 시간**. YouTube IFrame Player API의 `onStateChange`·`getCurrentTime`·`getPlaybackRate` 기반 heartbeat 수집(`video_watch_sessions`에 `source=YOUTUBE_EMBED` 구분).
+4. **통제 한계 명시**: 임베드는 자체 호스팅 대비 스킵·배속·탭 이탈 통제력이 낮음 → ① 재생속도 1.0 초과 구간 미인정 ② 탭 비활성(visibilitychange) 구간 미인정 ③ 구간 합집합 80% 이상일 때만 해당 영상 완료 인정 ④ 영상별 확인 퀴즈(1~3문항) 통과 시 인정(권고).
+5. **영상 완료 단위 인정**: 부분 시청은 가산하지 않음(영상 단위 all-or-nothing, 길이는 YouTube API `contentDetails.duration`).
+6. **가용성 위험**: 영상 비공개·삭제·임베드 차단 시 이미 인정된 시간은 유지하고(`credited_snapshot` 보존), 신규 수강자에겐 대체 영상 매핑. 일 1회 가용성 점검 잡 추가(`media-tv24`).
+7. **DDL 영향**: `external_videos(credit_eligible, grade, duration_sec, last_checked_at)`, `step_progress.credited_seconds_by_source`, `courses.snubh_credit_cap_hours`.
+8. **직능원 등록 서류**: 이수시간 구성(자체 vs 외부 영상 비율)과 외부 콘텐츠 이용 권한 증빙을 교육과정표에 명기.
+
+> [!WARNING]
+> 제3자(병원) 영상을 유료 과정의 공식 이수시간으로 활용하는 것은 병원 측 이용 허락과 유튜브 약관 양쪽 확인이 필요합니다(R3). 협의 결과에 따라 상한·인정 범위가 조정될 수 있습니다.
+
+### 12.4 확정 사항 — MVP 범위 (화면 16개 군 전체 / 실제 콘텐츠 5개 군)
+
+- **전 16개 군**: 질환 마스터, 카드·스텝바 화면, 과정 상세, 교안 뷰어 골격, 문제은행 구조, 자격증 템플릿을 모두 개방. 콘텐츠 미탑재 군은 상태 `COMING_SOON`(수강신청 불가, 알림 신청 CTA).
+- **콘텐츠 탑재 5개 군(잠정안, 확정 필요)**: 아래 선정 기준 — ① 간병 현장 수요(피딩·폴리·체변·섬망 등 10대 골든 룰 커버) ② SNUBH A등급 확보량 ③ 자체 실기 촬영 용이성.
+
+| 순위 | 질환군 | 선정 사유 | 우려 |
+| :---: | :--- | :--- | :--- |
+| 1 | **01 신경계** | 뇌졸중 편마비(탈건착환·트랜스퍼·낙상), SNUBH 59편 풍부 | — |
+| 2 | **05 소화기·간담도** | 피딩·엘튜브·PEG·장루 실기 비중 최고 | SNUBH 오분류 최다 → 큐레이션 선행, A등급 부족 시 이론 상한 활용도 낮음 |
+| 3 | **06 비뇨·신장** | 폴리·유린백·투석, SNUBH 73편 | Foley 직접 영상 소수 |
+| 4 | **09 인지·정신·치매** | 섬망·BPSD, 간병 수요 최상위 | SNUBH 26편 중 간병 직결 소수 |
+| 5 | **13 노인성 복합만성** | 체변 q2hr·욕창·와상 토탈케어 | 184편 중 138편 제외 대상 → 실질 A등급 소량 |
+
+- **대안**: 데이터가 풍부한 03 심혈관(47편, 협심증 시리즈)·08 종양(34편)을 13 또는 05 대신 넣는 안 → 콘텐츠 품질 우선이면 대안 채택. **Phase 0-7 큐레이션 결과(군별 A등급 편수)로 최종 확정**.
+- **오픈 순서 영향**: 16(응급기도·연하)·02(호흡기)는 석션 실기 의료 경계(R2)로 후순위.
+
+### 12.5 남은 의사결정 사항
+
+1. **MVP 5개 군 최종 확정** (§12.4 잠정안 승인 또는 교체)
+2. **SNUBH 이용 협의 담당·일정** 및 **인정 상한 비율(제안 50%)** 승인
+3. **정규시험 형식**: 실기 시뮬레이션 문항(CASE_STUDY) 비중, 과목 구성(예: 질환이해/간병실무/응급·안전)
+4. **CTI 벤더·알림톡 대행사**: 선정 일정
+5. **Phase 0 산출물 착수 순서**: 0-1(DDL)·0-6(질환군별 이수시간 편성표) 우선 권고
 
 ---
 
@@ -459,3 +527,4 @@ PASS/NICE 실연동, PG 결제·환불, CTI 벤더 어댑터, 카카오 알림�
 | Rev | 일자 | 내용 |
 | :--- | :--- | :--- |
 | 0.1 | 2026-10-12 | PRD Rev 1.2 및 SNUBH 690편 분석 기반 초안 작성 |
+| 0.2 | 2026-10-12 | 사용자 결정 반영: Next/Vite+AntD/Expo + Turborepo(packages/types·utils), 질환군별 이수시간, SNUBH A등급 이수 인정(안전장치), MVP 5개 군 콘텐츠(잠정) |
