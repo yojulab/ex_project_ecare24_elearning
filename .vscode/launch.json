@@ -16,14 +16,31 @@
       "url": "http://localhost:3001",
       "webRoot": "${workspaceFolder}/frontend_admin/src",
       "sourceMaps": true
+    },
+    {
+      "name": "mobileApp: Mobile Web Simulator (Port 3002)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3002",
+      "webRoot": "${workspaceFolder}/mobileApp/src",
+      "sourceMaps": true
+    },
+    {
+      "name": "mobileApp: React Native CLI / Metro",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/mobileApp",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"]
     }
   ],
   "compounds": [
     {
-      "name": "Fullstack: User Web (:3000) + Admin CS (:3001)",
+      "name": "Fullstack: User Web (:3000) + Admin CS (:3001) + Mobile (:3002)",
       "configurations": [
         "Frontend User: Next.js (Port 3000)",
-        "Frontend Admin: React Admin Vite (Port 3001)"
+        "Frontend Admin: React Admin Vite (Port 3001)",
+        "mobileApp: Mobile Web Simulator (Port 3002)"
       ]
     }
   ]

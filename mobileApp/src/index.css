@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* ==========================================================================
+   의뢰자 소통용 UI 일련번호 인스펙션 뱃지 시스템 (ui-tagging-inspection.md)
+   ========================================================================== */
+.ui-serial-badge {
+  display: none;
+  position: absolute;
+  top: -8px;
+  left: 0px;
+  z-index: 9999;
+  background-color: #7c3aed;
+  color: #ffffff;
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #c4b5fd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.15s ease-in-out;
+}
+
+.ui-inspection-mode .ui-serial-badge {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.ui-serial-badge:hover {
+  background-color: #6d28d9;
+  transform: scale(1.08);
+}
+
+.ui-serial-badge.copied {
+  background-color: #10b981 !important;
+  border-color: #6ee7b7 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   실버 UX 접근성 폰트 스케일러 (Font Scaling [가-/가/가+])
+   ========================================================================== */
+.font-scale-sm {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.font-scale-md {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.font-scale-lg {
+  font-size: 20px;
+  line-height: 1.7;
+}
+
+.font-scale-lg h1 {
+  font-size: 1.6em;
+}
+.font-scale-lg h2 {
+  font-size: 1.4em;
+}
+.font-scale-lg h3 {
+  font-size: 1.25em;
+}
+
+/* ==========================================================================
+   실버 UX 초고대비 (High Contrast) 모드
+   ========================================================================== */
+.high-contrast {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+
+.high-contrast .bg-white,
+.high-contrast .bg-slate-50,
+.high-contrast .bg-slate-100,
+.high-contrast .bg-slate-200 {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+
+.high-contrast .text-slate-900,
+.high-contrast .text-slate-800,
+.high-contrast .text-slate-700,
+.high-contrast .text-slate-600 {
+  color: #ffffff !important;
+}
+
+.high-contrast .border {
+  border-color: #ffff00 !important;
+}
+
+.high-contrast .bg-blue-600,
+.high-contrast .bg-blue-700 {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  font-weight: 900 !important;
+}
+
+/* ==========================================================================
+   모바일 최적화 스크롤바 & 유틸리티
+   ========================================================================== */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.03); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite ease-in-out;
+}

@@ -5,10 +5,12 @@
   "workspaces": [
     "packages/*",
     "frontend_user",
-    "frontend_admin"
+    "frontend_admin",
+    "mobileApp"
   ],
   "scripts": {
     "dev:user": "npm run dev --workspace=frontend_user",
-    "dev:admin": "npm run dev --workspace=frontend_admin"
+    "dev:admin": "npm run dev --workspace=frontend_admin",
+    "dev:mobile": "npm run dev --workspace=mobileApp"
   }
 }
