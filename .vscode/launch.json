@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Frontend User: Next.js (Port 3000)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/frontend_user/src",
+      "sourceMaps": true
+    },
+    {
+      "name": "Frontend Admin: React Admin Vite (Port 3001)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3001",
+      "webRoot": "${workspaceFolder}/frontend_admin/src",
+      "sourceMaps": true
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Fullstack: User Web (:3000) + Admin CS (:3001)",
+      "configurations": [
+        "Frontend User: Next.js (Port 3000)",
+        "Frontend Admin: React Admin Vite (Port 3001)"
+      ]
+    }
+  ]
+}

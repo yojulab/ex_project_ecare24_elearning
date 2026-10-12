@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-scale: 1;
+}
+
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: font-size 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* 실버 친화적 글자 크기 3단계 스케일링 */
+body.font-scale-normal {
+  font-size: 16px;
+}
+body.font-scale-large {
+  font-size: 18px;
+}
+body.font-scale-larger {
+  font-size: 20px;
+}
+
+/* 고대비 모드 (High Contrast Mode) */
+body.high-contrast {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+body.high-contrast * {
+  border-color: #ffff00 !important;
+}
+body.high-contrast a,
+body.high-contrast button {
+  color: #ffff00 !important;
+}
+body.high-contrast .bg-white,
+body.high-contrast .bg-slate-50,
+body.high-contrast .bg-slate-100 {
+  background-color: #121212 !important;
+  color: #ffffff !important;
+}
+
+/* ============================================================================
+   의뢰자 소통용 UI 일련번호 인스펙션 뱃지 스타일 규격 (ui-tagging-inspection.md)
+   ============================================================================ */
+.ui-serial-badge {
+  display: none;
+  position: absolute;
+  top: -6px;
+  left: -4px;
+  z-index: 9999;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: auto;
+}
+
+.ui-serial-badge:hover {
+  transform: scale(1.1);
+  background: #3730a3;
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.4);
+}
+
+.ui-serial-badge.copied {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #34d399 !important;
+}
+
+/* Alt + I 활성화 시 모든 일련번호 뱃지 노출 */
+body.ui-inspect-active .ui-serial-badge {
+  display: inline-flex !important;
+  align-items: center;
+  animation: badgeFadeIn 0.25s ease-out;
+}
+
+@keyframes badgeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 토스트 알림 */
+#ui-tagger-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 100000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+#ui-tagger-toast.ui-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* 플로팅 인스펙터 토글 패널 */
+.ui-inspector-floating-dock {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e1b4b;
+  border: 1px solid #4338ca;
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 30px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ui-inspector-floating-dock:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.5);
+  background: #312e81;
+}
+
+.ui-inspector-floating-dock.active {
+  background: #047857;
+  border-color: #10b981;
+}
