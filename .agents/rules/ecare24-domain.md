@@ -105,6 +105,12 @@ ecare24/
 - YouTube Data API v3 연동: 최신 영상 3시간 주기 자동 동기화.
 - 1분 케어 쇼츠 상하 스와이프 플레이어 및 "심화 교안 무료 받기" 1초 유입 퍼널 연동.
 
+### 4-3. 간병 실무 필수 전문 용어 사전 준수 규정
+- **기준 문서**: [`docs/caregiver_terminology_dictionary.md`](file:///apps/project_ecare24_elearning/docs/caregiver_terminology_dictionary.md) 및 [`.agents/rules/caregiver-terminology.md`](file:///apps/project_ecare24_elearning/.agents/rules/caregiver-terminology.md)
+- **적용 원칙**:
+  - 교안, 동영상 시나리오, CBT 문제은행, 콜센터 템플릿 작성 시 간병 실무 필수 전문 용어(피딩, L-tube, PEG, 폴리, 유린백, 체변, 앙와위/측위, 아스피레이션 등) 및 **"현장 압축 10대 골든 룰"**을 철저히 준수합니다.
+  - 환자 안전과 직결된 임상 수칙(유린백 방광 하단 거치, 탈건착환 공식, 석션 1회 15초 이내, 피딩 시 반좌위 유지 등)을 왜곡하거나 누락하는 행위를 엄격히 금지합니다.
+
 ---
 
 ## 5. 데이터베이스(PostgreSQL) 핵심 테이블 스키마 규격
