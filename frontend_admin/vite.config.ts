@@ -11,8 +11,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@ecare24/types': path.resolve(__dirname, '../packages/types/src'),
-      '@ecare24/utils': path.resolve(__dirname, '../packages/utils/src'),
+      '@ecare24/types': path.resolve(__dirname, '../packages/types/src/index.ts'),
+      '@ecare24/utils': path.resolve(__dirname, '../packages/utils/src/index.ts'),
     },
   },
 });
