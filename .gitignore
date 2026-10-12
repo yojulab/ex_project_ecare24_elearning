@@ -29,3 +29,5 @@ Thumbs.db
 # Playwright Artifacts (스냅샷 이미지는 커밋 가능하나 리포트 등은 제외)
 tests/reports/
 tests/test-results/
+frontend_admin/.vite/
+mobileApp/.vite/
