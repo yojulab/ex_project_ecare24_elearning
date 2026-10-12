@@ -11,6 +11,8 @@
   "scripts": {
     "dev:user": "npm run dev --workspace=frontend_user",
     "dev:admin": "npm run dev --workspace=frontend_admin",
-    "dev:mobile": "npm run dev --workspace=mobileApp"
+    "dev:mobile": "npm run dev --workspace=mobileApp",
+    "tunnel:share": "bash scripts/start_tunnels.sh",
+    "tunnel:status": "bash scripts/status_tunnels.sh"
   }
 }
