@@ -21,7 +21,7 @@ export const App: React.FC = () => {
   const [fontSizeLevel, setFontSizeLevel] = useState<'sm' | 'md' | 'lg'>('md');
   const [highContrast, setHighContrast] = useState<boolean>(false);
   const [uiInspection, setUiInspection] = useState<boolean>(false);
-  const [isDeviceFrame, setIsDeviceFrame] = useState<boolean>(true);
+  const [isDeviceFrame, setIsDeviceFrame] = useState<boolean>(false);
   const [isOffline, setIsOffline] = useState<boolean>(false);
 
   // Global Alt + I shortcut for UI inspection mode

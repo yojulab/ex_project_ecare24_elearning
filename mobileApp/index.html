@@ -10,7 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
   </head>
   <body class="bg-slate-900 text-slate-800 antialiased select-none">
-    <div id="root"></div>
+    <div id="root">
+      <div id="loading-placeholder" style="display:flex;min-height:100vh;align-items:center;justify-content:center;background-color:#0f172a;color:#94a3b8;font-family:sans-serif;font-size:14px;flex-direction:column;gap:8px;">
+        <div style="font-weight:bold;color:#f8fafc;font-size:16px;">📱 eCare24 스마트러닝</div>
+        <div>화면을 불러오는 중입니다...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

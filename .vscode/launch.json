@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Frontend User: Next.js (Port 3000)",
+      "name": "Frontend User: Next.js (Port 30010)",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/frontend_user",
@@ -12,7 +12,7 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Frontend Admin: React Admin Vite (Port 3001)",
+      "name": "Frontend Admin: React Admin Vite (Port 30011)",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/frontend_admin",
@@ -22,7 +22,7 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "mobileApp: Mobile Web Simulator (Port 3002)",
+      "name": "mobileApp: Mobile Web Simulator (Port 30012)",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/mobileApp",
@@ -41,11 +41,11 @@
   ],
   "compounds": [
     {
-      "name": "Fullstack: 3개 서버 동시 실행 (:3000, :3001, :3002)",
+      "name": "Fullstack: 3개 서버 동시 실행 (:30010, :30011, :30012)",
       "configurations": [
-        "Frontend User: Next.js (Port 3000)",
-        "Frontend Admin: React Admin Vite (Port 3001)",
-        "mobileApp: Mobile Web Simulator (Port 3002)"
+        "Frontend User: Next.js (Port 30010)",
+        "Frontend Admin: React Admin Vite (Port 30011)",
+        "mobileApp: Mobile Web Simulator (Port 30012)"
       ]
     }
   ]

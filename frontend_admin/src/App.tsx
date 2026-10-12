@@ -86,12 +86,12 @@ export const App: React.FC = () => {
             ecare24 Admin v1.0 (Mockup Engine Active)
           </span>
           <a
-            href="http://localhost:3000"
+            href="http://localhost:30010"
             target="_blank"
             rel="noreferrer"
             className="text-indigo-400 hover:text-indigo-300 font-semibold underline text-xs"
           >
-            수강생 웹 포털 바로가기 (:3000) ↗
+            수강생 웹 포털 바로가기 (:30010) ↗
           </a>
         </div>
       </nav>

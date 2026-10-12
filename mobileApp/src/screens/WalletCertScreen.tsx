@@ -153,7 +153,7 @@ export const WalletCertScreen: React.FC = () => {
               </div>
             </div>
             <a
-              href="http://localhost:3000/verify"
+              href="http://localhost:30010/verify"
               target="_blank"
               rel="noreferrer"
               className="p-2 rounded-xl bg-slate-700 text-slate-200 hover:text-white"

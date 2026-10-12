@@ -496,7 +496,7 @@ CREATE TABLE counseling_logs (
 NODE_ENV=development
 PORT=4000
 API_PREFIX=/api/v1
-CORS_ORIGIN=http://localhost:3000,http://localhost:3001,http://localhost:19006
+CORS_ORIGIN=http://localhost:30010,http://localhost:30011,http://localhost:30012,http://localhost:19006
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=ecare24_admin
@@ -530,7 +530,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
 NEXT_PUBLIC_YOUTUBE_API_KEY=AIzaSyD_EXAMPLE_YOUTUBE_API_KEY
 NEXT_PUBLIC_YOUTUBE_CHANNEL_ID=UC_EXAMPLE_CARE24TV_CHANNEL_ID
 NEXT_PUBLIC_CDN_BASE_URL=https://cdn.ecare24.kr
-NEXT_PUBLIC_CERT_VERIFY_URL=http://localhost:3000/verify
+NEXT_PUBLIC_CERT_VERIFY_URL=http://localhost:30010/verify
 NEXT_PUBLIC_APP_ROLE=USER_PORTAL
 ```
 
@@ -538,7 +538,7 @@ NEXT_PUBLIC_APP_ROLE=USER_PORTAL
 ```bash
 # [API 엔드포인트]
 NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1
-NEXT_PUBLIC_PORT=3001
+NEXT_PUBLIC_PORT=30011
 NEXT_PUBLIC_CDN_BASE_URL=https://cdn.ecare24.kr
 
 # [콜센터 CTI WebSocket & WebRTC]
@@ -558,8 +558,8 @@ EXPO_PUBLIC_FCM_PROJECT_ID=ecare24-push-firebase
 
 ### 6.5 Playwright 자동화 테스트 환경 변수 명세 (`tests/.env.example`)
 ```bash
-PLAYWRIGHT_USER_BASE_URL=http://localhost:3000
-PLAYWRIGHT_ADMIN_BASE_URL=http://localhost:3001
+PLAYWRIGHT_USER_BASE_URL=http://localhost:30010
+PLAYWRIGHT_ADMIN_BASE_URL=http://localhost:30011
 PLAYWRIGHT_HEADLESS=true
 PLAYWRIGHT_SCREENSHOT_DIR=./tests/snapshots
 ```
@@ -589,7 +589,7 @@ PLAYWRIGHT_SCREENSHOT_DIR=./tests/snapshots
       "name": "Frontend User: React Web Chrome Debug",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3000",
+      "url": "http://localhost:30010",
       "webRoot": "${workspaceFolder}/frontend_user/src",
       "sourceMaps": true
     },
@@ -597,7 +597,7 @@ PLAYWRIGHT_SCREENSHOT_DIR=./tests/snapshots
       "name": "Frontend Admin: React Admin Chrome Debug",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:3001",
+      "url": "http://localhost:30011",
       "webRoot": "${workspaceFolder}/frontend_admin/src",
       "sourceMaps": true
     },
@@ -652,15 +652,15 @@ export default defineConfig({
   projects: [
     {
       name: 'User Web (Chrome)',
-      use: { ...devices['Desktop Chrome'], baseURL: process.env.PLAYWRIGHT_USER_BASE_URL || 'http://localhost:3000' },
+      use: { ...devices['Desktop Chrome'], baseURL: process.env.PLAYWRIGHT_USER_BASE_URL || 'http://localhost:30010' },
     },
     {
       name: 'Admin Callcenter Web (Chrome)',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 }, baseURL: process.env.PLAYWRIGHT_ADMIN_BASE_URL || 'http://localhost:3001' },
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1920, height: 1080 }, baseURL: process.env.PLAYWRIGHT_ADMIN_BASE_URL || 'http://localhost:30011' },
     },
     {
       name: 'Mobile App View (Pixel 7)',
-      use: { ...devices['Pixel 7'], baseURL: process.env.PLAYWRIGHT_USER_BASE_URL || 'http://localhost:3000' },
+      use: { ...devices['Pixel 7'], baseURL: process.env.PLAYWRIGHT_USER_BASE_URL || 'http://localhost:30010' },
     }
   ],
 });
@@ -724,7 +724,7 @@ Week 4 (Sprint 4) : Playwright 무인 E2E 검증, 직능원 심사 증빙 추출
   - `frontend_admin`: Shadcn/Ant Design 기반 콜센터 3분할 레이아웃 스캐폴딩.
   - `mobileApp`: React Native Expo/RN 기본 내비게이션 셋업.
 - **Day 4: .vscode 4대 타겟 멀티 디버그 환경 연동**
-  - `.vscode/launch.json`에 정의된 Backend(9229), User(3000), Admin(3001), mobileApp 원클릭 디버깅 검증.
+  - `.vscode/launch.json`에 정의된 Backend(9229), User(30010), Admin(30011), mobileApp(30012) 원클릭 디버깅 검증.
 - **Day 5: Swagger API 자동 문서화 및 프론트엔드 API 클라이언트 코드 생성**
   - TanStack Query 훅 및 TypeScript 인터페이스 자동 추출.
 
@@ -794,8 +794,9 @@ Week 4 (Sprint 4) : Playwright 무인 E2E 검증, 직능원 심사 증빙 추출
    - PostgreSQL DDL 스크립트(콜센터 상담 테이블 포함) 및 마이그레이션 파일
    - Swagger / OpenAPI 규격서 (`http://localhost:4000/api-docs`)
 3. **프론트엔드 & 모바일 앱 (`frontend_user/`, `frontend_admin/`, `mobileApp/`)**:
-   - 수강생 웹 포털 소스코드 (`frontend_user/`, Port 3000)
-   - 통합 관리자 및 콜센터 포털 소스코드 (`frontend_admin/`, Port 3001)
+   - 수강생 웹 포털 소스코드 (`frontend_user/`, Port 30010)
+   - 통합 관리자 및 콜센터 포털 소스코드 (`frontend_admin/`, Port 30011)
+   - React Native 모바일 웹/앱 소스코드 (`mobileApp/`, Port 30012)
    - React Native 모바일 앱 빌드 아티팩트 (APK/AAB, IPA)
 4. **품질/자동화 (`tests/`)**:
    - Playwright 테스트 스크립트 및 16개 질환군/콜센터 캡처 이미지 리포트

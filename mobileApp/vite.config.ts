@@ -5,7 +5,7 @@ import path from 'path';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3002,
+    port: 30012,
     host: '0.0.0.0',
   },
   resolve: {
@@ -14,5 +14,8 @@ export default defineConfig({
       '@ecare24/types': path.resolve(__dirname, '../packages/types/src/index.ts'),
       '@ecare24/utils': path.resolve(__dirname, '../packages/utils/src/index.ts'),
     },
+  },
+  optimizeDeps: {
+    exclude: ['@ecare24/types', '@ecare24/utils'],
   },
 });

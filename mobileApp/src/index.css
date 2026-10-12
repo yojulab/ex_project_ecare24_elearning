@@ -11,6 +11,11 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+  #root {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 /* ==========================================================================

@@ -190,9 +190,9 @@ flowchart LR
 ```mermaid
 flowchart TB
     subgraph Clients
-        FU["frontend_user (Next.js, :3000)"]
-        FA["frontend_admin (Vite SPA, :3001)"]
-        MA["mobileApp (Expo RN)"]
+        FU["frontend_user (Next.js, :30010)"]
+        FA["frontend_admin (Vite SPA, :30011)"]
+        MA["mobileApp (Vite RN, :30012)"]
     end
     subgraph Backend["backend (NestJS, :4000, /api/v1)"]
         GW["API Layer + Guards (JWT, RBAC)"]

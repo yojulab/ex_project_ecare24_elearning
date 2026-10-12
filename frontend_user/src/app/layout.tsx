@@ -142,12 +142,12 @@ export default function RootLayout({
               보건복지부 소관 직능원 등록 민간자격 과정
             </span>
             <a
-              href="http://localhost:3001"
+              href="http://localhost:30011"
               target="_blank"
               rel="noreferrer"
               className="text-indigo-400 hover:text-indigo-300 font-semibold underline"
             >
-              상담원/관리자 콜센터 포털 (:3001) ↗
+              상담원/관리자 콜센터 포털 (:30011) ↗
             </a>
           </div>
         </div>
