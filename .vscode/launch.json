@@ -6,42 +6,118 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
+      "urlFilter": "http://localhost:3000/*",
       "webRoot": "${workspaceFolder}/frontend_user/src",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "userDataDir": false,
+      "timeout": 30000,
+      "runtimeArgs": [
+        "--no-first-run",
+        "--no-default-browser-check"
+      ]
     },
     {
       "name": "Frontend Admin: React Admin Vite (Port 3001)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3001",
+      "urlFilter": "http://localhost:3001/*",
       "webRoot": "${workspaceFolder}/frontend_admin/src",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "userDataDir": false,
+      "timeout": 30000,
+      "runtimeArgs": [
+        "--no-first-run",
+        "--no-default-browser-check"
+      ]
     },
     {
       "name": "mobileApp: Mobile Web Simulator (Port 3002)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3002",
+      "urlFilter": "http://localhost:3002/*",
       "webRoot": "${workspaceFolder}/mobileApp/src",
-      "sourceMaps": true
+      "sourceMaps": true,
+      "userDataDir": false,
+      "timeout": 30000,
+      "runtimeArgs": [
+        "--no-first-run",
+        "--no-default-browser-check"
+      ]
     },
     {
-      "name": "mobileApp: React Native CLI / Metro",
+      "name": "Attach: Mobile Web Simulator (Port 3002)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "urlFilter": "http://localhost:3002/*",
+      "webRoot": "${workspaceFolder}/mobileApp/src",
+      "sourceMaps": true,
+      "timeout": 30000
+    },
+    {
+      "name": "Attach: Frontend Admin (Port 3001)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "urlFilter": "http://localhost:3001/*",
+      "webRoot": "${workspaceFolder}/frontend_admin/src",
+      "sourceMaps": true,
+      "timeout": 30000
+    },
+    {
+      "name": "Attach: Frontend User (Port 3000)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "urlFilter": "http://localhost:3000/*",
+      "webRoot": "${workspaceFolder}/frontend_user/src",
+      "sourceMaps": true,
+      "timeout": 30000
+    },
+    {
+      "name": "Server: mobileApp Vite Dev",
       "type": "node",
       "request": "launch",
       "cwd": "${workspaceFolder}/mobileApp",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "start"]
+      "runtimeArgs": ["run", "dev"]
+    },
+    {
+      "name": "Server: frontend_admin Vite Dev",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/frontend_admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"]
+    },
+    {
+      "name": "Server: frontend_user Next Dev",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/frontend_user",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"]
     }
   ],
   "compounds": [
     {
-      "name": "Fullstack: User Web (:3000) + Admin CS (:3001) + Mobile (:3002)",
+      "name": "Fullstack: Launch Chrome (:3000, :3001, :3002)",
       "configurations": [
         "Frontend User: Next.js (Port 3000)",
         "Frontend Admin: React Admin Vite (Port 3001)",
         "mobileApp: Mobile Web Simulator (Port 3002)"
       ]
+    },
+    {
+      "name": "Fullstack: Attach All (:3000, :3001, :3002)",
+      "configurations": [
+        "Attach: Frontend User (Port 3000)",
+        "Attach: Frontend Admin (Port 3001)",
+        "Attach: Mobile Web Simulator (Port 3002)"
+      ]
     }
   ]
 }
+
