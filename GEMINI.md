@@ -77,4 +77,6 @@
 | **2026-10-13** | 운영 서버 프로덕션(Production) 모드 전면 전환 | `run_port.sh`, `start_server.sh`, `package.json`, `README.md` | NODE_ENV=production 기본화, BUILD_ID 자동 검증 및 클린 빌드, Next.js start 및 Vite preview 프로덕션 서빙 구축 |
 | **2026-10-13** | 셸 스크립트 대폭 단순화 및 compile/port 관리 단일화 통합 | `run_port.sh`, `compile.sh`, `start_server.sh`, `stop_server.sh`, `restart_server.sh`, `README.md` | 850줄의 비대한 스크립트를 250줄의 직관적 통합 스크립트로 단순화, compile/start/dev/stop/restart/status 일관 문법 지원 |
 | **2026-10-13** | 개별 패키지 빌드 이슈 해결 및 폰트 CDN 정규화 | `mobileApp`, `frontend_user`, `frontend_admin`, `package.json` | Google Fonts 부재 Pretendard 제거 및 jsdelivr 분리(400 에러 해결), postinstall .bin 자동 링크(vite: not found 방지), TS antd 모듈 인식 보장 |
+| **2026-10-13** | 외부 도메인 차단 방지 Vite allowedHosts 전체 허용 | `frontend_admin/vite.config.ts`, `mobileApp/vite.config.ts`, `GEMINI.md` | third.axfoundly.com 등 터널/외부 호스트 차단 방지를 위해 server 및 preview allowedHosts: true 전면 적용 |
+
 
