@@ -108,6 +108,16 @@ get_service_meta() {
 # ------------------------------------------------------------------------------
 # 1. 컴파일 (Build / Compile)
 # ------------------------------------------------------------------------------
+# 빌드 도구(tsc, vite, next) 누락 시 devDependencies 포함 재설치
+# (NODE_ENV=production 환경에서 npm install 시 devDependencies가 생략되어 'tsc: not found' 발생 방지)
+ensure_build_deps() {
+  local root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if [ ! -e "$root/node_modules/typescript/bin/tsc" ] || [ ! -e "$root/node_modules/vite/bin/vite.js" ]; then
+    echo -e "${YELLOW}⚠ 빌드 도구(typescript/vite) 누락 감지 → devDependencies 포함 설치 진행...${NC}"
+    (cd "$root" && NODE_ENV=development npm install --include=dev) || return 1
+  fi
+}
+
 build_service() {
   local port=$1
   local meta
@@ -115,6 +125,7 @@ build_service() {
   local ws_name=$(echo "$meta" | cut -d: -f1)
   local title=$(echo "$meta" | cut -d: -f2)
 
+  ensure_build_deps || { echo -e "   ${RED}✗ 의존성 설치 실패${NC}"; return 1; }
   echo -e "🔨 [:${port}] ${BOLD}${title}${NC} 컴파일 시작..."
   if npm run build --workspace="${ws_name}"; then
     echo -e "   ${GREEN}✓ [:${port}] 컴파일 완료${NC}\n"

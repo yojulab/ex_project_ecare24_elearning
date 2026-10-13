@@ -33,3 +33,21 @@ tests/test-results/
 frontend_admin/.vite/
 frontend_user/.vite/
 mobileApp/.vite/
+
+# TypeScript / Vite 부산물
+*.tsbuildinfo
+next-env.d.ts
+vite.config.js
+vite.config.d.ts
+
+# 로컬 환경 변수 (모든 하위 디렉토리)
+**/.env
+**/.env.*
+!**/.env.example
+
+# 에디터/OS
+.idea/
+*.swp
+
+# 프로세스 PID 파일
+*.pid
