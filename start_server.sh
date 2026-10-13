@@ -25,10 +25,11 @@ COLOR_RESET='\033[0m'
 
 mkdir -p "$LOG_DIR"
 
-USER_LOG="${LOG_DIR}/frontend_user_${TODAY}.log"
-ADMIN_LOG="${LOG_DIR}/frontend_admin_${TODAY}.log"
-MOBILE_LOG="${LOG_DIR}/mobileApp_${TODAY}.log"
-LIFECYCLE_LOG="${LOG_DIR}/server_lifecycle_${TODAY}.log"
+PROJECT_NAME="ecare24"
+USER_LOG="${LOG_DIR}/${PROJECT_NAME}_frontend_user_${TODAY}.log"
+ADMIN_LOG="${LOG_DIR}/${PROJECT_NAME}_frontend_admin_${TODAY}.log"
+MOBILE_LOG="${LOG_DIR}/${PROJECT_NAME}_mobileApp_${TODAY}.log"
+LIFECYCLE_LOG="${LOG_DIR}/${PROJECT_NAME}_server_lifecycle_${TODAY}.log"
 
 echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
 echo -e "${COLOR_CYAN} 🚀 eCare24 3대 통합 서비스 백그라운드 기동 시작...${COLOR_RESET}"

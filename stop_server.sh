@@ -14,6 +14,7 @@ set -uo pipefail
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="${PROJECT_DIR}/logs"
 TODAY=$(date +"%Y%m%d")
+PROJECT_NAME="ecare24"
 
 # 색상 코드
 COLOR_RED='\033[0;31m'
@@ -111,7 +112,7 @@ pkill -f "vite --port 30012" >/dev/null 2>&1 || true
 # 3. 로그 기록
 if [ -d "$LOG_DIR" ]; then
   TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-  echo "[${TIMESTAMP}] [eCare24] 모든 서비스 정상 종료 완료" >> "${LOG_DIR}/server_lifecycle_${TODAY}.log"
+  echo "[${TIMESTAMP}] [eCare24] 모든 서비스 정상 종료 완료" >> "${LOG_DIR}/${PROJECT_NAME}_server_lifecycle_${TODAY}.log"
 fi
 
 echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
