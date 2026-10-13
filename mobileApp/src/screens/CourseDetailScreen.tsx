@@ -189,7 +189,7 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
                     Step 2 · 실기 VOD
                   </span>
                   <h3 className="text-sm font-black text-slate-900 mt-0.5">
-                    임상 실기 VOD (SNUBH 큐레이션)
+                    임상 실기 VOD (대학병원 임상간호 큐레이션)
                   </h3>
                 </div>
               </div>

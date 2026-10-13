@@ -18,6 +18,8 @@ interface HomeScreenProps {
   onNavigateToExam: () => void;
   onNavigateToTV24: (clipId?: string) => void;
   onNavigateToMaterial: () => void;
+  onNavigateToAbout?: () => void;
+  onNavigateToCurriculum?: () => void;
   isOffline: boolean;
 }
 
@@ -26,6 +28,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateToExam,
   onNavigateToTV24,
   onNavigateToMaterial,
+  onNavigateToAbout,
+  onNavigateToCurriculum,
   isOffline,
 }) => {
   return (
@@ -107,73 +111,54 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
       </section>
 
-      {/* SEC02: 16 Disease Categories Grid */}
-      <section className="px-4 mt-5">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-xs font-bold text-blue-600 uppercase">16대 질환군 전문과정</span>
-            <h2 className="text-base font-black text-slate-900 leading-tight">
-              보건복지부 직능원 공인 과정
-            </h2>
-          </div>
-          <button
-            onClick={() => onNavigateToCourse()}
-            className="text-xs font-bold text-slate-500 hover:text-blue-600 flex items-center"
-          >
-            <span>전체보기</span>
-            <ChevronRight size={14} />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {MOCK_DISEASES.slice(0, 6).map((disease) => (
-            <UiBadge
-              key={disease.id}
-              serialId={`P41-SEC02-DIS${String(disease.id).padStart(2, '0')}`}
-              className="w-full"
+      {/* SEC02: 수강신청 & 교육체계 바로가기 배너 (카드 그리드 삭제 후 단순화) */}
+      <section className="px-4 mt-5 space-y-3">
+        {/* 수강신청 바로가기 CTA */}
+        <UiBadge serialId="P41-SEC02-APPLY" className="w-full">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full text-emerald-100">
+                공인 교육과정
+              </span>
+              <h3 className="text-base font-black mt-1 text-white leading-tight">
+                돌봄종사자 수강신청 바로가기
+              </h3>
+              <p className="text-xs text-emerald-100 font-medium mt-0.5">
+                16대 질환별 전문 돌봄 자격 트랙 및 실습 연계
+              </p>
+            </div>
+            <button
+              onClick={() => onNavigateToCurriculum ? onNavigateToCurriculum() : onNavigateToCourse()}
+              className="bg-white text-emerald-800 hover:bg-emerald-50 px-3.5 py-2 rounded-xl font-black text-xs flex items-center gap-1 shadow shrink-0 active:scale-95 transition-all"
             >
-              <div
-                onClick={() => onNavigateToCourse(disease.id)}
-                className={`cursor-pointer rounded-2xl p-3 border transition-all text-left flex flex-col justify-between min-h-[115px] ${
-                  disease.isMvp
-                    ? 'bg-white border-blue-200 shadow-sm hover:border-blue-500 hover:shadow-md'
-                    : 'bg-slate-50 border-slate-200 hover:bg-white'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-black text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md">
-                      #{disease.code.split('_')[0]}
-                    </span>
-                    {disease.isMvp ? (
-                      <span className="text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.2 rounded">
-                        MVP 과정
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        준비중
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900 mt-1.5 leading-snug line-clamp-1">
-                    {disease.nameKo}
-                  </h3>
-                  <p className="text-[11px] font-medium text-slate-500 line-clamp-1 mt-0.5">
-                    {disease.shortDesc}
-                  </p>
-                </div>
+              <span>수강신청</span>
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </UiBadge>
 
-                <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-[11px] font-bold text-slate-600 mt-2">
-                  <span className="flex items-center gap-1">
-                    <Clock size={11} className="text-blue-600" />
-                    <span>총 {disease.totalRequiredHours}시간</span>
-                  </span>
-                  <ChevronRight size={13} className="text-slate-400" />
-                </div>
+        {/* 교육원 소개 배너 */}
+        <UiBadge serialId="P41-SEC02-ABOUT" className="w-full">
+          <div
+            onClick={() => onNavigateToAbout && onNavigateToAbout()}
+            className="cursor-pointer bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm flex items-center justify-between hover:border-emerald-500 transition-all"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center font-black text-emerald-700 text-sm">
+                院
               </div>
-            </UiBadge>
-          ))}
-        </div>
+              <div>
+                <h4 className="text-sm font-black text-slate-900 leading-tight">
+                  한국돌봄종사자양성교육원 소개
+                </h4>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                  설립비전 · 인사말 · 조직도 · 오시는길
+                </p>
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-slate-400" />
+          </div>
+        </UiBadge>
       </section>
 
       {/* SEC03: 간병24TV 실무 핫클립 (1분 쇼츠 퀵 플레이어) */}

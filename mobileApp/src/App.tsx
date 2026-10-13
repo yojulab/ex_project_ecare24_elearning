@@ -132,6 +132,8 @@ export const App: React.FC = () => {
                 onNavigateToExam={handleOpenExam}
                 onNavigateToTV24={handleOpenTV24}
                 onNavigateToMaterial={() => handleOpenMaterial(selectedDiseaseId)}
+                onNavigateToAbout={() => handleSelectTab('about')}
+                onNavigateToCurriculum={() => handleSelectTab('curriculum')}
                 isOffline={isOffline}
               />
             ) : currentTab === 'about' ? (
