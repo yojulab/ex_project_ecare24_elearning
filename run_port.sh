@@ -65,25 +65,52 @@ print_header() {
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
 }
 
-# 포트 활성 여부 확인
+# 포트 활성 여부 확인 (도커 최소 환경 호환 6중 안전망)
 is_port_in_use() {
   local port=$1
+
+  # 1. bash 내장 /dev/tcp 소켓 검사 (외부 패키지 전혀 불필요, 100% 호환)
+  if (bash -c "(echo > /dev/tcp/127.0.0.1/${port}) >/dev/null 2>&1" 2>/dev/null); then
+    return 0
+  fi
+
+  # 2. python3 소켓 검사
+  if command -v python3 >/dev/null 2>&1; then
+    if python3 -c "import socket; s=socket.socket(); s.settimeout(0.3); exit(0 if s.connect_ex(('127.0.0.1', ${port}))==0 else 1)" 2>/dev/null; then
+      return 0
+    fi
+  fi
+
+  # 3. fuser 점검
   if command -v fuser >/dev/null 2>&1; then
     fuser "${port}/tcp" >/dev/null 2>&1 && return 0
   fi
+
+  # 4. lsof 점검
   if command -v lsof >/dev/null 2>&1; then
     lsof -ti ":${port}" >/dev/null 2>&1 && return 0
   fi
+
+  # 5. ss 점검
   if command -v ss >/dev/null 2>&1; then
     ss -tlpn 2>/dev/null | grep -q ":${port} " && return 0
   fi
+
+  # 6. /proc/net/tcp 16진수 포트 점검
+  local hex_port
+  hex_port=$(printf "%04X" "$port")
+  if [ -f /proc/net/tcp ] && grep -qi ":${hex_port} " /proc/net/tcp 2>/dev/null; then
+    return 0
+  fi
+
   return 1
 }
 
-# 특정 포트 점유 PID 획득
+# 특정 포트 점유 PID 획득 (fuser/lsof 없는 도커 환경에서도 pgrep/ps fallback)
 get_port_pids() {
   local port=$1
   local pids=""
+
   if command -v fuser >/dev/null 2>&1; then
     pids=$(fuser "${port}/tcp" 2>/dev/null || true)
   fi
@@ -93,6 +120,25 @@ get_port_pids() {
   if [ -z "$pids" ] && command -v ss >/dev/null 2>&1; then
     pids=$(ss -tlpn 2>/dev/null | grep ":${port} " | grep -o 'pid=[0-9]*' | cut -d= -f2 || true)
   fi
+
+  # fuser/lsof/ss가 없을 경우 프로세스 이름 및 커맨드라인 패턴 기반 조회
+  if [ -z "$pids" ]; then
+    case "$port" in
+      30010)
+        pids=$(pgrep -f "(next.*30010|next-server.*14|frontend_user)" 2>/dev/null || true)
+        ;;
+      30011)
+        pids=$(pgrep -f "(vite.*30011|frontend_admin)" 2>/dev/null || true)
+        ;;
+      30012)
+        pids=$(pgrep -f "(vite.*30012|mobileApp)" 2>/dev/null || true)
+        ;;
+      *)
+        pids=$(pgrep -f "${port}" 2>/dev/null || true)
+        ;;
+    esac
+  fi
+
   echo "$pids" | tr '\n' ' ' | xargs
 }
 
@@ -238,15 +284,35 @@ run_dev_single() {
     local log_file="${LOG_DIR}/ecare24_${dir}_${TODAY}.log"
     echo -e "▶ 백그라운드 기동 시작... 로그 파일: ${log_file}"
 
+    export HOSTNAME="$run_host"
+    export PORT="$run_port"
+
     if [ "$type" = "next" ]; then
-      nohup env HOSTNAME="$run_host" PORT="$run_port" npx next dev -p "$run_port" -H "$run_host" > "$log_file" 2>&1 &
+      if [ "$run_port" = "30010" ] && [ "$run_host" = "0.0.0.0" ]; then
+        nohup npm run dev > "$log_file" 2>&1 &
+      else
+        nohup npx next dev -p "$run_port" -H "$run_host" > "$log_file" 2>&1 &
+      fi
     else
-      nohup env HOSTNAME="$run_host" PORT="$run_port" npx vite --port "$run_port" --host "$run_host" > "$log_file" 2>&1 &
+      if ([ "$run_port" = "30011" ] || [ "$run_port" = "30012" ]) && [ "$run_host" = "0.0.0.0" ]; then
+        nohup npm run dev > "$log_file" 2>&1 &
+      else
+        nohup npx vite --port "$run_port" --host "$run_host" > "$log_file" 2>&1 &
+      fi
     fi
 
     local pid=$!
     echo -e "${COLOR_GREEN}✓ 백그라운드 프로세스 등록 완료 (PID: ${pid})${COLOR_RESET}"
-    sleep 2
+    echo -n "⏳ 포트 바인딩 대기 중"
+    for i in {1..8}; do
+      if is_port_in_use "$run_port"; then
+        break
+      fi
+      echo -n "."
+      sleep 1
+    done
+    echo ""
+
     if is_port_in_use "$run_port"; then
       echo -e "${COLOR_GREEN}🎉 서비스가 포트 :${run_port}에 정상 바인딩되었습니다!${COLOR_RESET}"
       echo -e "   접속 주소: ${COLOR_CYAN}http://${run_host}:${run_port}${COLOR_RESET}"
@@ -261,9 +327,17 @@ run_dev_single() {
     export PORT="$run_port"
 
     if [ "$type" = "next" ]; then
-      exec npx next dev -p "$run_port" -H "$run_host"
+      if [ "$run_port" = "30010" ] && [ "$run_host" = "0.0.0.0" ]; then
+        exec npm run dev
+      else
+        exec npx next dev -p "$run_port" -H "$run_host"
+      fi
     else
-      exec npx vite --port "$run_port" --host "$run_host"
+      if ([ "$run_port" = "30011" ] || [ "$run_port" = "30012" ]) && [ "$run_host" = "0.0.0.0" ]; then
+        exec npm run dev
+      else
+        exec npx vite --port "$run_port" --host "$run_host"
+      fi
     fi
   fi
 }
@@ -284,28 +358,41 @@ run_dev_all() {
   sleep 1
 
   local run_host="${DEFAULT_HOST}"
+  export HOSTNAME="$run_host"
 
   # 1) 수강생 포털
   local user_log="${LOG_DIR}/ecare24_frontend_user_${TODAY}.log"
   echo -e "▶ [1/3] 수강생 웹 포털 (:30010, Next.js) 백그라운드 기동..."
-  (cd "${PROJECT_DIR}/frontend_user" && nohup env HOSTNAME="$run_host" PORT=30010 npx next dev -p 30010 -H "$run_host" > "$user_log" 2>&1 &)
+  cd "${PROJECT_DIR}/frontend_user"
+  nohup env HOSTNAME="$run_host" PORT=30010 npm run dev > "$user_log" 2>&1 &
   echo -e "      로그: ${user_log}"
 
   # 2) 관리자/콜센터 CS
   local admin_log="${LOG_DIR}/ecare24_frontend_admin_${TODAY}.log"
   echo -e "▶ [2/3] 관리자 & CS 포털 (:30011, Vite) 백그라운드 기동..."
-  (cd "${PROJECT_DIR}/frontend_admin" && nohup env HOSTNAME="$run_host" PORT=30011 npx vite --port 30011 --host "$run_host" > "$admin_log" 2>&1 &)
+  cd "${PROJECT_DIR}/frontend_admin"
+  nohup env HOSTNAME="$run_host" PORT=30011 npm run dev > "$admin_log" 2>&1 &
   echo -e "      로그: ${admin_log}"
 
   # 3) 모바일 시뮬레이터
   local mobile_log="${LOG_DIR}/ecare24_mobileApp_${TODAY}.log"
   echo -e "▶ [3/3] 모바일 웹 시뮬레이터 (:30012, Vite) 백그라운드 기동..."
-  (cd "${PROJECT_DIR}/mobileApp" && nohup env HOSTNAME="$run_host" PORT=30012 npx vite --port 30012 --host "$run_host" > "$mobile_log" 2>&1 &)
+  cd "${PROJECT_DIR}/mobileApp"
+  nohup env HOSTNAME="$run_host" PORT=30012 npm run dev > "$mobile_log" 2>&1 &
   echo -e "      로그: ${mobile_log}"
 
+  cd "${PROJECT_DIR}"
+
   echo ""
-  echo -e "⏳ 서비스 초기화 대기 중 (3초)..."
-  sleep 3
+  echo -n -e "⏳ 서비스 초기화 및 포트 바인딩 대기 중"
+  for i in {1..8}; do
+    if is_port_in_use 30010 && is_port_in_use 30011 && is_port_in_use 30012; then
+      break
+    fi
+    echo -n "."
+    sleep 1
+  done
+  echo ""
 
   echo ""
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
@@ -501,7 +588,14 @@ main() {
     exit 0
   fi
 
+  local script_invoked
+  script_invoked=$(basename "${BASH_SOURCE[0]:-$0}")
+
   local action="dev"
+  if [[ "$script_invoked" =~ compile ]]; then
+    action="build"
+  fi
+
   local target=""
   local daemon=false
 
@@ -509,6 +603,11 @@ main() {
   case "$1" in
     compile|build)
       action="build"
+      shift
+      target="${1:-all}"
+      ;;
+    dev|run|start)
+      action="dev"
       shift
       target="${1:-all}"
       ;;
@@ -534,13 +633,11 @@ main() {
       exit 0
       ;;
     all|--all)
-      action="dev"
       target="all"
       shift
       ;;
     *)
       # 포트 번호 또는 서비스 이름인 경우
-      action="dev"
       target="$1"
       shift
       ;;
