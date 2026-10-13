@@ -40,6 +40,23 @@ LOG_DIR="${PROJECT_DIR}/logs"
 TODAY=$(date +"%Y%m%d")
 mkdir -p "$LOG_DIR"
 
+# 모노레포 하위 워크스페이스 .bin 심볼릭 링크 자동 점검 및 복원 안전망
+ensure_workspace_bin_links() {
+  local root_bin="${PROJECT_DIR}/node_modules/.bin"
+  if [ -d "$root_bin" ]; then
+    for sub in frontend_user frontend_admin mobileApp; do
+      local sub_dir="${PROJECT_DIR}/${sub}"
+      if [ -d "$sub_dir" ]; then
+        mkdir -p "${sub_dir}/node_modules"
+        if [ ! -e "${sub_dir}/node_modules/.bin" ]; then
+          ln -s "../../node_modules/.bin" "${sub_dir}/node_modules/.bin" 2>/dev/null || true
+        fi
+      fi
+    done
+  fi
+}
+ensure_workspace_bin_links
+
 # 기본 호스트 및 포트 설정 (0.0.0.0 바인딩 우선)
 if [ -n "${HOST:-}" ]; then
   DEFAULT_HOST="$HOST"
