@@ -24,6 +24,7 @@ test-results/
 .DS_Store
 Thumbs.db
 *.log
+logs/
 .cache/
 
 # Playwright Artifacts (스냅샷 이미지는 커밋 가능하나 리포트 등은 제외)
