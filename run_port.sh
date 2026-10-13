@@ -420,6 +420,15 @@ run_build() {
   echo -e "${COLOR_MAGENTA}📦 [컴파일 / 빌드 모드] 프로덕션 빌드 및 타입체크 검증 시작${COLOR_RESET}"
   echo ""
 
+  # Next.js와 Vite는 dev 서버와 build가 .next 및 dist 캐시를 공유하므로 충돌 방지
+  if is_port_in_use 30010; then
+    echo -e "${COLOR_YELLOW}⚠️  기동 중인 dev 서버와의 캐시 충돌 방지를 위해 기존 프로세스를 일시 정리합니다.${COLOR_RESET}"
+    stop_port 30010 "frontend_user" >/dev/null 2>&1 || true
+    stop_port 30011 "frontend_admin" >/dev/null 2>&1 || true
+    stop_port 30012 "mobileApp" >/dev/null 2>&1 || true
+    sleep 1
+  fi
+
   if [ "$target_key" = "all" ]; then
     echo -e "${COLOR_BOLD}전체 3개 서비스 일괄 컴파일 수행...${COLOR_RESET}"
     echo ""
@@ -429,6 +438,7 @@ run_build() {
 
     # 1. frontend_user
     echo -e "▶ [1/3] frontend_user (수강생 포털, Next.js build) 컴파일 중..."
+    rm -rf "${PROJECT_DIR}/frontend_user/.next"
     if (cd "${PROJECT_DIR}/frontend_user" && npm run build); then
       echo -e "${COLOR_GREEN}✓ frontend_user 컴파일 성공!${COLOR_RESET}\n"
       ((success_count++))
