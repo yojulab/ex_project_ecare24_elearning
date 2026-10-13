@@ -1,8 +1,8 @@
 import React from 'react';
 import { UiBadge } from './UiBadge';
-import { Home, BookOpen, FileCheck, Award, Film } from 'lucide-react';
+import { Home, BookOpen, BookMarked, ClipboardCheck, Award } from 'lucide-react';
 
-export type TabType = 'home' | 'course' | 'exam' | 'wallet' | 'tv24';
+export type TabType = 'home' | 'apply' | 'guide' | 'practice' | 'cert' | 'course' | 'exam' | 'wallet' | 'tv24';
 
 interface MobileTabBarProps {
   currentTab: TabType;
@@ -15,10 +15,10 @@ export const MobileTabBar: React.FC<MobileTabBarProps> = ({
 }) => {
   const tabs = [
     { id: 'home' as TabType, label: '홈', icon: Home, tag: 'P40-TAB-HOME' },
-    { id: 'course' as TabType, label: '질환과정', icon: BookOpen, tag: 'P40-TAB-COURSE' },
-    { id: 'exam' as TabType, label: 'CBT시험', icon: FileCheck, tag: 'P40-TAB-EXAM' },
-    { id: 'wallet' as TabType, label: '자격증지갑', icon: Award, tag: 'P40-TAB-WALLET' },
-    { id: 'tv24' as TabType, label: '간병24TV', icon: Film, tag: 'P40-TAB-TV24' },
+    { id: 'apply' as TabType, label: '수강신청', icon: BookOpen, tag: 'P40-TAB-APPLY' },
+    { id: 'guide' as TabType, label: '돌봄지침서', icon: BookMarked, tag: 'P40-TAB-GUIDE' },
+    { id: 'practice' as TabType, label: '현장실습', icon: ClipboardCheck, tag: 'P40-TAB-PRACTICE' },
+    { id: 'cert' as TabType, label: '자격증', icon: Award, tag: 'P40-TAB-CERT' },
   ];
 
   return (

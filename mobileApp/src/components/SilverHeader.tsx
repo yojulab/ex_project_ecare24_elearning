@@ -34,15 +34,15 @@ export const SilverHeader: React.FC<SilverHeaderProps> = ({
         <div className="flex items-center gap-1.5">
           <UiBadge serialId="P40-HDR-LOGO">
             <div className="flex items-center gap-1.5">
-              <span className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center text-sm shadow">
-                24
+              <span className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-black flex items-center justify-center text-xs shadow">
+                돌봄
               </span>
               <div className="flex flex-col">
-                <span className="text-sm font-black tracking-tight text-slate-900 leading-tight">
-                  eCare24
+                <span className="text-xs font-black tracking-tight text-slate-900 leading-tight">
+                  한국돌봄종사자학원
                 </span>
-                <span className="text-[10px] font-bold text-blue-600 leading-none">
-                  스마트러닝
+                <span className="text-[9px] font-bold text-emerald-600 leading-none">
+                  240h 이원화과정
                 </span>
               </div>
             </div>

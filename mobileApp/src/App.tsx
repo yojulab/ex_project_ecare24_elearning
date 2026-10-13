@@ -132,7 +132,7 @@ export const App: React.FC = () => {
                 onNavigateToMaterial={() => handleOpenMaterial(selectedDiseaseId)}
                 isOffline={isOffline}
               />
-            ) : currentTab === 'course' ? (
+            ) : currentTab === 'apply' || currentTab === 'course' ? (
               <CourseDetailScreen
                 initialDiseaseId={selectedDiseaseId}
                 onOpenVideoPlayer={handleOpenVideoPlayer}
@@ -140,16 +140,16 @@ export const App: React.FC = () => {
                 onOpenExam={handleOpenExam}
                 isOffline={isOffline}
               />
-            ) : currentTab === 'exam' ? (
+            ) : currentTab === 'guide' || currentTab === 'tv24' ? (
+              <TV24ShortsScreen onNavigateToCourse={handleOpenCourse} />
+            ) : currentTab === 'practice' || currentTab === 'exam' ? (
               <ExamScreen
                 courseId={selectedDiseaseId}
-                onNavigateToWallet={() => handleSelectTab('wallet')}
-                onBackToCourse={() => handleSelectTab('course')}
+                onNavigateToWallet={() => handleSelectTab('cert')}
+                onBackToCourse={() => handleSelectTab('apply')}
               />
-            ) : currentTab === 'wallet' ? (
+            ) : currentTab === 'cert' || currentTab === 'wallet' ? (
               <WalletCertScreen />
-            ) : currentTab === 'tv24' ? (
-              <TV24ShortsScreen onNavigateToCourse={handleOpenCourse} />
             ) : null}
           </main>
 

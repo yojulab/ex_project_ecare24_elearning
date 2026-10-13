@@ -59,10 +59,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <title>ecare24 환자 질환별 전문간병사 통합 플랫폼</title>
+        <title>한국돌봄종사자양성학원 - 240시간 전문 돌봄인력 양성</title>
         <meta
           name="description"
-          content="16대 질환군 전문간병사 자격과정 및 실버 친화적 에듀테크 포털"
+          content="160시간 이론·실기 + 80시간 현장실습 이원화 교육체계, 분당서울대학교병원 16대 질환 돌봄 지침서 기반 전문 교육기관"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -138,8 +138,8 @@ export default function RootLayout({
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-slate-400 hidden sm:inline">
-              보건복지부 소관 직능원 등록 민간자격 과정
+            <span className="text-emerald-400 font-semibold hidden sm:inline">
+              ● 240시간 이원화 교육체계 (160h 이론실기 + 80h 병원실습)
             </span>
             <a
               href="http://localhost:30011"
@@ -147,13 +147,13 @@ export default function RootLayout({
               rel="noreferrer"
               className="text-indigo-400 hover:text-indigo-300 font-semibold underline"
             >
-              상담원/관리자 콜센터 포털 (:30011) ↗
+              간호사 심사·상담 포털 (:30011) ↗
             </a>
           </div>
         </div>
 
         {/* ==================================================================
-            글로벌 내비게이션 바 (GNB)
+            글로벌 내비게이션 바 (GNB) - 한국돌봄종사자양성학원
             ================================================================== */}
         <header
           data-serial-id="P00-SEC01-GNB01"
@@ -163,52 +163,70 @@ export default function RootLayout({
             {/* 로고 */}
             <UiBadge serialId="P00-SEC01-LOG01" label="[P00-SEC01-LOG01]">
               <a href="/" className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-700 to-indigo-500 flex items-center justify-center font-extrabold text-white text-lg shadow-md">
-                  eC
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-700 to-teal-500 flex items-center justify-center font-extrabold text-white text-base shadow-md tracking-tighter">
+                  돌봄
                 </div>
                 <div>
-                  <span className="font-extrabold text-xl text-slate-900 tracking-tight block leading-none">
-                    ecare<span className="text-indigo-600">24</span>
+                  <span className="font-extrabold text-lg text-slate-900 tracking-tight block leading-none">
+                    한국돌봄종사자<span className="text-emerald-600">양성학원</span>
                   </span>
-                  <span className="text-[11px] font-semibold text-slate-500 tracking-wider">
-                    환자 질환별 전문간병사
+                  <span className="text-[10px] font-semibold text-slate-500 tracking-wider">
+                    보건복지부 요양보호사·임상간호 연계 공식 교육기관
                   </span>
                 </div>
               </a>
             </UiBadge>
 
-            {/* 메인 메뉴 링크 */}
-            <nav className="flex items-center gap-6 text-sm font-bold text-slate-700">
+            {/* 메인 메뉴 링크 (5대 핵심 메뉴 - 잡다한 메뉴 제거) */}
+            <nav className="flex items-center gap-5 lg:gap-7 text-sm font-bold text-slate-700">
               <UiBadge serialId="P00-SEC01-LNK01" label="[P00-SEC01-LNK01]">
                 <a
-                  href="/#courses"
-                  className="flex items-center gap-1.5 hover:text-indigo-600 transition"
+                  href="/#about"
+                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
                 >
-                  <BookOpen className="w-4 h-4 text-indigo-500" />
-                  <span>16대 질환 과정</span>
+                  <span>학원소개</span>
                 </a>
               </UiBadge>
 
               <UiBadge serialId="P00-SEC01-LNK02" label="[P00-SEC01-LNK02]">
                 <a
-                  href="/tv24"
-                  className="flex items-center gap-1.5 hover:text-indigo-600 transition"
+                  href="/#courses"
+                  className="flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 transition bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200"
                 >
-                  <Video className="w-4 h-4 text-rose-500" />
-                  <span>간병24TV 숏폼</span>
-                  <span className="bg-rose-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-                    HOT
-                  </span>
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <span>수강신청 (단일과정)</span>
                 </a>
               </UiBadge>
 
               <UiBadge serialId="P00-SEC01-LNK03" label="[P00-SEC01-LNK03]">
                 <a
-                  href="/verify"
-                  className="flex items-center gap-1.5 hover:text-indigo-600 transition"
+                  href="/#curriculum"
+                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
                 >
-                  <Award className="w-4 h-4 text-emerald-600" />
-                  <span>자격증 진위검증</span>
+                  <span>교육체계 (160h+80h)</span>
+                </a>
+              </UiBadge>
+
+              <UiBadge serialId="P00-SEC01-LNK04" label="[P00-SEC01-LNK04]">
+                <a
+                  href="/tv24"
+                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
+                >
+                  <Video className="w-4 h-4 text-indigo-500" />
+                  <span>돌봄 지침서 (16대 질환)</span>
+                  <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                    690편
+                  </span>
+                </a>
+              </UiBadge>
+
+              <UiBadge serialId="P00-SEC01-LNK05" label="[P00-SEC01-LNK05]">
+                <a
+                  href="/verify"
+                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
+                >
+                  <Award className="w-4 h-4 text-amber-600" />
+                  <span>자격증 신청/검증</span>
                 </a>
               </UiBadge>
             </nav>
@@ -218,7 +236,7 @@ export default function RootLayout({
               <UiBadge serialId="P00-SEC01-BTN03" label="[P00-SEC01-BTN03]">
                 <div className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold">
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>박순자 간병사님</span>
+                  <span>박순자 돌봄교육생님</span>
                 </div>
               </UiBadge>
             </div>
@@ -233,24 +251,25 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-6">
             <div>
               <div className="font-extrabold text-white text-base mb-2">
-                ecare24 환자 질환별 전문간병사 자격연수원
+                한국돌봄종사자양성학원
               </div>
               <p className="leading-relaxed text-slate-400 max-w-md">
-                주식회사 이케어24 | 한국직업능력연구원(pqi.or.kr) 등록 민간자격 관리기관
+                보건복지부 요양보호 표준 커리큘럼 및 임상간호 실습 연계 공인 교육기관
+                <br />
+                총 240시간 교육과정 (이론·실기 160시간 + 지정 협약의료기관 현장실습 80시간)
                 <br />
                 주소: 서울특별시 강남구 테헤란로 427 위워크타워 14층 | 대표전화: 1588-2424
                 <br />
-                본 플랫폼의 모든 임상 간병 콘텐츠는 대학병원 전문의 및 임상간호사의 자문을 거쳐
-                편성되었습니다.
+                본 학원의 모든 임상 실무 지침서는 분당서울대학교병원 의학 커리큘럼을 기반으로 운영됩니다.
               </p>
             </div>
             <div className="flex flex-col gap-1 text-slate-500">
-              <span className="font-bold text-slate-300">고객센터 & CTI 상담지원</span>
-              <span className="text-lg font-extrabold text-indigo-400 font-mono">
+              <span className="font-bold text-slate-300">입학 상담 및 실습 배정 안내</span>
+              <span className="text-xl font-extrabold text-emerald-400 font-mono">
                 1588-2424
               </span>
               <span>운영시간: 평일 09:00 ~ 18:00 (주말/공휴일 휴무)</span>
-              <span>상담원 3분할 CTI 시스템 상시 가동 중</span>
+              <span>수간호사 및 전담 임상지도관 상시 배치</span>
             </div>
           </div>
         </footer>

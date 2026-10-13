@@ -1,10 +1,12 @@
 # [구현 계획서] ecare24 환자 질환별 전문간병사 자격과정 통합 플랫폼
 
-- **문서 번호**: ECARE24-IMPL-2026-001 (Rev. 0.2 Draft)
-- **작성일자**: 2026. 10. 12
+- **문서 번호**: ECARE24-IMPL-2026-001 (Rev. 1.0 전면 개정판)
+- **작성/개정일자**: 2026. 10. 13
+- **플랫폼 명칭**: **한국돌봄종사자양성학원** 통합 플랫폼
 - **근거 문서**:
+  - 웹·앱 전면 개편 종합 기획: [REVISED_IA_AND_MENU_SPECIFICATION.md](./ux/REVISED_IA_AND_MENU_SPECIFICATION.md) (Rev. 2.0)
   - PRD: [TASK_SPECIFICATION_ECARE24.md](./TASK_SPECIFICATION_ECARE24.md) (ECARE24-SOW-2026-001 Rev. 1.2)
-  - 과정 영상 원천: [snubh_16_disease_care_curriculum.md](./snubh_16_disease_care_curriculum.md) (분당서울대병원 @snubh 690편)
+  - 과정 영상 원천: [snubh_16_disease_care_curriculum.md](./snubh_16_disease_care_curriculum.md) (분당서울대병원 @snubh 690편 전수)
   - 임상 용어: [caregiver_terminology_dictionary.md](./caregiver_terminology_dictionary.md) (ECARE24-GLOSSARY-2026-V1)
 - **단계 성격**: 기획·상세 아키텍처 수립 (**※ 본 문서는 소스코드를 포함하지 않으며, 스프린트 착수용 명세·WBS·인터페이스만 정의함**)
 
@@ -14,11 +16,13 @@
 
 | 구분 | 분석 결론 |
 | :--- | :--- |
-| **범위** | 4대 타겟(`frontend_user`, `frontend_admin`, `backend`, `mobileApp`) + `tests/`, 기능 ID 20종(UX/DIS/LMS/EXAM/CERT/TV/CS/ADM), 16개 질환군 × 4단계 |
-| **PRD 품질** | 방향성·화면·DDL 골격은 충분. 단, **DDL 누락 테이블 12종**, **수치·포맷 불일치 7건**, **외부연동 계약 미정 6건** 존재 → §2 참조 |
-| **SNUBH 커리큘럼** | 690편 전수 분류되었으나 **키워드 기반 오분류 다수**(예: "폐"→폐경·자폐·녹내장, "간"→간호사 채용, "기도"→경기도). 또한 대부분 **환자·일반인 대상 건강강좌**로, PRD Step 2 "실기·실습 4K 영상"을 대체할 수 없음 → **Step 1 보조 참고강의 + 간병24TV 퍼널 소재**로 위치 재정의 권고 (§3) |
-| **일정** | PRD의 4주(20영업일)는 외부 기관 계약(PASS·PG·CTI·알림톡·앱스토어·직능원 등록) 리드타임상 **풀스코프 달성 불가**. **4주 = 코어 MVP(외부연동 Mock)**, 이후 Phase 2~3로 분리 권고 (§9) |
-| **법·규정 리스크** | 민간자격 표기 문구, 의료행위 경계(석션 등), 제3자 YouTube 콘텐츠 이용 정책 → 법무 검토 선행 필요 (§11) |
+| **개편 정체성** | **한국돌봄종사자양성학원**: 중장년·실버 수강생 눈높이 최적화 및 불필요 메뉴 전면 제거 (nllc-edu 레퍼런스 차별화) |
+| **단일 수강신청** | 수강신청은 오직 **「돌봄종사자양성자 과정」 단 1개 과정**으로 일원화하여 탐색 혼선 원천 차단 |
+| **이원화 교육체계** | **총 240시간 규격**: **제1영역 (이론·실기 160시간)** 이러닝/실기 VOD + **제2영역 (현장실습 80시간)** 협약 요양병원 현장실습 |
+| **자격증 신청 통제** | `(본원 이론 160h 수료 OR 요양보호사 자격증 보유)` + `80h 현장실습 (심사자 임상간호사의 실습평가서 80점 이상 Pass)` 필수 게이트 |
+| **돌봄 지침서 탑재** | 분당서울대학교병원 16대 질환군·71개 단위·690편 전수를 최상위 독립 메뉴 **「돌봄 지침서」**로 편성하여 평생 임상 매뉴얼 제공 |
+| **범위** | 4대 타겟(`frontend_user`, `frontend_admin`, `backend`, `mobileApp`) + `tests/`, 신규 이원화 DDL(`care_enrollments`, `nurse_field_evaluations`) |
+| **일정** | 코어 스프린트 4단계: Sprint 1 (웹 GNB/단일신청) → Sprint 2 (모바일 5대탭) → Sprint 3 (돌봄지침서) → Sprint 4 (간호사평가/자격증) |
 
 ---
 
@@ -48,6 +52,11 @@ PRD §9 기능 ID를 기준으로 담당 모듈·화면·테스트를 1:1 매핑
 | ADM-CRT-01 | 직능원 보고 대장 | `certificates` | P24 | P1 | `admin-cert-registry.spec` |
 | ADM-CRT-02 | 진위조회·갱신 | `certificates` | P24 | P0 | `admin-cert-registry.spec` |
 | ADM-TV-01 | YouTube 동기화 | `media-tv24` (크론) | P25 | P1 | `tv24-integration.spec` |
+| **APP-CR-01** | **단일 수강신청 퍼널** (오직 돌봄종사자양성자 과정) | `courses`, `care_enrollments` | P02, P40-TAB-APPLY | P0 | `course-apply.spec` |
+| **DUAL-01** | **160h+80h 이원화 교육체계 관리** | `care_enrollments` | P03, P40-TAB-PRACTICE | P0 | `dual-curriculum.spec` |
+| **NURSE-EVAL-01** | **간호사 실습평가서 10대 골든룰 채점/Pass 판정** | `nurse_field_evaluations` | P05, P25(Admin) | P0 | `nurse-eval.spec` |
+| **GUIDE-01** | **돌봄 지침서 (분당서울대병원 16대 질환 690편)** | `courses`, `media-assets` | P04, P40-TAB-GUIDE | P0 | `care-guidebook.spec` |
+| **APP-TAB-01** | **모바일 5대 하단 탭바 네비게이션** | — (React Native / Client) | P40 (전 화면 하단) | P0 | `mobile-tabbar.spec` |
 
 > [!NOTE]
 > PRD에 기능 ID가 없지만 본문에 요구된 항목을 **보강 ID**로 추가한다: `AUTH-01`(PASS/간편인증), `PAY-01`(PG 결제·환불), `ELIG-01`(응시자격 자동판정), `RETAKE-01`(재응시권), `RENEW-01`(보수교육 2년 알림), `FUNNEL-01`(무료 교안 1장 다운로드), `CALC-01`(기대수익 계산기), `LIVE-01`(라이브 Q&A), `COMM-01`(현장 고민상담소 게시판), `PROCTOR-01`(시험 이탈 감지·중복로그인 차단·웹캠 옵션).
