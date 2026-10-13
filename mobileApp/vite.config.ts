@@ -15,7 +15,4 @@ export default defineConfig({
       '@ecare24/utils': path.resolve(__dirname, '../packages/utils/src/index.ts'),
     },
   },
-  optimizeDeps: {
-    exclude: ['@ecare24/types', '@ecare24/utils'],
-  },
 });
