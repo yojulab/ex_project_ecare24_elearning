@@ -1,10 +1,10 @@
 # 📋 [한국돌봄종사자양성교육원] 웹·앱 디자인 및 메뉴 구성 전면 개편 종합 기획서
 ## (Revised IA, Menu Tree & Silver UX Specification for Web & App)
 
-> **문서 버전**: Rev 2.2 (GNB 드롭다운 제거, 교육원소개 /about 별도페이지, 수강신청 메뉴 삭제, 교육 체계 /curriculum 절차 다이어그램 & 16대 트랙, 돌봄 지침서 간결화)  
+> **문서 버전**: Rev 2.3 (실버 글자 겹침 방지, 분당서울대병원 문구 ➔ 대학병원 표준 임상 전면 대체, 홈 편수 뱃지/16대 트랙 문구 정리, 공식포털 탑바 이동)  
 > **기획 대상**: 한국돌봄종사자양성교육원 수강생 웹 포털(`frontend_user`), 모바일 앱(`mobileApp`), 심사자/간호사 관리 포털(`frontend_admin`)  
 > **기준 레퍼런스**: [국민평생교육원 (https://nllc-edu.com/)](https://nllc-edu.com/) 분석 및 [이케어요양보호사교육원 (http://www.ecarecti.co.kr/)](http://www.ecarecti.co.kr/) 교육원 소개 구조 연계  
-> **연계 임상 교안**: [분당서울대학교병원 16대 질환군 전수 마스터 커리큘럼 (snubh_16_disease_care_curriculum.md)](file:///apps/project_ecare24_elearning/docs/snubh_16_disease_care_curriculum.md)  
+> **연계 임상 교안**: [대학병원 임상 간호 16대 질환군 마스터 커리큘럼 (snubh_16_disease_care_curriculum.md)](file:///apps/project_ecare24_elearning/docs/snubh_16_disease_care_curriculum.md)  
 > **표준 룰 준수**: [GEMINI.md](file:///apps/project_ecare24_elearning/GEMINI.md), [AGENTS.md](file:///apps/project_ecare24_elearning/AGENTS.md), [caregiver-terminology.md](file:///apps/project_ecare24_elearning/.agents/rules/caregiver-terminology.md), [ui-tagging-inspection.md](file:///apps/project_ecare24_elearning/.agents/rules/ui-tagging-inspection.md)
 
 ---
@@ -18,11 +18,11 @@
 
 | 번호 | 의뢰자 요구사항 | 현행 문제점 (As-Is / 레퍼런스 nllc-edu) | 개편 방향 (To-Be: 한국돌봄종사자양성교육원) | 반영 화면 및 모듈 |
 | :---: | :--- | :--- | :--- | :--- |
-| **REQ-01** | **수강생 눈높이 결정 및 접근성 극대화**<br>(생략 가능한 잡다한 메뉴 전면 제거) | • nllc-edu: 16개 복잡한 자격 카테고리 난립<br>• 다중 서브메뉴로 실버 학습자 이탈 초래 | • 불필요한 카테고리/배너/광고 100% 제거<br>• 폰트 3단계 조절(`[가-/가/가+]` 16px→22px→28px 차이 극대화), 고대비 모드, 기본 바탕색 일괄 적용(#f8fafc) | • 웹: GNB 간결화 4대 메뉴<br>• 앱: 5대 직관 하단 탭바<br>• WCAG AAA 실버 바 |
+| **REQ-01** | **수강생 눈높이 결정 및 접근성 극대화**<br>(글자 확대 시 겹침 방지 및 잡다한 메뉴 제거) | • nllc-edu: 복잡한 카테고리 난립<br>• 글자 확대 시 상하 텍스트 겹침(overlap) 발생 | • 불필요한 카테고리 100% 제거<br>• 폰트 3단계 조절(`[가-/가/가+]`) 시 줄간격 확보 및 컨테이너 자동 신축으로 **글자 겹침 원천 방지**<br>• 기본 바탕색 일괄 적용(#f8fafc) | • 웹: GNB 간결화 4대 메뉴<br>• 앱: 5대 직관 하단 탭바<br>• `globals.css`, `index.css` |
 | **REQ-02** | **수강 신청 메뉴 삭제 및 단일 신청 일원화**<br>(GNB 중복 수강신청 메뉴 삭제) | • 네비게이션에 독립 수강신청 메뉴가 중복 노출되어 혼선 | • **GNB의 독립 '수강신청' 메뉴 전면 삭제**<br>• 홈 히어로 배너 CTA 및 교육체계 다이어그램 Step 1에서 원클릭 직행 일원화 | • 웹: `layout.tsx` GNB 삭제, `page.tsx` CTA<br>• 앱: `MobileTabBar.tsx` 탭 일원화 |
-| **REQ-03** | **교육 체계: 별도 페이지 + 절차 다이어그램**<br>(16대 트랙 및 상단 로드맵 다이어그램) | • 홈에 단순 나열되어 신청과 수료 절차를 한눈에 파악하기 어려움 | • **'교육 체계' 별도 페이지(`/curriculum`) 신규 구축**<br>• **페이지 상단에 '수강신청~수료 절차 5단계 다이어그램'** 탑재<br>• 16대 질환별 전문 자격 트랙(각 총 8시간: 이론 4h + 실기 4h) 카드 배치 | • 웹: `/curriculum`<br>• 앱: `[P40-TAB-CURR]` (CurriculumScreen) |
+| **REQ-03** | **교육 체계: 별도 페이지 + 절차 다이어그램**<br>(상단 로드맵 다이어그램 + 과정 카드) | • 홈에 단순 나열되어 신청과 수료 절차를 한눈에 파악하기 어려움 | • **'교육 체계' 별도 페이지(`/curriculum`) 신규 구축**<br>• **페이지 상단에 '수강신청~수료 절차 5단계 다이어그램'** 탑재<br>• 홈 히어로의 중복 문구('16대 전문 돌봄 자격 트랙') 삭제 및 정돈 | • 웹: `/curriculum`, `page.tsx`<br>• 앱: `[P40-TAB-CURR]` (CurriculumScreen) |
 | **REQ-04** | **교육원소개: 드롭다운 삭제 및 별도 페이지**<br>(ecarecti.co.kr 참조 5대 하위메뉴) | • hover 시 나타나는 GNB 드롭다운이 실버 사용자 조작에 불편함 유발 | • **GNB 드롭다운 전면 삭제, 단일 링크로 `/about` 별도 페이지 구축**<br>• ecarecti.co.kr 5대 하위메뉴(교육원소개, 대표인사말, 조직안내, 오시는길, 관련사이트) 탭뷰 구현 | • 웹: `/about`<br>• 앱: `[P40-TAB-ABOUT]` (AboutScreen) |
-| **REQ-05** | **돌봄 지침서 명칭 간결화**<br>(돌봄 지침서 (16대 질환) ➔ 돌봄 지침서) | • 괄호 부가 설명이 메뉴 바를 복잡하게 만듦 | • 괄호 제거 후 **「돌봄 지침서」**로 명칭 간결화<br>• 분당서울대학교병원 16대 질환군 690편 가이드북 직결 | • 웹: `layout.tsx`, `/tv24`<br>• 앱: `[P40-TAB-GUIDE]` |
+| **REQ-05** | **돌봄 지침서 명칭 간결화 & 뱃지/기관명 정돈**<br>(편수 뱃지 삭제 & 대학병원 표준 임상 대체) | • 특정 병원명 노출 및 편수 뱃지(690편)로 메뉴 복잡도 증가 | • 괄호 및 편수 뱃지 삭제 후 **「돌봄 지침서」**로 간결화<br>• '분당서울대병원' 관련 문구를 **'대학병원 표준 임상 간호 가이드라인'**으로 전면 대체 | • 웹: `layout.tsx`, `page.tsx`, `/tv24`<br>• 앱: `[P40-TAB-GUIDE]`, `screens` |
 | **REQ-06** | **자격증 신청 조건 엄격화**<br>(이론 수료 or 요양보호사 + 간호사 실습평가서 Pass) | • 시험 점수만으로 자격증 발급 시 임상 검증 부재 | • **트랙 A**: 교육원 8h 트랙 수료<br>• **트랙 B**: 요양보호사 자격증 소지자<br>• **필수 게이트**: 심사 간호사의 **현장 실습평가서 합격(70점 이상)** 필수 | • 웹: `/verify`<br>• 관리자: 간호사 평가 모듈 |
 
 ---

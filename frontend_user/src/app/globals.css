@@ -16,41 +16,75 @@ body {
 /* ============================================================================
    실버 친화적 글자 크기 3단계 스케일링 (체감 차이 대폭 확대: 16px -> 22px -> 28px)
    ============================================================================ */
+/* ============================================================================
+   실버 친화적 글자 크기 3단계 스케일링 (체감 차이 대폭 확대 및 텍스트 겹침 방지)
+   ============================================================================ */
 body.font-scale-normal {
   font-size: 16px;
   line-height: 1.6;
 }
 
+/* 크게 (22px): 주요 텍스트 뚜렷한 확대 & 유연한 줄간격으로 겹침 완벽 방지 */
 body.font-scale-large {
-  font-size: 22px !important; /* 확연한 1차 확대 (+6px) */
-  line-height: 1.7;
+  font-size: 22px !important;
+  line-height: 1.65 !important;
 }
-body.font-scale-large h1 { font-size: 2.75rem !important; }
-body.font-scale-large h2 { font-size: 2.25rem !important; }
-body.font-scale-large h3 { font-size: 1.75rem !important; }
+body.font-scale-large h1 { font-size: 2.5rem !important; line-height: 1.3 !important; }
+body.font-scale-large h2 { font-size: 2.1rem !important; line-height: 1.35 !important; }
+body.font-scale-large h3 { font-size: 1.7rem !important; line-height: 1.4 !important; }
 body.font-scale-large p,
-body.font-scale-large span,
-body.font-scale-large a,
+body.font-scale-large li,
+body.font-scale-large label,
+body.font-scale-large input {
+  font-size: 1.35rem !important;
+  line-height: 1.65 !important;
+}
 body.font-scale-large button,
-body.font-scale-large input,
-body.font-scale-large label {
-  font-size: 1.25rem !important;
+body.font-scale-large a {
+  font-size: 1.15rem !important;
+  line-height: 1.4 !important;
 }
 
+/* 아주 크게 (28px): 초특대 가독성 & 컨테이너 자동 신축으로 겹침 완벽 방지 */
 body.font-scale-larger {
-  font-size: 28px !important; /* 초특대 2차 확대 (+12px) */
-  line-height: 1.8;
+  font-size: 28px !important;
+  line-height: 1.75 !important;
 }
-body.font-scale-larger h1 { font-size: 3.4rem !important; }
-body.font-scale-larger h2 { font-size: 2.85rem !important; }
-body.font-scale-larger h3 { font-size: 2.2rem !important; }
+body.font-scale-larger h1 { font-size: 3.1rem !important; line-height: 1.3 !important; }
+body.font-scale-larger h2 { font-size: 2.6rem !important; line-height: 1.35 !important; }
+body.font-scale-larger h3 { font-size: 2.1rem !important; line-height: 1.4 !important; }
 body.font-scale-larger p,
-body.font-scale-larger span,
-body.font-scale-larger a,
+body.font-scale-larger li,
+body.font-scale-larger label,
+body.font-scale-larger input {
+  font-size: 1.65rem !important;
+  line-height: 1.75 !important;
+}
 body.font-scale-larger button,
-body.font-scale-larger input,
-body.font-scale-larger label {
-  font-size: 1.55rem !important;
+body.font-scale-larger a {
+  font-size: 1.35rem !important;
+  line-height: 1.4 !important;
+}
+
+/* 실버 확대 모드 시 레이아웃 겹침 방지 공통 방어벽 */
+body.font-scale-large header,
+body.font-scale-larger header,
+body.font-scale-large nav,
+body.font-scale-larger nav,
+body.font-scale-large .flex,
+body.font-scale-larger .flex {
+  min-height: auto;
+  overflow: visible;
+}
+
+body.font-scale-large [data-serial-id*="BAR"],
+body.font-scale-larger [data-serial-id*="BAR"],
+body.font-scale-large [data-serial-id*="GNB"],
+body.font-scale-larger [data-serial-id*="GNB"] {
+  height: auto !important;
+  min-height: 48px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 /* 고대비 모드 (High Contrast Mode) */
@@ -83,7 +117,8 @@ body.high-contrast .bg-slate-100 {
   z-index: 9999;
   background: #4f46e5;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 10px !important;
+  line-height: 1 !important;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 700;
   padding: 2px 6px;

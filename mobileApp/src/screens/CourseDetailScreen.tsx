@@ -199,7 +199,7 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
             </div>
 
             <p className="mt-2 text-xs font-medium text-slate-600">
-              분당서울대병원 공식 임상 간호 실기 영상 연계. 골든 룰 팁 팝업 제공.
+              대학병원 표준 임상 간호 실기 영상 연계. 골든 룰 팁 팝업 제공.
             </p>
 
             <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">

@@ -106,16 +106,9 @@ export default function HomePage() {
           ==================================================================== */}
       <section
         data-serial-id="P01-SEC01-HERO"
-        className="bg-gradient-to-b from-emerald-50/60 via-slate-50 to-slate-50 pt-12 pb-14 px-4 sm:px-8 border-b border-slate-200"
+        className="bg-gradient-to-b from-emerald-50/60 via-slate-50 to-slate-50 pt-10 pb-14 px-4 sm:px-8 border-b border-slate-200"
       >
         <div className="max-w-5xl mx-auto text-center space-y-4">
-          <UiBadge serialId="P01-SEC01-BAD01" label="[P01-SEC01-BAD01]">
-            <div className="inline-flex items-center gap-2 bg-emerald-100/80 text-emerald-900 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold border border-emerald-300">
-              <ShieldCheck className="w-4 h-4 text-emerald-700" />
-              <span>한국돌봄종사자양성교육원 공식 교육포털</span>
-            </div>
-          </UiBadge>
-
           <UiBadge serialId="P01-SEC01-TIT01" label="[P01-SEC01-TIT01]">
             <h1 className="text-3xl sm:text-5xl font-extrabold text-slate-950 tracking-tight leading-tight">
               환자의 질환을 정확히 알아야, <br className="hidden sm:inline" />
@@ -127,9 +120,7 @@ export default function HomePage() {
           </UiBadge>
 
           <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed pt-1">
-            <strong>16대 질환군 전문 돌봄 자격 트랙 (각 총 8시간 이수)</strong>
-            <br />
-            분당서울대학교병원 의학 커리큘럼 기반 돌봄 지침서 및 임상간호사 실습평가 연계
+            대학병원 표준 임상 간호 지침서 및 임상간호사 실습평가 연계
           </p>
 
           {/* 원클릭 핵심 액션 버튼 */}
@@ -173,11 +164,11 @@ export default function HomePage() {
             </div>
             <UiBadge serialId="P01-SEC02-TIT01" label="[P01-SEC02-TIT01]">
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                16대 전문 돌봄 자격 트랙 <span className="text-emerald-700">(각 총 8시간)</span>
+                질환별 전문 돌봄 교육과정 <span className="text-emerald-700">(각 총 8시간)</span>
               </h2>
             </UiBadge>
             <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              각 트랙은 <strong>이론 4시간 + 실기 4시간 = 총 8시간</strong>으로 구성되어 질환별 핵심 임상케어를 단기 집중 이수합니다.
+              각 과정은 <strong>이론 4시간 + 실기 4시간 = 총 8시간</strong>으로 구성되어 질환별 핵심 임상케어를 단기 집중 이수합니다.
             </p>
           </div>
 
@@ -315,12 +306,6 @@ export default function HomePage() {
                 현장 압축 10대 골든 룰 (Golden Rules)
               </h2>
             </div>
-            <a
-              href="/tv24"
-              className="bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
-            >
-              분당서울대병원 690편 지침서 전체보기 ▷
-            </a>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 text-xs">

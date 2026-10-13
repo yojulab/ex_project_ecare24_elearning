@@ -65,7 +65,7 @@ export const AboutScreen: React.FC = () => {
             </p>
             <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 font-medium">
               • 16대 질환별 맞춤 이론 4h + 실기 4h<br />
-              • 분당서울대병원 돌봄지침서 연계<br />
+              • 대학병원 표준 임상 돌봄지침서 연계<br />
               • 간호사 실습평가서 70점 이상 통과제
             </div>
           </div>

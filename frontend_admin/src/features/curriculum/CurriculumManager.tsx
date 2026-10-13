@@ -99,7 +99,7 @@ export const CurriculumManager: React.FC = () => {
       <UiBadge serialId="P22-SEC02-CRD01" label="[P22-SEC02-CRD01]" className="w-full">
         <Card
           size="small"
-          title="SNUBH(분당서울대병원 690편) & 간병24TV 큐레이션 관리 대장"
+          title="대학병원 표준 임상 가이드라인 & 간병24TV 큐레이션 관리 대장"
           extra={
             <div className="flex items-center gap-2">
               <Select

@@ -117,7 +117,7 @@ export default function AboutPage() {
                   </div>
                   <h3 className="font-extrabold text-lg text-teal-950 mb-2">16대 질환별 맞춤 트랙</h3>
                   <p className="text-slate-600 text-sm leading-relaxed">
-                    분당서울대병원 돌봄지침서 및 대학병원 임상 가이드라인을 기반으로 각 질환별 8시간(이론 4h + 실기 4h) 집중 자격 교육을 제공합니다.
+                    대학병원 표준 임상 가이드라인 및 전문 돌봄 지침서를 기반으로 각 질환별 8시간(이론 4h + 실기 4h) 집중 자격 교육을 제공합니다.
                   </p>
                 </div>
 

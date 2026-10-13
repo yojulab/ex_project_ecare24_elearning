@@ -144,7 +144,7 @@ export const CourseMaterialScreen: React.FC<CourseMaterialScreenProps> = ({
             편마비 환자의 체위변경(체변) 및 탈건착환 안전 수칙
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            최종 임상 검수: 분당서울대병원 재활의학센터 / 수석간호사 이영희
+            최종 임상 검수: 대학병원 임상간호교육센터 / 수석간호사 이영희
           </p>
         </div>
 

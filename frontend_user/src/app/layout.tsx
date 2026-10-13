@@ -11,6 +11,7 @@ import {
   Type,
   Headphones,
   CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { initUiInspectorGlobalListener } from '@ecare24/utils';
 import UiBadge from '../components/UiBadge';
@@ -59,10 +60,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <title>한국돌봄종사자양성학원 - 240시간 전문 돌봄인력 양성</title>
+        <title>한국돌봄종사자양성교육원 - 16대 전문 돌봄 자격 교육포털</title>
         <meta
           name="description"
-          content="160시간 이론·실기 + 80시간 현장실습 이원화 교육체계, 분당서울대학교병원 16대 질환 돌봄 지침서 기반 전문 교육기관"
+          content="16대 전문 돌봄 자격 트랙 및 간호사 실습평가 연계, 대학병원 표준 임상 돌봄 지침서 기반 전문 교육기관"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -137,18 +138,12 @@ export default function RootLayout({
             </UiBadge>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="text-emerald-400 font-semibold hidden sm:inline">
-              ● 16대 전문 돌봄 자격 트랙 (각 총 8시간 이수)
+          {/* 우측: 한국돌봄종사자양성교육원 공식 교육포털 (기존 링크/설명 삭제 후 배치) */}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 font-bold border border-emerald-700/60 text-xs shadow-sm">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>한국돌봄종사자양성교육원 공식 교육포털</span>
             </span>
-            <a
-              href="http://localhost:30011"
-              target="_blank"
-              rel="noreferrer"
-              className="text-indigo-400 hover:text-indigo-300 font-semibold underline"
-            >
-              간호사 심사·상담 포털 (:30011) ↗
-            </a>
           </div>
         </div>
 
@@ -208,9 +203,6 @@ export default function RootLayout({
                 >
                   <Video className="w-4 h-4 text-indigo-500" />
                   <span>돌봄 지침서</span>
-                  <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-                    690편
-                  </span>
                 </a>
               </UiBadge>
 
@@ -249,13 +241,13 @@ export default function RootLayout({
                 한국돌봄종사자양성교육원
               </div>
               <p className="leading-relaxed text-slate-400 max-w-md">
-                보건복지부 요양보호 표준 커리큘럼 및 임상간호 실습 연계 16대 질환 전문 돌봄 교육기관
+                보건복지부 요양보호 표준 커리큘럼 및 임상간호 실습 연계 전문 돌봄 교육기관
                 <br />
-                16대 질환별 전문 자격 트랙 (각 총 8시간 이수제: 이론 4h + 실기 4h)
+                전문 자격 트랙 (각 총 8시간 이수제: 이론 4h + 실기 4h)
                 <br />
-                주소: 서울특별시 강남구 테헤란로 427 위워크타워 14층 | 대표전화: 1588-2424
+                주소: 서울특별시 영등포구 영등포로 150 이케어교육빌딩 4층 | 대표전화: 1588-2424
                 <br />
-                본 교육원의 모든 임상 실무 지침서는 분당서울대학교병원 의학 커리큘럼을 기반으로 운영됩니다.
+                본 교육원의 모든 임상 실무 지침서는 대학병원 표준 임상 간호 가이드라인을 기반으로 운영됩니다.
               </p>
             </div>
             <div className="flex flex-col gap-1 text-slate-500">

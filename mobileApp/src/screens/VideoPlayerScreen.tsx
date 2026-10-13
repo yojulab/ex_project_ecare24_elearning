@@ -78,7 +78,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
           </button>
         </UiBadge>
         <span className="text-xs font-black text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-          분당서울대병원(SNUBH) 큐레이션 A등급
+          대학병원 표준 임상 간호 큐레이션 A등급
         </span>
       </div>
 
@@ -94,7 +94,7 @@ export const VideoPlayerScreen: React.FC<VideoPlayerScreenProps> = ({
               {videoInfo.title}
             </p>
             <span className="text-[11px] text-slate-400 mt-1">
-              [분당서울대병원] 재활의학센터 전문간호 교육영상
+              [대학병원 임상센터] 재활의학센터 전문간호 교육영상
             </span>
           </div>
         </UiBadge>

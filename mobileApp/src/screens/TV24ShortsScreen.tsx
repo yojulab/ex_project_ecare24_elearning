@@ -30,7 +30,7 @@ export const TV24ShortsScreen: React.FC<TV24ShortsScreenProps> = ({
       tags: ['#편마비', '#탈건착환', '#낙상예방', '#간병24TV'],
       likes: 1240,
       diseaseId: 1,
-      hospital: '분당서울대병원 재활의학센터',
+      hospital: '대학병원 재활의학교육센터',
       highlight: '벗을 땐 건강한 쪽부터, 입힐 땐 마비된 쪽부터!',
     },
     {
@@ -39,7 +39,7 @@ export const TV24ShortsScreen: React.FC<TV24ShortsScreenProps> = ({
       tags: ['#폴리', '#유린백', '#비뇨기케어', '#골든룰'],
       likes: 890,
       diseaseId: 3,
-      hospital: '분당서울대병원 비뇨의학과',
+      hospital: '대학병원 비뇨임상센터',
       highlight: '유린백은 항상 환자 방광(침대) 아래에 거치!',
     },
     {
@@ -48,7 +48,7 @@ export const TV24ShortsScreen: React.FC<TV24ShortsScreenProps> = ({
       tags: ['#체위변경', '#욕창예방', '#측위', '#실버간병'],
       likes: 2150,
       diseaseId: 5,
-      hospital: '분당서울대병원 간호본부',
+      hospital: '대학병원 임상간호본부',
       highlight: 'q2hr 체변 + 베개 30도 지지로 골반 압박 분산',
     },
     {
@@ -57,7 +57,7 @@ export const TV24ShortsScreen: React.FC<TV24ShortsScreenProps> = ({
       tags: ['#피딩', '#엘튜브', '#PEG', '#흡인성폐렴'],
       likes: 1530,
       diseaseId: 2,
-      hospital: '분당서울대병원 소화기내과',
+      hospital: '대학병원 소화기임상센터',
       highlight: '피딩 중 및 주입 후 30분간 좌위/반좌위 유지!',
     },
   ];
