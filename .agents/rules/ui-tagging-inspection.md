@@ -44,8 +44,14 @@
 ### 2-3. 원클릭 클립보드 복사 (Click to Copy)
 - **동작**:
   1. 의뢰자가 수정하고 싶은 요소의 일련번호 뱃지를 마우스로 클릭.
-  2. 클립보드에 해당 고유 ID(예: `P01-SEC03-BTN02`)가 즉시 복사됨 (`navigator.clipboard.writeText`).
-  3. 뱃지 라벨이 1.2초간 녹색 **`[Copied! ✓]`**로 바뀌며 하단에 미니 토스트 알림 발생.
+  2. 클립보드에 **4대 필수 정보(일련번호, 페이지명, URI, 항목명)**가 정돈된 포맷으로 즉시 복사됨 (`navigator.clipboard.writeText`).
+     ```text
+     - 일련번호: P01-SEC03-BTN02
+     - 페이지명: 한국돌봄종사자양성교육원 메인 홈
+     - URI: http://localhost:30010/curriculum
+     - 항목명: 16대 질환 무료 수강
+     ```
+  3. 뱃지 라벨이 1.2초간 녹색 **`[Copied! ✓]`**로 바뀌며 하단에 상세 토스트 알림 발생(`📋 [P01-SEC03-BTN02] 정보 복사 완료! (일련번호/페이지/URI/항목명)`).
 
 ---
 
@@ -54,18 +60,22 @@
 ```
 [의뢰자 (클라이언트)]
   1. Alt + I 를 눌러 화면의 인스펙션 뱃지를 켠다.
-  2. 수정하고 싶은 버튼의 뱃지를 클릭한다 -> 'P02-SEC02-BTN01' 클립보드 자동 복사.
+  2. 수정하고 싶은 버튼의 뱃지를 클릭한다 -> 일련번호, 페이지명, URI, 항목명이 클립보드 자동 복사.
   3. 채팅창에 붙여넣기(Ctrl+V)하여 요청:
-     "P02-SEC02-BTN01 버튼의 문구를 '자격시험 바로 응시'로 변경하고 배경색을 에메랄드로 바꿔주세요."
+     - 일련번호: P02-SEC02-BTN01
+     - 페이지명: 16대 질환 전문과정
+     - URI: http://localhost:30010/curriculum
+     - 항목명: 자격시험 바로 응시
+     "위 항목의 버튼 문구를 '자격시험 바로 응시'로 변경하고 배경색을 에메랄드로 바꿔주세요."
 
 [AI 에이전트]
-  1. 'P02-SEC02-BTN01' 태그 식별자를 grep_search로 즉시 추적.
+  1. 'P02-SEC02-BTN01' 및 제공된 URI/페이지명을 통해 해당 파일/엘리먼트를 즉시 추적.
   2. 오차 없이 정확한 파일의 해당 엘리먼트를 특정하여 0.1초 만에 수정 완료.
 ```
 
 ---
 
-## 4. 프론트엔드 공통 인스펙션 스크립트 규격 (`ui-tagger.js`)
+## 4. 프론트엔드 공통 인스펙션 스크립트 규격 (`uiTagHelper.ts` / `ui-tagger.js`)
 
 개발 단계에서 모든 웹 화면에 주입되는 경량 스크립트 표준:
 
@@ -88,15 +98,33 @@
     showToast(isInspectMode ? '🔍 UI 일련번호 뱃지 활성화 (Alt+I로 닫기)' : 'UI 일련번호 뱃지 숨김');
   }
 
-  // 2. 뱃지 클릭 시 클립보드 복사 이벤트 위임
+  // 2. 뱃지 클릭 시 4대 정보 클립보드 복사 이벤트 위임
   document.addEventListener('click', (e) => {
     const badge = e.target.closest('.ui-serial-badge');
     if (!badge) return;
     e.preventDefault();
     e.stopPropagation();
 
-    const serialId = badge.getAttribute('data-serial-id');
-    navigator.clipboard.writeText(serialId).then(() => {
+    const serialId = badge.getAttribute('data-serial-id') || badge.innerText;
+    const pageName = document.title || '페이지';
+    const uri = window.location.href;
+    const container = badge.parentElement;
+    let itemName = badge.getAttribute('data-item-name') || container?.getAttribute('data-item-name') || '';
+    if (!itemName && container) {
+      const clone = container.cloneNode(true);
+      clone.querySelectorAll('.ui-serial-badge').forEach(b => b.remove());
+      itemName = (clone.textContent || '').replace(/\s+/g, ' ').trim().substring(0, 40);
+    }
+    if (!itemName) itemName = serialId;
+
+    const copyText = [
+      `- 일련번호: ${serialId}`,
+      `- 페이지명: ${pageName}`,
+      `- URI: ${uri}`,
+      `- 항목명: ${itemName}`
+    ].join('\n');
+
+    navigator.clipboard.writeText(copyText).then(() => {
       const originalText = badge.innerText;
       badge.innerText = 'Copied! ✓';
       badge.classList.add('copied');
@@ -104,7 +132,7 @@
         badge.innerText = originalText;
         badge.classList.remove('copied');
       }, 1200);
-      showToast(`📋 [${serialId}] 복사 완료! 피드백에 붙여넣으세요.`);
+      showToast(`📋 [${serialId}] 정보 복사 완료! (일련번호/페이지/URI/항목명)`);
     });
   });
 
@@ -117,7 +145,7 @@
     }
     toast.innerText = msg;
     toast.className = 'ui-toast-show';
-    setTimeout(() => { toast.className = ''; }, 2000);
+    setTimeout(() => { toast.className = ''; }, 2200);
   }
 })();
 ```

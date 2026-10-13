@@ -7,9 +7,9 @@
 ## 1. 에이전트 필수 준수 사항
 
 1. **상시 룰 참조**: 작업을 시작하기 전 반드시 [GEMINI.md](file:///apps/project_ecare24_elearning/GEMINI.md), 도메인 룰([.agents/rules/ecare24-domain.md](file:///apps/project_ecare24_elearning/.agents/rules/ecare24-domain.md)), 간병 전문 용어 룰([.agents/rules/caregiver-terminology.md](file:///apps/project_ecare24_elearning/.agents/rules/caregiver-terminology.md)), UI 태깅 인스펙션 룰([.agents/rules/ui-tagging-inspection.md](file:///apps/project_ecare24_elearning/.agents/rules/ui-tagging-inspection.md)), Git 워크플로우 룰([.agents/rules/git-workflow.md](file:///apps/project_ecare24_elearning/.agents/rules/git-workflow.md))을 준수한다.
-2. **의뢰자 소통용 UI 일련번호 태깅 및 뱃지 복사 규정 준수**:
+2. **의뢰자 소통용 UI 일련번호 태깅 및 4대 정보 뱃지 복사 규정 준수**:
    - 모든 화면과 주요 인터랙션 태그 요소에 고유 일련번호(`[P01-SEC01-BTN01]`)를 부여하여 의뢰자와 정밀하게 소통한다.
-   - 단축키 `Alt + I`로 뱃지 표시/숨김 토글을 지원하고, 뱃지 클릭 시 일련번호가 클립보드에 복사(`[Copied! ✓]`)되도록 설계 및 검증한다.
+   - 단축키 `Alt + I`로 뱃지 표시/숨김 토글을 지원하고, 뱃지 클릭 시 **4대 핵심 정보(일련번호, 페이지명, URI, 항목명)**가 클립보드에 정돈되어 복사(`[Copied! ✓]`)되도록 설계 및 검증한다.
 3. **간병 임상 용어 및 10대 골든 룰 엄수**:
    - 모든 교안, 모의고사, 상담 템플릿 작성 시 [caregiver_terminology_dictionary.md](file:///apps/project_ecare24_elearning/docs/caregiver_terminology_dictionary.md)의 용어(피딩, 엘튜브, PEG, 폴리, 유린백, 체변 등) 및 10대 골든 룰(탈건착환, q2hr 체변, 유린백 방광 하단 거치, 석션 15초 이내 등)을 정확히 적용한다.
 4. **기획/아키텍처 단계 준수 (비개발 원칙)**:

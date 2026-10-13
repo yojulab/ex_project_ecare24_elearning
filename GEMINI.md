@@ -28,9 +28,9 @@
 1. **기획 및 상세 아키텍처 수립 단계 준수 (비개발 원칙)**:
    - **※ 본 단계에서는 실제 소스코드 개발을 진행하지 않습니다.**
    - 개발팀, 기획팀, 인프라팀이 상호 합의하고 즉시 스프린트에 착수할 수 있도록 구체적인 스펙, WBS, 인터페이스 정의 및 아키텍처 수립에 집중합니다.
-2. **의뢰자 소통용 UI 일련번호 태깅 및 단축키 뱃지 복사 규정**:
+2. **의뢰자 소통용 UI 일련번호 태깅 및 4대 정보 뱃지 복사 규정**:
    - 모든 화면과 컴포넌트 태그에 고유 일련번호(`[P01-SEC01-BTN01]`)를 부여합니다.
-   - 단축키 **`Alt + I`**로 뱃지 표시/숨김 토글을 지원하고, **뱃지 클릭 시 일련번호가 클립보드에 자동 복사(Copy)**되어 의뢰자가 피드백에 1초 만에 활용할 수 있도록 구현합니다.
+   - 단축키 **`Alt + I`**로 뱃지 표시/숨김 토글을 지원하고, **뱃지 클릭 시 4대 핵심 정보(일련번호, 페이지명, URI, 항목명)가 클립보드에 자동 복사(Copy)**되어 의뢰자가 피드백에 1초 만에 활용할 수 있도록 구현합니다.
 3. **간병 실무 필수 전문 용어 및 10대 골든 룰 준수**:
    - 모든 교안, CBT 시험 문항, 콜센터 상담 템플릿 작성 시 [caregiver_terminology_dictionary.md](file:///apps/project_ecare24_elearning/docs/caregiver_terminology_dictionary.md)의 전문 용어(피딩, 엘튜브, PEG, 폴리, 유린백, 체변, 앙와위/측위 등)와 **"현장 압축 10대 골든 룰"**(탈건착환, q2hr 체변, 유린백 방광 하단 거치, 석션 15초 이내 등)을 절대 준수합니다.
 4. **알맞은 업무 종료 시 Git Commit 의무화**:
@@ -78,5 +78,6 @@
 | **2026-10-13** | 셸 스크립트 대폭 단순화 및 compile/port 관리 단일화 통합 | `run_port.sh`, `compile.sh`, `start_server.sh`, `stop_server.sh`, `restart_server.sh`, `README.md` | 850줄의 비대한 스크립트를 250줄의 직관적 통합 스크립트로 단순화, compile/start/dev/stop/restart/status 일관 문법 지원 |
 | **2026-10-13** | 개별 패키지 빌드 이슈 해결 및 폰트 CDN 정규화 | `mobileApp`, `frontend_user`, `frontend_admin`, `package.json` | Google Fonts 부재 Pretendard 제거 및 jsdelivr 분리(400 에러 해결), postinstall .bin 자동 링크(vite: not found 방지), TS antd 모듈 인식 보장 |
 | **2026-10-13** | 외부 도메인 차단 방지 Vite allowedHosts 전체 허용 | `frontend_admin/vite.config.ts`, `mobileApp/vite.config.ts`, `GEMINI.md` | third.axfoundly.com 등 터널/외부 호스트 차단 방지를 위해 server 및 preview allowedHosts: true 전면 적용 |
+| **2026-10-13** | UI 인스펙터 뱃지 복사 시 4대 정보(일련번호, 페이지명, URI, 항목명) 확장 | `packages/utils/uiTagHelper.ts`, `UiBadge.tsx`, `ui-tagging-inspection.md`, `GEMINI.md` | 뱃지 클릭 시 단일 ID 대신 일련번호, 페이지명, URI, 항목명이 정돈된 텍스트로 자동 추출·복사되도록 고도화 |
 
 
