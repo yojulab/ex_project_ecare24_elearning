@@ -60,7 +60,7 @@
 }
 
 /* ==========================================================================
-   실버 UX 접근성 폰트 스케일러 (Font Scaling [가-/가/가+])
+   실버 UX 접근성 폰트 스케일러 (Font Scaling [가-/가/가+]: 차이 대폭 확대)
    ========================================================================== */
 .font-scale-sm {
   font-size: 15px;
@@ -68,23 +68,25 @@
 }
 
 .font-scale-md {
-  font-size: 17px;
+  font-size: 21px !important; /* 확연한 1차 확대 (+6px) */
   line-height: 1.6;
 }
+.font-scale-md h1 { font-size: 1.8em !important; }
+.font-scale-md h2 { font-size: 1.5em !important; }
+.font-scale-md h3 { font-size: 1.35em !important; }
 
 .font-scale-lg {
-  font-size: 20px;
+  font-size: 28px !important; /* 초특대 2차 확대 (+13px) */
   line-height: 1.7;
 }
-
 .font-scale-lg h1 {
-  font-size: 1.6em;
+  font-size: 2.2em !important;
 }
 .font-scale-lg h2 {
-  font-size: 1.4em;
+  font-size: 1.8em !important;
 }
 .font-scale-lg h3 {
-  font-size: 1.25em;
+  font-size: 1.55em !important;
 }
 
 /* ==========================================================================

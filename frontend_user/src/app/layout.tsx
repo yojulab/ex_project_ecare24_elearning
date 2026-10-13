@@ -139,7 +139,7 @@ export default function RootLayout({
 
           <div className="flex items-center gap-3">
             <span className="text-emerald-400 font-semibold hidden sm:inline">
-              ● 240시간 이원화 교육체계 (160h 이론실기 + 80h 병원실습)
+              ● 16대 전문 돌봄 자격 트랙 (각 총 8시간 이수)
             </span>
             <a
               href="http://localhost:30011"
@@ -153,7 +153,7 @@ export default function RootLayout({
         </div>
 
         {/* ==================================================================
-            글로벌 내비게이션 바 (GNB) - 한국돌봄종사자양성학원
+            글로벌 내비게이션 바 (GNB) - 한국돌봄종사자양성교육원
             ================================================================== */}
         <header
           data-serial-id="P00-SEC01-GNB01"
@@ -168,26 +168,39 @@ export default function RootLayout({
                 </div>
                 <div>
                   <span className="font-extrabold text-lg text-slate-900 tracking-tight block leading-none">
-                    한국돌봄종사자<span className="text-emerald-600">양성학원</span>
+                    한국돌봄종사자<span className="text-emerald-600">양성교육원</span>
                   </span>
                   <span className="text-[10px] font-semibold text-slate-500 tracking-wider">
-                    보건복지부 요양보호사·임상간호 연계 공식 교육기관
+                    보건복지부 요양보호사·임상간호 연계 16대 전문자격 공식 교육기관
                   </span>
                 </div>
               </a>
             </UiBadge>
 
-            {/* 메인 메뉴 링크 (5대 핵심 메뉴 - 잡다한 메뉴 제거) */}
+            {/* 메인 메뉴 링크 (포함 관계 체계화: 교육원소개 하위 드롭다운 연계) */}
             <nav className="flex items-center gap-5 lg:gap-7 text-sm font-bold text-slate-700">
-              <UiBadge serialId="P00-SEC01-LNK01" label="[P00-SEC01-LNK01]">
-                <a
-                  href="/#about"
-                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
-                >
-                  <span>학원소개</span>
-                </a>
-              </UiBadge>
+              {/* 1. 교육원소개 (ecarecti.co.kr 참조 5대 하위메뉴 포함 관계) */}
+              <div className="relative group">
+                <UiBadge serialId="P00-SEC01-LNK01" label="[P00-SEC01-LNK01]">
+                  <a
+                    href="/#about"
+                    className="flex items-center gap-1 hover:text-emerald-600 transition py-1"
+                  >
+                    <span>교육원소개</span>
+                    <span className="text-[10px] text-slate-400 group-hover:text-emerald-600 transition">▼</span>
+                  </a>
+                </UiBadge>
+                {/* 하위 드롭다운 레이어 (ecarecti.co.kr 구조 1:1 매핑) */}
+                <div className="absolute top-full left-0 hidden group-hover:block bg-white border border-slate-200 rounded-xl shadow-xl py-2 w-44 z-50 text-xs">
+                  <a href="/#about-intro" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">교육원소개</a>
+                  <a href="/#about-greeting" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">대표인사말</a>
+                  <a href="/#about-org" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">조직안내</a>
+                  <a href="/#about-map" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">오시는길</a>
+                  <a href="/#about-sites" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">관련사이트</a>
+                </div>
+              </div>
 
+              {/* 2. 수강신청 (단일과정) */}
               <UiBadge serialId="P00-SEC01-LNK02" label="[P00-SEC01-LNK02]">
                 <a
                   href="/#courses"
@@ -198,15 +211,17 @@ export default function RootLayout({
                 </a>
               </UiBadge>
 
+              {/* 3. 교육체계 (16대 자격 트랙 · 각 8시간) */}
               <UiBadge serialId="P00-SEC01-LNK03" label="[P00-SEC01-LNK03]">
                 <a
                   href="/#curriculum"
                   className="flex items-center gap-1.5 hover:text-emerald-600 transition"
                 >
-                  <span>교육체계 (160h+80h)</span>
+                  <span>교육체계 (16대 트랙·각 8h)</span>
                 </a>
               </UiBadge>
 
+              {/* 4. 돌봄 지침서 (16대 질환 690편 라이브러리) */}
               <UiBadge serialId="P00-SEC01-LNK04" label="[P00-SEC01-LNK04]">
                 <a
                   href="/tv24"
@@ -220,6 +235,7 @@ export default function RootLayout({
                 </a>
               </UiBadge>
 
+              {/* 5. 자격증 신청/검증 */}
               <UiBadge serialId="P00-SEC01-LNK05" label="[P00-SEC01-LNK05]">
                 <a
                   href="/verify"
@@ -243,24 +259,24 @@ export default function RootLayout({
           </div>
         </header>
 
-        {/* 본문 콘텐츠 */}
-        <main className="flex-1">{children}</main>
+        {/* 본문 콘텐츠 (기본 바탕색 통일) */}
+        <main className="flex-1 bg-slate-50">{children}</main>
 
         {/* 푸터 */}
         <footer className="bg-slate-900 text-slate-400 py-10 px-4 text-xs border-t border-slate-800 mt-16">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between gap-6">
             <div>
               <div className="font-extrabold text-white text-base mb-2">
-                한국돌봄종사자양성학원
+                한국돌봄종사자양성교육원
               </div>
               <p className="leading-relaxed text-slate-400 max-w-md">
-                보건복지부 요양보호 표준 커리큘럼 및 임상간호 실습 연계 공인 교육기관
+                보건복지부 요양보호 표준 커리큘럼 및 임상간호 실습 연계 16대 질환 전문 돌봄 교육기관
                 <br />
-                총 240시간 교육과정 (이론·실기 160시간 + 지정 협약의료기관 현장실습 80시간)
+                16대 질환별 전문 자격 트랙 (각 총 8시간 이수제: 이론 4h + 실기 4h)
                 <br />
                 주소: 서울특별시 강남구 테헤란로 427 위워크타워 14층 | 대표전화: 1588-2424
                 <br />
-                본 학원의 모든 임상 실무 지침서는 분당서울대학교병원 의학 커리큘럼을 기반으로 운영됩니다.
+                본 교육원의 모든 임상 실무 지침서는 분당서울대학교병원 의학 커리큘럼을 기반으로 운영됩니다.
               </p>
             </div>
             <div className="flex flex-col gap-1 text-slate-500">

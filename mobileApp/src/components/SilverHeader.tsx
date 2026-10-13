@@ -39,10 +39,10 @@ export const SilverHeader: React.FC<SilverHeaderProps> = ({
               </span>
               <div className="flex flex-col">
                 <span className="text-xs font-black tracking-tight text-slate-900 leading-tight">
-                  한국돌봄종사자학원
+                  한국돌봄종사자교육원
                 </span>
                 <span className="text-[9px] font-bold text-emerald-600 leading-none">
-                  240h 이원화과정
+                  16대트랙(각 8h)
                 </span>
               </div>
             </div>
