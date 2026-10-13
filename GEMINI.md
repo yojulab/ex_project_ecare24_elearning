@@ -75,3 +75,5 @@
 | **2026-10-13** | 모바일 앱 홈 질환별 카드 삭제 및 수강신청 일원화 | `mobileApp`, `HomeScreen.tsx`, `GEMINI.md` | 모바일 앱 홈에서도 '16대 질환군 전문과정' 카드 그리드 완전 삭제, '돌봄종사자 수강신청 바로가기' 및 '교육원 소개' 배너로 일원화 |
 | **2026-10-13** | 포트별 개별 및 일괄 컴파일/기동 스크립트 구축 | `run_port.sh`, `compile.sh`, `package.json` | 모든 포트(30010, 30011, 30012) 일괄/개별 dev 기동 및 build 컴파일 sh 제공 (대화형 CLI 메뉴, 0.0.0.0 바인딩 지원) |
 | **2026-10-13** | 운영 서버 프로덕션(Production) 모드 전면 전환 | `run_port.sh`, `start_server.sh`, `package.json`, `README.md` | NODE_ENV=production 기본화, BUILD_ID 자동 검증 및 클린 빌드, Next.js start 및 Vite preview 프로덕션 서빙 구축 |
+| **2026-10-13** | 셸 스크립트 대폭 단순화 및 compile/port 관리 단일화 통합 | `run_port.sh`, `compile.sh`, `start_server.sh`, `stop_server.sh`, `restart_server.sh`, `README.md` | 850줄의 비대한 스크립트를 250줄의 직관적 통합 스크립트로 단순화, compile/start/dev/stop/restart/status 일관 문법 지원 |
+
