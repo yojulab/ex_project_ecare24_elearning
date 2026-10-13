@@ -67,3 +67,4 @@
 | **2026-10-12** | eCare24 PRD 사양 반영 및 Git Commit 의무화 | `ecare24-domain.md`, `git-workflow.md`, `GEMINI.md`, `AGENTS.md` | `TASK_SPECIFICATION_ECARE24.md` (Rev 1.2) 업무지시서 요구사항 완벽 반영 및 업무 종료 시 Git commit 룰 탑재 |
 | **2026-10-12** | 간병 실무 필수 전문 용어 사전 룰 연동 | `caregiver-terminology.md`, `ecare24-domain.md`, `GEMINI.md`, `AGENTS.md` | `caregiver_terminology_dictionary.md` 기반 임상 전문 용어 및 10대 골든 룰 준수 체계 탑재 |
 | **2026-10-12** | 의뢰자 소통용 UI 태깅 & 인스펙션 뱃지 시스템 구축 | `ui-tagging-inspection.md`, `ecare24-domain.md`, `GEMINI.md`, `AGENTS.md` | 의뢰자-에이전트 간 정밀 피드백을 위한 페이지/태그 일련번호 체계, `Alt+I` 단축키 토글, 뱃지 클릭 복사(Copy) 규격 수립 |
+| **2026-10-13** | 한국돌봄종사자양성학원 웹·앱 메뉴/디자인 전면 개편 | `REVISED_IA_AND_MENU_SPECIFICATION.md`, `ecare24-domain.md`, `GEMINI.md` | nllc-edu 분석 기반 잡다한 메뉴 제거, 단일 수강신청, 160h+80h 이원화, 간호사 실습평가서 조건, 분당서울대병원 돌봄지침서 메뉴 탑재 |

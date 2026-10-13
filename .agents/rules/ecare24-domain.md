@@ -1,7 +1,13 @@
 # eCare24 이러닝 플랫폼 도메인 엔지니어링 가이드
 
-- **문서 참조**: `TASK_SPECIFICATION_ECARE24.md` (문서 번호: `ECARE24-SOW-2026-001 Rev. 1.2`)
-- **프로젝트 명칭**: ecare24 환자 질환별 전문간병사 자격과정 웹·앱 통합 플랫폼
+- **문서 참조**: `TASK_SPECIFICATION_ECARE24.md` (문서 번호: `ECARE24-SOW-2026-001 Rev. 1.2`), `docs/ux/REVISED_IA_AND_MENU_SPECIFICATION.md` (Rev. 2.0)
+- **기관 및 플랫폼 명칭**: **한국돌봄종사자양성학원** (웹: `frontend_user`, 앱: `mobileApp`, 심사: `frontend_admin`)
+- **수강생 눈높이 및 의뢰자 5대 핵심 설계 원칙**:
+  1. **접근성 극대화 및 불필요 메뉴 전면 제거**: 레퍼런스(nllc-edu.com)의 복잡한 16개 자격 카테고리(반려동물, 뷰티 등) 및 잡다한 서브메뉴를 100% 제거하고 실버 맞춤형 1-Depth 네비게이션 제공.
+  2. **수강 신청 단일화**: 수강 신청은 오직 **「돌봄종사자양성자 과정」** 1개 과정만 존재.
+  3. **이수 과정 교육체계의 이원화**: **총 240시간** (제1영역: 160시간 이론·실기 + 제2영역: 80시간 현장실습).
+  4. **자격증 신청 조건 엄격화**: `(본원 이론 160h 수료 OR 국가공인 요양보호사 자격 보유)` + `80h 현장실습 (심사자인 임상간호사의 현장 실습평가서 합격 Pass)` 필수.
+  5. **'돌봄 지침서' 최상위 메뉴 구성**: 분당서울대학교병원 16대 질환군·71개 세부단위·690편 전수 임상 커리큘럼을 실무 핸드북 라이브러리로 전면 배치.
 - **프로젝트 핵심 원칙**:
   > **※ 본 단계는 기획 및 상세 아키텍처 수립 단계입니다.**
   > **본 단계에서는 실제 소스코드 개발을 진행하지 않으며**, 개발팀, 기획팀, 인프라팀이 상호 합의하고 즉각 스프린트에 착수할 수 있도록 구체적인 스펙, 인터페이스 정의, 스키마, 작업 분할 구조(WBS) 및 검증 아키텍처를 정의합니다.
@@ -123,14 +129,16 @@ ecare24/
 
 ## 5. 데이터베이스(PostgreSQL) 핵심 테이블 스키마 규격
 
-백엔드는 아래 7대 핵심 DDL 구조를 기본 데이터 모델로 채택합니다:
+백엔드는 아래 9대 핵심 DDL 구조를 기본 데이터 모델로 채택합니다:
 1. `disease_categories`: 16대 질환군 마스터 (id, code, name_ko, icon_url, display_order)
-2. `courses`: 교육 과정 마스터 (id, category_id, title, target_disease, required_hours, qualification_name)
-3. `curriculum_steps`: 4단계 커리큘럼 (id, course_id, step_number, step_type, content_url, audio_tts_url)
-4. `exam_questions`: CBT 문제은행 (id, category_id, question_type, title, explanation, points, options JSONB, correct_answer)
-5. `certificates`: 민간자격 발급 대장 (id, certificate_no, registry_no, user_id, course_id, qr_verify_token, pdf_file_url)
-6. `counseling_tickets`: 콜센터 상담 티켓 (id, user_id, agent_id, inbound_caller_number, category, status, subject)
-7. `counseling_logs`: 상담 통화 메모 및 녹취 (id, ticket_id, agent_id, content, call_duration_seconds, recording_file_url)
+2. `courses`: 단일 교육과정 마스터 (`CARE-WORKER-240H`, 총 240시간 규격)
+3. `care_enrollments`: 이원화 교육 이수 마스터 (160h 이론실기 + 80h 현장실습, 요양보호사 우대 트랙)
+4. `nurse_field_evaluations`: 임상간호사 현장 실습평가서 (10대 골든 룰 채점표, 80점 이상 Pass 판정)
+5. `curriculum_steps`: 4단계 커리큘럼 (id, course_id, step_number, step_type, content_url, audio_tts_url)
+6. `exam_questions`: CBT 문제은행 (id, category_id, question_type, title, explanation, points, options JSONB, correct_answer)
+7. `certificates`: 공인 자격증 발급 대장 (id, certificate_no, registry_no, user_id, course_id, qr_verify_token, pdf_file_url)
+8. `counseling_tickets`: 콜센터 상담 티켓 (id, user_id, agent_id, inbound_caller_number, category, status, subject)
+9. `counseling_logs`: 상담 통화 메모 및 녹취 (id, ticket_id, agent_id, content, call_duration_seconds, recording_file_url)
 
 ---
 
