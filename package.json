@@ -9,6 +9,9 @@
     "mobileApp"
   ],
   "scripts": {
+    "start": "bash start_server.sh",
+    "stop": "bash stop_server.sh",
+    "restart": "bash restart_server.sh",
     "dev:user": "npm run dev --workspace=frontend_user",
     "dev:admin": "npm run dev --workspace=frontend_admin",
     "dev:mobile": "npm run dev --workspace=mobileApp",
