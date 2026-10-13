@@ -69,3 +69,4 @@
 | **2026-10-12** | 의뢰자 소통용 UI 태깅 & 인스펙션 뱃지 시스템 구축 | `ui-tagging-inspection.md`, `ecare24-domain.md`, `GEMINI.md`, `AGENTS.md` | 의뢰자-에이전트 간 정밀 피드백을 위한 페이지/태그 일련번호 체계, `Alt+I` 단축키 토글, 뱃지 클릭 복사(Copy) 규격 수립 |
 | **2026-10-13** | 한국돌봄종사자양성학원 웹·앱 메뉴/디자인 전면 개편 | `REVISED_IA_AND_MENU_SPECIFICATION.md`, `ecare24-domain.md`, `GEMINI.md` | nllc-edu 분석 기반 잡다한 메뉴 제거, 단일 수강신청, 160h+80h 이원화, 간호사 실습평가서 조건, 분당서울대병원 돌봄지침서 메뉴 탑재 |
 | **2026-10-13** | 한국돌봄종사자양성교육원 6대 메뉴/내용 고도화 보완 | `frontend_user`, `mobileApp`, `REVISED_IA_AND_MENU_SPECIFICATION.md`, `GEMINI.md` | 학원→교육원 명칭 변경, 배경색 `#f8fafc` 통일, 홈 단순화/계층화, 실버 폰트 스케일 확대(16/22/28px), 16대 자격 트랙 각 8h 개편, ecarecti 참조 교육원소개 5대 하위메뉴 탑재 |
+| **2026-10-13** | 교육원소개/교육체계 독립 페이지화 & 메뉴 간결화 | `frontend_user`, `mobileApp`, `REVISED_IA_AND_MENU_SPECIFICATION.md`, `GEMINI.md` | 교육원소개 드롭다운 제거 및 /about 별도페이지화, 수강신청 중복메뉴 삭제, 교육 체계 /curriculum 상단 수강신청~수료 절차도 탑재, 돌봄 지침서 명칭 간결화 |

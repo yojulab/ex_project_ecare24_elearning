@@ -58,7 +58,6 @@ const iconMap: Record<string, React.ReactNode> = {
 };
 
 export default function HomePage() {
-  const [activeAboutTab, setActiveAboutTab] = useState<'intro' | 'greeting' | 'org' | 'map' | 'sites'>('intro');
   const [guideSearchQuery, setGuideSearchQuery] = useState('');
 
   // 16대 자격 트랙 검색 필터
@@ -182,16 +181,25 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* 질환 검색 필터창 */}
-          <div className="w-full md:w-72 relative">
-            <input
-              type="text"
-              value={guideSearchQuery}
-              onChange={(e) => setGuideSearchQuery(e.target.value)}
-              placeholder="질환명 검색 (예: 뇌졸중, 치매)"
-              className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-            />
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+          {/* 질환 검색 필터창 & 교육체계 상세 바로가기 */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
+            <a
+              href="/curriculum"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition"
+            >
+              <span>교육 체계 &amp; 수료 절차도 보기</span>
+              <ChevronRight className="w-4 h-4" />
+            </a>
+            <div className="w-full sm:w-64 relative">
+              <input
+                type="text"
+                value={guideSearchQuery}
+                onChange={(e) => setGuideSearchQuery(e.target.value)}
+                placeholder="질환명 검색 (예: 뇌졸중, 치매)"
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+              />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            </div>
           </div>
         </div>
 
@@ -257,181 +265,38 @@ export default function HomePage() {
       {/* ====================================================================
           [P01-SEC03] 교육원 소개 섹션 (ecarecti.co.kr 참조 5대 하위메뉴 포함 관계)
           ==================================================================== */}
+      {/* ====================================================================
+          [P01-SEC03] 교육원 소개 배너 (/about 별도 페이지 연계)
+          ==================================================================== */}
       <section
         id="about"
         data-serial-id="P01-SEC03-ABOUT"
         className="max-w-7xl mx-auto px-4 sm:px-8 pt-16"
       >
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
-          <div className="mb-6">
-            <span className="text-xs font-bold text-emerald-700">기관 정보 & 교육 이념</span>
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+              기관 정보 및 설립 비전
+            </span>
             <UiBadge serialId="P01-SEC03-TIT01" label="[P01-SEC03-TIT01]">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight mt-0.5">
-                교육원 소개
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
+                한국돌봄종사자양성교육원 소개
               </h2>
             </UiBadge>
+            <p className="text-sm text-slate-600 leading-relaxed pt-1">
+              보건복지부 요양보호 표준과 대학병원 임상 전문 간호를 연계하여, 16대 중증 질환별 전문 돌봄 인력을 양성하는 공인 교육기관입니다. 
+              (1. 교육원소개 · 2. 대표인사말 · 3. 조직안내 · 4. 오시는길 · 5. 관련사이트)
+            </p>
           </div>
-
-          {/* ecarecti.co.kr 5대 하위 탭 내비게이션 */}
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3 mb-6">
-            {[
-              { id: 'intro', label: '교육원소개', code: 'P01-SEC03-TAB01' },
-              { id: 'greeting', label: '대표인사말', code: 'P01-SEC03-TAB02' },
-              { id: 'org', label: '조직안내', code: 'P01-SEC03-TAB03' },
-              { id: 'map', label: '오시는길', code: 'P01-SEC03-TAB04' },
-              { id: 'sites', label: '관련사이트', code: 'P01-SEC03-TAB05' },
-            ].map((tab) => (
-              <UiBadge key={tab.id} serialId={tab.code} label={`[${tab.code}]`}>
-                <button
-                  onClick={() => setActiveAboutTab(tab.id as any)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
-                    activeAboutTab === tab.id
-                      ? 'bg-emerald-600 text-white shadow'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              </UiBadge>
-            ))}
-          </div>
-
-          {/* 탭 1. 교육원소개 */}
-          {activeAboutTab === 'intro' && (
-            <div id="about-intro" className="space-y-4 text-sm text-slate-700 leading-relaxed">
-              <h3 className="text-lg font-extrabold text-slate-900">
-                한국돌봄종사자양성교육원 비전 및 설립 목적
-              </h3>
-              <p>
-                한국돌봄종사자양성교육원은 고령화 사회의 급격한 진입에 발맞추어, 단순 가사 보조 수준에
-                머물러 있던 전통적 간병을 **의학적 이해와 임상 안전 수칙에 기반한 16대 질환 전문 돌봄 서비스**로
-                도약시키기 위해 설립된 공인 교육기관입니다.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-emerald-800 text-base mb-1">임상 안전 최우선</strong>
-                  <span className="text-xs text-slate-500">
-                    q2hr 체위변경, 비위관 피딩 반좌위, 유린백 하단 거치 등 10대 골든 룰 절대 준수
-                  </span>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-emerald-800 text-base mb-1">16대 질환 전문화</strong>
-                  <span className="text-xs text-slate-500">
-                    분당서울대학교병원 의학 커리큘럼 690편 연동으로 전문 질환별 지침 습득
-                  </span>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-emerald-800 text-base mb-1">간호사 실습평가제</strong>
-                  <span className="text-xs text-slate-500">
-                    전담 임상간호사의 현장 실기 평가서 합격(Pass)을 통한 철저한 자격 검증
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 탭 2. 대표인사말 */}
-          {activeAboutTab === 'greeting' && (
-            <div id="about-greeting" className="space-y-3 text-sm text-slate-700 leading-relaxed">
-              <h3 className="text-lg font-extrabold text-slate-900">
-                원장 환영사 — "돌봄 종사자의 긍지와 환자의 존엄을 함께 지킵니다"
-              </h3>
-              <p>
-                안녕하십니까. 한국돌봄종사자양성교육원 원장입니다.
-                돌봄은 단순히 곁을 지키는 일이 아니라, 질환을 앓고 있는 환자의 생명과 삶의 질을 현장에서
-                가장 가까이 지탱하는 숭고한 전문 직무입니다.
-              </p>
-              <p>
-                본 교육원은 16대 질환군 각각에 최적화된 **각 8시간 단기 집중 전문 트랙**을 통해,
-                누구나 부담 없이 체계적으로 임상 지식을 습득하고 현장에서 당당히 대우받는 전문 돌봄인력으로
-                성장할 수 있도록 최선을 다해 지원하겠습니다.
-              </p>
-              <div className="pt-2 text-right font-bold text-slate-900">
-                한국돌봄종사자양성교육원 원장 및 임직원 배상
-              </div>
-            </div>
-          )}
-
-          {/* 탭 3. 조직안내 */}
-          {activeAboutTab === 'org' && (
-            <div id="about-org" className="space-y-3 text-sm text-slate-700 leading-relaxed">
-              <h3 className="text-lg font-extrabold text-slate-900">교육원 조직 및 교수진 안내</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-slate-900 text-sm mb-1">원장단 및 기획실</strong>
-                  <p className="text-xs text-slate-500">
-                    교육과정 인가, 보건복지부 요양보호 표준 관리, 직능원 민간자격 관리
-                  </p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-emerald-800 text-sm mb-1">임상간호 교수진</strong>
-                  <p className="text-xs text-slate-500">
-                    대학병원 및 요양병원 경력 10년 이상 수간호사 중심 실기 코칭 및 평가
-                  </p>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-slate-900 text-sm mb-1">학사행정 및 실습지원팀</strong>
-                  <p className="text-xs text-slate-500">
-                    협약 병원 배치, 1:1 맞춤 상담, 수강생 모바일 학습 지원센터 운영
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 탭 4. 오시는길 */}
-          {activeAboutTab === 'map' && (
-            <div id="about-map" className="space-y-3 text-sm text-slate-700 leading-relaxed">
-              <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-emerald-600" />
-                <span>오시는 길 (교육장 안내)</span>
-              </h3>
-              <p>
-                <strong>주소:</strong> 서울특별시 강남구 테헤란로 427 위워크타워 14층 한국돌봄종사자양성교육원
-              </p>
-              <p>
-                <strong>대중교통:</strong> 지하철 2호선 / 수인분당선 **선릉역 10번 출구** 도보 2분
-              </p>
-              <p>
-                <strong>상담 및 안내전화:</strong> 1588-2424 (평일 09:00 ~ 18:00)
-              </p>
-              <div className="p-3 bg-slate-100 rounded-xl text-xs text-slate-600">
-                ※ 방문 상담 시 사전 예약을 권장해 드립니다. 주차 지원 가능합니다.
-              </div>
-            </div>
-          )}
-
-          {/* 탭 5. 관련사이트 */}
-          {activeAboutTab === 'sites' && (
-            <div id="about-sites" className="space-y-3 text-sm text-slate-700 leading-relaxed">
-              <h3 className="text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-emerald-600" />
-                <span>가족기관 및 협력 사이트</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                <a
-                  href="http://www.ecarecti.co.kr"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="p-4 bg-slate-50 hover:bg-emerald-50 rounded-2xl border border-slate-200 hover:border-emerald-300 transition block"
-                >
-                  <strong className="block text-slate-900 text-sm mb-1 flex items-center justify-between">
-                    이케어요양보호사교육원
-                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-                  </strong>
-                  <span className="text-xs text-slate-500">공식 요양보호사 자격과정 포털</span>
-                </a>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-slate-900 text-sm mb-1">이케어너싱그룹</strong>
-                  <span className="text-xs text-slate-500">임상간호사 및 전문간병 인력 네트워크</span>
-                </div>
-                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                  <strong className="block text-slate-900 text-sm mb-1">협력 요양병원</strong>
-                  <span className="text-xs text-slate-500">수도권 50여 개 지정 실습 의료기관</span>
-                </div>
-              </div>
-            </div>
-          )}
+          <UiBadge serialId="P01-SEC03-BTN01" label="[P01-SEC03-BTN01]">
+            <a
+              href="/about"
+              className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-6 py-3.5 rounded-xl shadow transition text-sm shrink-0"
+            >
+              <span>교육원소개 전체보기</span>
+              <ChevronRight className="w-4 h-4" />
+            </a>
+          </UiBadge>
         </div>
       </section>
 

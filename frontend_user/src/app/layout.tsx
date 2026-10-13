@@ -177,65 +177,44 @@ export default function RootLayout({
               </a>
             </UiBadge>
 
-            {/* 메인 메뉴 링크 (포함 관계 체계화: 교육원소개 하위 드롭다운 연계) */}
-            <nav className="flex items-center gap-5 lg:gap-7 text-sm font-bold text-slate-700">
-              {/* 1. 교육원소개 (ecarecti.co.kr 참조 5대 하위메뉴 포함 관계) */}
-              <div className="relative group">
-                <UiBadge serialId="P00-SEC01-LNK01" label="[P00-SEC01-LNK01]">
-                  <a
-                    href="/#about"
-                    className="flex items-center gap-1 hover:text-emerald-600 transition py-1"
-                  >
-                    <span>교육원소개</span>
-                    <span className="text-[10px] text-slate-400 group-hover:text-emerald-600 transition">▼</span>
-                  </a>
-                </UiBadge>
-                {/* 하위 드롭다운 레이어 (ecarecti.co.kr 구조 1:1 매핑) */}
-                <div className="absolute top-full left-0 hidden group-hover:block bg-white border border-slate-200 rounded-xl shadow-xl py-2 w-44 z-50 text-xs">
-                  <a href="/#about-intro" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">교육원소개</a>
-                  <a href="/#about-greeting" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">대표인사말</a>
-                  <a href="/#about-org" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">조직안내</a>
-                  <a href="/#about-map" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">오시는길</a>
-                  <a href="/#about-sites" className="block px-4 py-2 hover:bg-emerald-50 hover:text-emerald-700 font-medium">관련사이트</a>
-                </div>
-              </div>
-
-              {/* 2. 수강신청 (단일과정) */}
-              <UiBadge serialId="P00-SEC01-LNK02" label="[P00-SEC01-LNK02]">
+            {/* 메인 메뉴 링크 (드롭다운 제거 및 독립 페이지 연계) */}
+            <nav className="flex items-center gap-6 lg:gap-8 text-sm font-bold text-slate-700">
+              {/* 1. 교육원소개 (별도 페이지 /about) */}
+              <UiBadge serialId="P00-SEC01-LNK01" label="[P00-SEC01-LNK01]">
                 <a
-                  href="/#courses"
-                  className="flex items-center gap-1.5 text-emerald-700 hover:text-emerald-800 transition bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200"
+                  href="/about"
+                  className="flex items-center gap-1 hover:text-emerald-600 transition py-1"
                 >
-                  <BookOpen className="w-4 h-4 text-emerald-600" />
-                  <span>수강신청 (단일과정)</span>
+                  <span>교육원소개</span>
                 </a>
               </UiBadge>
 
-              {/* 3. 교육체계 (16대 자격 트랙 · 각 8시간) */}
+              {/* 2. 교육 체계 (별도 페이지 /curriculum, 상단 수강신청~수료 절차 다이어그램) */}
               <UiBadge serialId="P00-SEC01-LNK03" label="[P00-SEC01-LNK03]">
                 <a
-                  href="/#curriculum"
+                  href="/curriculum"
                   className="flex items-center gap-1.5 hover:text-emerald-600 transition"
                 >
-                  <span>교육체계 (16대 트랙·각 8h)</span>
+                  <BookOpen className="w-4 h-4 text-emerald-600" />
+                  <span>교육 체계</span>
                 </a>
               </UiBadge>
 
-              {/* 4. 돌봄 지침서 (16대 질환 690편 라이브러리) */}
+              {/* 3. 돌봄 지침서 (간결화) */}
               <UiBadge serialId="P00-SEC01-LNK04" label="[P00-SEC01-LNK04]">
                 <a
                   href="/tv24"
                   className="flex items-center gap-1.5 hover:text-emerald-600 transition"
                 >
                   <Video className="w-4 h-4 text-indigo-500" />
-                  <span>돌봄 지침서 (16대 질환)</span>
+                  <span>돌봄 지침서</span>
                   <span className="bg-emerald-600 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                     690편
                   </span>
                 </a>
               </UiBadge>
 
-              {/* 5. 자격증 신청/검증 */}
+              {/* 4. 자격증 신청/검증 */}
               <UiBadge serialId="P00-SEC01-LNK05" label="[P00-SEC01-LNK05]">
                 <a
                   href="/verify"

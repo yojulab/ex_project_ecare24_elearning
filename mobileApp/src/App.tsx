@@ -9,6 +9,8 @@ import { ExamScreen } from './screens/ExamScreen';
 import { WalletCertScreen } from './screens/WalletCertScreen';
 import { TV24ShortsScreen } from './screens/TV24ShortsScreen';
 import { CourseMaterialScreen } from './screens/CourseMaterialScreen';
+import { AboutScreen } from './screens/AboutScreen';
+import { CurriculumScreen } from './screens/CurriculumScreen';
 
 export const App: React.FC = () => {
   // Navigation State
@@ -132,6 +134,10 @@ export const App: React.FC = () => {
                 onNavigateToMaterial={() => handleOpenMaterial(selectedDiseaseId)}
                 isOffline={isOffline}
               />
+            ) : currentTab === 'about' ? (
+              <AboutScreen />
+            ) : currentTab === 'curriculum' ? (
+              <CurriculumScreen onSelectCourse={handleOpenCourse} />
             ) : currentTab === 'apply' || currentTab === 'course' ? (
               <CourseDetailScreen
                 initialDiseaseId={selectedDiseaseId}
@@ -146,7 +152,7 @@ export const App: React.FC = () => {
               <ExamScreen
                 courseId={selectedDiseaseId}
                 onNavigateToWallet={() => handleSelectTab('cert')}
-                onBackToCourse={() => handleSelectTab('apply')}
+                onBackToCourse={() => handleSelectTab('curriculum')}
               />
             ) : currentTab === 'cert' || currentTab === 'wallet' ? (
               <WalletCertScreen />
