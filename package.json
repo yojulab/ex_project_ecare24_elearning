@@ -9,6 +9,7 @@
     "mobileApp"
   ],
   "scripts": {
+    "postinstall": "for d in frontend_user frontend_admin mobileApp; do mkdir -p $d/node_modules && (test -e $d/node_modules/.bin || ln -sf ../../node_modules/.bin $d/node_modules/.bin); done",
     "start": "bash run_port.sh all",
     "prod": "bash run_port.sh all",
     "prod:all": "bash run_port.sh all",
