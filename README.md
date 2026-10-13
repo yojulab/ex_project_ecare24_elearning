@@ -17,89 +17,104 @@
 
 ---
 
-## 🚀 2. 포트별 개별 및 일괄 컴파일 / 기동 가이드 (`run_port.sh` & `compile.sh`)
+## 🚀 2. 포트별 개별 및 일괄 운영/개발 기동 가이드 (`run_port.sh` & `compile.sh`)
 
-루트 디렉터리의 `run_port.sh` (또는 심볼릭 링크 `compile.sh`)를 사용하여 3개 서비스를 **개별 또는 일괄로 기동 및 컴파일**할 수 있습니다.
+루트 디렉터리의 `run_port.sh` (또는 심볼릭 링크 `compile.sh`)를 사용하여 3개 서비스를 **운영 모드(Production)** 또는 **개발 모드(Development)**로 개별/일괄 기동 및 컴파일할 수 있습니다.
 
-모든 프로세스는 기본적으로 **`HOSTNAME=0.0.0.0`**으로 바인딩되어 외부 및 컨테이너 환경에서도 접속 가능합니다.
+> [!NOTE]
+> **운영 서버 최적화**: 기본 실행 시 **`NODE_ENV=production`** 모드로 동작하며, 사전 빌드 산출물(`BUILD_ID`, `dist`)이 없으면 **자동으로 클린 빌드를 수행한 뒤 고속 서빙(Next.js `next start`, Vite `vite preview`)**합니다. 모든 프로세스는 `HOSTNAME=0.0.0.0`으로 바인딩됩니다.
 
 ### 2.1. 대화형 선택 메뉴 (Interactive CLI)
 인자 없이 스크립트를 실행하면 터미널에서 번호 선택만으로 모든 기능을 제어할 수 있습니다:
 ```bash
 ./run_port.sh
-# 또는
-./compile.sh
 ```
 
 ```text
 =================================================================
- 🏥 eCare24 통합 포트 제어 및 컴파일 매니저 (run_port.sh)
+ 🏥 eCare24 통합 운영/개발 포트 매니저 (run_port.sh)
 =================================================================
 원하시는 작업을 번호로 선택하세요:
 
- [개발 서버 실행 (dev)]
-   1) 🚀 모든 포트 일괄 기동 (30010, 30011, 30012 백그라운드)
-   2) 💻 수강생 웹 포털 개별 기동 (:30010 Next.js, 실시간 콘솔)
-   3) 💻 관리자 & CS 개별 기동 (:30011 Vite, 실시간 콘솔)
-   4) 💻 모바일 웹 시뮬레이터 개별 기동 (:30012 Vite, 실시간 콘솔)
+ [운영 서버 모드 (Production - 권장)]
+   1) 🚀 모든 포트 일괄 운영 기동 (30010, 30011, 30012 Production Start)
+   2) 🌐 수강생 웹 포털 운영 기동 (:30010 Next.js start)
+   3) 🌐 관리자 & CS 운영 기동 (:30011 Vite preview)
+   4) 🌐 모바일 웹 시뮬레이터 운영 기동 (:30012 Vite preview)
 
- [컴파일 및 빌드 검증 (build)]
-   5) 📦 모든 포트 일괄 컴파일 (Build All: Next.js + Vite 2종)
-   6) 📦 수강생 웹 포털 개별 컴파일 (Build :30010)
-   7) 📦 관리자 & CS 포털 개별 컴파일 (Build :30011)
-   8) 📦 모바일 웹 시뮬레이터 개별 컴파일 (Build :30012)
+ [개발 모드 (Development)]
+   5) 💻 모든 포트 일괄 개발 서버 기동 (Dev All, HMR 지원)
+   6) 💻 수강생 웹 포털 개발 기동 (:30010 dev)
+   7) 💻 관리자 & CS 포털 개발 기동 (:30011 dev)
+   8) 💻 모바일 웹 시뮬레이터 개발 기동 (:30012 dev)
+
+ [컴파일 및 빌드 검증]
+   9) 📦 모든 서비스 일괄 컴파일 / 빌드 (Build All)
 
  [관리 및 진단]
-   9) 🔍 현재 포트 점유 상태 및 헬스체크 (Status)
-  10) 🛑 모든 포트 서비스 일괄 종료 (Stop All)
+  10) 🔍 현재 포트 점유 상태 및 헬스체크 (Status)
+  11) 🛑 모든 포트 서비스 일괄 종료 (Stop All)
    0) 🚪 종료 (Exit)
 ```
 
 ---
 
-### 2.2. 개발 서버 기동 (dev 모드)
+### 2.2. 운영 서버 기동 (Production 모드 - 기본값)
 
-#### A. 모든 포트(30010, 30011, 30012) 일괄 백그라운드 기동
-기존 프로세스를 안전하게 정리한 후 3대 서비스를 동시에 백그라운드로 띄우고 헬스체크 결과를 출력합니다:
+#### A. 모든 포트(30010, 30011, 30012) 일괄 운영 기동 (백그라운드)
+사전 빌드 산출물이 없을 경우 자동 빌드 후 3개 서비스를 백그라운드로 안전하게 띄웁니다:
 ```bash
 ./run_port.sh all
 # 또는
-npm run dev:all
+npm start
+# 또는
+npm run prod:all
 ```
 
-#### B. 개별 포트 포그라운드 실시간 콘솔 기동 (터미널 실시간 로그)
+#### B. 개별 포트 운영 기동
 ```bash
-# [방법 1] 포트 번호 지정
-./run_port.sh 30010       # 수강생 웹 포털 (Next.js)
-./run_port.sh 30011       # 관리자/CS 포털 (Vite)
-./run_port.sh 30012       # 모바일 웹 앱 (Vite)
+# 실시간 콘솔 포그라운드 실행
+./run_port.sh 30010       # 수강생 웹 포털 (:30010, next start)
+./run_port.sh 30011       # 관리자/CS 포털 (:30011, vite preview)
+./run_port.sh 30012       # 모바일 웹 앱 (:30012, vite preview)
 
-# [방법 2] 서비스명 지정
-./run_port.sh user
-./run_port.sh admin
-./run_port.sh mobile
-
-# [방법 3] 환경변수 오버라이드 지원 (0.0.0.0 및 커스텀 포트)
-HOSTNAME=0.0.0.0 PORT=30010 ./run_port.sh 30010
-```
-
-#### C. 개별 포트 백그라운드(데몬) 기동 (`-d` / `--daemon`)
-터미널을 점유하지 않고 `logs/` 디렉터리에 분리 기록하며 백그라운드로 실행합니다:
-```bash
+# 백그라운드(데몬) 실행 (-d 옵션)
 ./run_port.sh 30010 -d
 ./run_port.sh 30011 -d
 ./run_port.sh 30012 -d
+
+# 환경변수 오버라이드 지정
+HOSTNAME=0.0.0.0 PORT=30010 ./run_port.sh 30010
 ```
 
 ---
 
-### 2.3. 컴파일 및 프로덕션 빌드 검증 (`compile` / `build`)
+### 2.3. 개발 모드 기동 (Development dev 모드)
+
+소스코드 수정 시 실시간 핫 리로딩(HMR)이 필요한 개발 환경에서는 `dev` 키워드를 사용합니다:
+```bash
+# 전체 개발 서버 일괄 기동
+./run_port.sh dev all
+# 또는
+npm run dev:all
+
+# 개별 개발 서버 기동
+./run_port.sh dev 30010
+./run_port.sh dev 30011
+./run_port.sh dev 30012
+```
+
+---
+
+### 2.4. 컴파일 및 프로덕션 빌드 검증 (`compile` / `build`)
 
 Next.js 번들링 및 Vite/TypeScript의 타입체크 및 정적 빌드를 검증합니다:
 
 ```bash
 # 1. 3개 서비스 전체 일괄 컴파일 / 빌드
 ./compile.sh all
+# 또는
+npm run build
 # 또는
 npm run compile
 
@@ -131,23 +146,29 @@ npm run compile
 루트 경로에서 `npm run` 명령어로 즉시 호출할 수 있도록 사전 구성되어 있습니다:
 
 ```bash
-# 개발 서버 관련
-npm run dev:all          # 3대 포트 일괄 백그라운드 기동
-npm run dev:user         # 수강생 포털 (:30010) 기동
-npm run dev:admin        # 관리자 포털 (:30011) 기동
-npm run dev:mobile       # 모바일 앱 (:30012) 기동
+# 운영 서버 기동 (Production)
+npm start                # 3대 포트 일괄 운영 기동 (Build 확인 후 백그라운드)
+npm run prod:all         # 3대 포트 일괄 운영 기동 (동일)
 npm run port             # run_port.sh 대화형 CLI 메뉴 실행
 
+# 개발 서버 기동 (Development dev)
+npm run dev              # 3대 포트 일괄 개발 서버 기동
+npm run dev:all          # 3대 포트 일괄 개발 서버 기동
+npm run dev:user         # 수강생 포털 (:30010 dev) 기동
+npm run dev:admin        # 관리자 포털 (:30011 dev) 기동
+npm run dev:mobile       # 모바일 앱 (:30012 dev) 기동
+
 # 컴파일/빌드 검증 관련
+npm run build            # 전체 3대 서비스 일괄 컴파일 (build all)
 npm run compile          # 전체 3대 서비스 일괄 컴파일 (build all)
 npm run compile:user     # 수강생 포털 Next.js 컴파일
 npm run compile:admin    # 관리자 포털 Vite/tsc 컴파일
 npm run compile:mobile   # 모바일 앱 Vite/tsc 컴파일
 
-# 기존 서버 라이프사이클 관리
-npm run start            # bash start_server.sh
-npm run stop             # bash stop_server.sh
-npm run restart          # bash restart_server.sh
+# 서비스 수명주기 및 진단
+npm run status           # 포트 점유 상태 및 헬스체크
+npm run stop             # 모든 포트 서비스 일괄 종료
+npm run restart          # 서비스 재시작
 
 # 외부 공유 터널
 npm run tunnel:share     # Cloudflare 외부 접속용 공용 URL 생성

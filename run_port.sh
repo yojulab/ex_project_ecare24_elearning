@@ -1,14 +1,21 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# eCare24 이러닝 플랫폼 - 포트별 개별/일괄 컴파일 & 기동 제어 스크립트 (run_port.sh)
+# eCare24 이러닝 플랫폼 - 운영/개발 포트별 개별 및 일괄 제어 매니저 (run_port.sh)
 #
-# 지원 기능:
-#   1. 개별 포트/서비스 개발 서버 기동 (포그라운드 또는 백그라운드)
-#   2. 모든 포트(30010, 30011, 30012) 일괄 백그라운드 기동
-#   3. 개별 또는 일괄 정적 빌드/컴파일 검증 (Next.js build, Vite build)
-#   4. 포트별 또는 전체 프로세스 안전 종료 (stop) 및 상태 점검 (status)
-#   5. 인자 없이 실행 시 대화형 선택 메뉴(Interactive CLI) 제공
+# 지원 모드:
+#   1. [운영 모드 - 기본값] Production Start (NODE_ENV=production)
+#      - 빌드 산출물(.next, dist) 부재 시 자동 사전 컴파일(Build) 수행
+#      - Next.js : next start -p 30010 -H 0.0.0.0 (사전 번들 SSR/Static 고속 서빙)
+#      - Vite    : vite preview --port 3001X --host 0.0.0.0 (최적화 정적 번들 서빙)
+#      - 메모리 최적화, HMR 부하 제거, 엔터프라이즈 운영 안정성 보장
+#
+#   2. [개발 모드] Development Dev (NODE_ENV=development)
+#      - 'dev' 키워드 또는 --dev 옵션 지정 시 실행
+#      - npm run dev 실시간 소스코드 HMR 핫 리로딩 지원
+#
+#   3. [컴파일 모드] Build / Compile (npm run build)
+#      - 'compile.sh' 호출 또는 'compile'/'build' 키워드 시 전체/개별 빌드 검증
 #
 # 대상 서비스 매핑:
 #   - [30010] frontend_user  : 수강생 웹 포털 (Next.js 14)
@@ -16,14 +23,13 @@
 #   - [30012] mobileApp      : 모바일 웹 시뮬레이터 (Vite + React)
 #
 # 사용 예시:
-#   • HOSTNAME=0.0.0.0 PORT=30010 ./run_port.sh 30010
-#   • ./run_port.sh all                      (3개 포트 일괄 dev 기동)
-#   • ./run_port.sh 30010                    (30010 포그라운드 실시간 콘솔 기동)
-#   • ./run_port.sh 30010 -d                 (30010 백그라운드 데몬 기동)
-#   • ./run_port.sh compile all              (또는 ./compile.sh all : 전체 일괄 컴파일)
-#   • ./run_port.sh compile 30010            (30010 개별 컴파일)
-#   • ./run_port.sh stop all                 (전체 프로세스 중지)
-#   • ./run_port.sh status                   (포트 점유 상태 확인)
+#   • ./run_port.sh all              (운영 모드 3개 포트 일괄 백그라운드 기동)
+#   • ./run_port.sh 30010            (30010 운영 모드 실시간 콘솔 기동)
+#   • ./run_port.sh 30010 -d         (30010 운영 모드 백그라운드 데몬 기동)
+#   • ./run_port.sh dev all          (개발 모드 3개 포트 일괄 기동)
+#   • ./compile.sh all               (전체 3개 서비스 일괄 컴파일 / 빌드)
+#   • ./run_port.sh stop all         (전체 프로세스 안전 종료)
+#   • ./run_port.sh status           (포트 점유 상태 및 헬스체크)
 # ==============================================================================
 
 set -uo pipefail
@@ -39,7 +45,7 @@ if [ -n "${HOST:-}" ]; then
   DEFAULT_HOST="$HOST"
 elif [ -n "${BIND_HOST:-}" ]; then
   DEFAULT_HOST="$BIND_HOST"
-elif [ -n "${HOSTNAME:-}" ] && [ "${HOSTNAME:-}" != "$(hostname 2>/dev/null)" ]; then
+elif [ -n "${HOSTNAME:-}" ] && [ "${HOSTNAME:-}" != "$(hostname 2>/dev/null)" ] && [ "${HOSTNAME:-}" != "$(uname -n 2>/dev/null)" ]; then
   DEFAULT_HOST="$HOSTNAME"
 else
   DEFAULT_HOST="0.0.0.0"
@@ -61,7 +67,7 @@ COLOR_RESET='\033[0m'
 # 헤더 출력
 print_header() {
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
-  echo -e "${COLOR_CYAN} 🏥 eCare24 통합 포트 제어 및 컴파일 매니저 (run_port.sh)${COLOR_RESET}"
+  echo -e "${COLOR_CYAN} 🏥 eCare24 통합 운영/개발 포트 매니저 (run_port.sh)${COLOR_RESET}"
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
 }
 
@@ -69,7 +75,7 @@ print_header() {
 is_port_in_use() {
   local port=$1
 
-  # 1. bash 내장 /dev/tcp 소켓 검사 (외부 패키지 전혀 불필요, 100% 호환)
+  # 1. bash 내장 /dev/tcp 소켓 검사 (외부 패키지 불필요, 100% 호환)
   if (bash -c "(echo > /dev/tcp/127.0.0.1/${port}) >/dev/null 2>&1" 2>/dev/null); then
     return 0
   fi
@@ -106,7 +112,7 @@ is_port_in_use() {
   return 1
 }
 
-# 특정 포트 점유 PID 획득 (fuser/lsof 없는 도커 환경에서도 pgrep/ps fallback)
+# 특정 포트 점유 PID 획득 (fuser/lsof 없는 환경에서도 pgrep fallback)
 get_port_pids() {
   local port=$1
   local pids=""
@@ -121,7 +127,7 @@ get_port_pids() {
     pids=$(ss -tlpn 2>/dev/null | grep ":${port} " | grep -o 'pid=[0-9]*' | cut -d= -f2 || true)
   fi
 
-  # fuser/lsof/ss가 없을 경우 프로세스 이름 및 커맨드라인 패턴 기반 조회
+  # fallback: 포트 번호 기반 프로세스 조회
   if [ -z "$pids" ]; then
     case "$port" in
       30010)
@@ -201,7 +207,6 @@ resolve_target() {
       echo "mobileApp 30012 vite 모바일_웹_시뮬레이터"
       ;;
     *)
-      # 사용자 정의 포트 번호일 경우
       if [[ "$input" =~ ^[0-9]+$ ]]; then
         echo "unknown $input unknown 사용자정의_포트"
       else
@@ -240,8 +245,43 @@ show_status() {
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
 }
 
-# 1. 개별 서비스 개발 서버 기동 (dev)
-run_dev_single() {
+# 운영 기동 전 빌드 산출물 사전 검증 및 자동 빌드
+ensure_built() {
+  local target_key=$1
+
+  if [ "$target_key" = "all" ]; then
+    local need_build=false
+    if [ ! -f "${PROJECT_DIR}/frontend_user/.next/BUILD_ID" ]; then need_build=true; fi
+    if [ ! -d "${PROJECT_DIR}/frontend_admin/dist" ] || [ ! -f "${PROJECT_DIR}/frontend_admin/dist/index.html" ]; then need_build=true; fi
+    if [ ! -d "${PROJECT_DIR}/mobileApp/dist" ] || [ ! -f "${PROJECT_DIR}/mobileApp/dist/index.html" ]; then need_build=true; fi
+
+    if [ "$need_build" = true ]; then
+      echo -e "${COLOR_YELLOW}📦 운영 서빙용 정적 번들/BUILD_ID가 없어 사전 컴파일(Build)을 자동 수행합니다...${COLOR_RESET}"
+      run_build all
+    fi
+  else
+    local target_info
+    target_info=$(resolve_target "$target_key")
+    if [ "$target_info" != "invalid" ]; then
+      read -r dir default_port type name <<< "$target_info"
+      local is_valid_build=true
+      if [ "$type" = "next" ]; then
+        if [ ! -f "${PROJECT_DIR}/${dir}/.next/BUILD_ID" ]; then is_valid_build=false; fi
+      else
+        if [ ! -f "${PROJECT_DIR}/${dir}/dist/index.html" ]; then is_valid_build=false; fi
+      fi
+      if [ "$is_valid_build" = false ]; then
+        echo -e "${COLOR_YELLOW}📦 [${name//_/ }] 운영 빌드 산출물이 없어 사전 컴파일을 자동 수행합니다...${COLOR_RESET}"
+        run_build "$target_key"
+      fi
+    fi
+  fi
+}
+
+# ==============================================================================
+# 1. [운영 모드] 개별 서비스 프로덕션 기동 (NODE_ENV=production, npm run start)
+# ==============================================================================
+run_prod_single() {
   local target_key=$1
   local daemon_mode=${2:-false}
   local custom_port=${PORT:-}
@@ -256,58 +296,58 @@ run_dev_single() {
   fi
 
   read -r dir default_port type name <<< "$target_info"
-
-  # PORT 환경변수가 설정되어 있으면 해당 포트 사용, 없으면 기본 포트
   local run_port=${custom_port:-$default_port}
   local run_host="${DEFAULT_HOST}"
   local clean_name="${name//_/ }"
 
+  # 빌드 산출물 확인
+  ensure_built "$target_key"
+
   echo -e "${COLOR_CYAN}-----------------------------------------------------------------${COLOR_RESET}"
-  echo -e "🚀 [기동 요청] ${COLOR_BOLD}${clean_name}${COLOR_RESET}"
+  echo -e "🚀 [운영 서버 기동] ${COLOR_BOLD}${clean_name}${COLOR_RESET} (Production Mode)"
   echo -e "   • 디렉터리 : ${PROJECT_DIR}/${dir}"
   echo -e "   • 호스트   : ${run_host}"
   echo -e "   • 포트     : :${run_port}"
-  echo -e "   • 방식     : $([ "$daemon_mode" = true ] && echo "백그라운드(Daemon)" || echo "포그라운드(Interactive 실시간 콘솔)")"
+  echo -e "   • 환경변수 : NODE_ENV=production"
+  echo -e "   • 방식     : $([ "$daemon_mode" = true ] && echo "백그라운드(Daemon)" || echo "포그라운드(Interactive)")"
   echo -e "${COLOR_CYAN}-----------------------------------------------------------------${COLOR_RESET}"
 
-  # 이미 포트 사용 중인지 점검
+  # 포트 충돌 점검
   if is_port_in_use "$run_port"; then
-    echo -e "${COLOR_YELLOW}⚠️  포트 :${run_port}가 이미 사용 중입니다. 기존 프로세스를 종료하고 재시작합니다...${COLOR_RESET}"
+    echo -e "${COLOR_YELLOW}⚠️  포트 :${run_port} 점유 감지. 기존 프로세스를 종료하고 재시작합니다...${COLOR_RESET}"
     stop_port "$run_port" "$clean_name"
     sleep 1
   fi
 
   cd "${PROJECT_DIR}/${dir}" || exit 1
+  export NODE_ENV=production
+  export HOSTNAME="$run_host"
+  export PORT="$run_port"
 
   if [ "$daemon_mode" = true ]; then
-    # 백그라운드 데몬 기동
     local log_file="${LOG_DIR}/ecare24_${dir}_${TODAY}.log"
-    echo -e "▶ 백그라운드 기동 시작... 로그 파일: ${log_file}"
-
-    export HOSTNAME="$run_host"
-    export PORT="$run_port"
+    echo -e "▶ 운영 백그라운드 기동 시작... 로그 파일: ${log_file}"
 
     if [ "$type" = "next" ]; then
       if [ "$run_port" = "30010" ] && [ "$run_host" = "0.0.0.0" ]; then
-        nohup npm run dev > "$log_file" 2>&1 &
+        nohup npm run start > "$log_file" 2>&1 &
       else
-        nohup npx next dev -p "$run_port" -H "$run_host" > "$log_file" 2>&1 &
+        nohup npx next start -p "$run_port" -H "$run_host" > "$log_file" 2>&1 &
       fi
     else
-      if ([ "$run_port" = "30011" ] || [ "$run_port" = "30012" ]) && [ "$run_host" = "0.0.0.0" ]; then
-        nohup npm run dev > "$log_file" 2>&1 &
+      if [ "$run_host" = "0.0.0.0" ]; then
+        nohup npm run start > "$log_file" 2>&1 &
       else
-        nohup npx vite --port "$run_port" --host "$run_host" > "$log_file" 2>&1 &
+        nohup npx vite preview --port "$run_port" --host "$run_host" > "$log_file" 2>&1 &
       fi
     fi
 
     local pid=$!
     echo -e "${COLOR_GREEN}✓ 백그라운드 프로세스 등록 완료 (PID: ${pid})${COLOR_RESET}"
+
     echo -n "⏳ 포트 바인딩 대기 중"
     for i in {1..8}; do
-      if is_port_in_use "$run_port"; then
-        break
-      fi
+      if is_port_in_use "$run_port"; then break; fi
       echo -n "."
       sleep 1
     done
@@ -317,38 +357,40 @@ run_dev_single() {
       echo -e "${COLOR_GREEN}🎉 서비스가 포트 :${run_port}에 정상 바인딩되었습니다!${COLOR_RESET}"
       echo -e "   접속 주소: ${COLOR_CYAN}http://${run_host}:${run_port}${COLOR_RESET}"
     else
-      echo -e "${COLOR_YELLOW}⏳ 서비스 초기화 중입니다. 'tail -f ${log_file}' 로 상태를 확인하세요.${COLOR_RESET}"
+      echo -e "${COLOR_YELLOW}⏳ 서비스 초기화 중입니다. 'tail -n 20 ${log_file}' 로 상태를 확인하세요.${COLOR_RESET}"
     fi
   else
-    # 포그라운드 인터랙티브 기동 (사용자가 요청한 형태: HOSTNAME=0.0.0.0 PORT=30010 npm run dev)
     echo -e "${COLOR_GREEN}▶ 터미널 포그라운드 기동 (종료하려면 Ctrl + C 를 누르세요)...${COLOR_RESET}"
     echo ""
-    export HOSTNAME="$run_host"
-    export PORT="$run_port"
-
     if [ "$type" = "next" ]; then
       if [ "$run_port" = "30010" ] && [ "$run_host" = "0.0.0.0" ]; then
-        exec npm run dev
+        exec npm run start
       else
-        exec npx next dev -p "$run_port" -H "$run_host"
+        exec npx next start -p "$run_port" -H "$run_host"
       fi
     else
-      if ([ "$run_port" = "30011" ] || [ "$run_port" = "30012" ]) && [ "$run_host" = "0.0.0.0" ]; then
-        exec npm run dev
+      if [ "$run_host" = "0.0.0.0" ]; then
+        exec npm run start
       else
-        exec npx vite --port "$run_port" --host "$run_host"
+        exec npx vite preview --port "$run_port" --host "$run_host"
       fi
     fi
   fi
 }
 
-# 2. 모든 포트 일괄 개발 서버 기동 (dev all)
-run_dev_all() {
+# ==============================================================================
+# 2. [운영 모드] 모든 포트 일괄 프로덕션 기동 (NODE_ENV=production)
+# ==============================================================================
+run_prod_all() {
   print_header
-  echo -e "${COLOR_BOLD}🚀 모든 포트(30010, 30011, 30012) 일괄 백그라운드 기동 시작...${COLOR_RESET}"
+  echo -e "${COLOR_BOLD}🚀 모든 포트(30010, 30011, 30012) [운영 모드] 일괄 백그라운드 기동 시작...${COLOR_RESET}"
+  echo -e "   (NODE_ENV=production, 사전 번들 고속 서빙 모드)"
   echo ""
 
-  # 포트 충돌 여부 점검
+  # 빌드 산출물 사전 점검 및 필요시 자동 빌드
+  ensure_built all
+
+  # 포트 충돌 여부 점검 및 정리
   for p in 30010 30011 30012; do
     if is_port_in_use "$p"; then
       echo -e "${COLOR_YELLOW}⚠️  기존 포트 :${p} 점유 감지. 안전하게 재할당합니다.${COLOR_RESET}"
@@ -359,26 +401,27 @@ run_dev_all() {
 
   local run_host="${DEFAULT_HOST}"
   export HOSTNAME="$run_host"
+  export NODE_ENV=production
 
-  # 1) 수강생 포털
+  # 1) 수강생 포털 (Next.js start)
   local user_log="${LOG_DIR}/ecare24_frontend_user_${TODAY}.log"
-  echo -e "▶ [1/3] 수강생 웹 포털 (:30010, Next.js) 백그라운드 기동..."
+  echo -e "▶ [1/3] 수강생 웹 포털 (:30010, Next.js start) 운영 기동..."
   cd "${PROJECT_DIR}/frontend_user"
-  nohup env HOSTNAME="$run_host" PORT=30010 npm run dev > "$user_log" 2>&1 &
+  nohup env NODE_ENV=production HOSTNAME="$run_host" PORT=30010 npm run start > "$user_log" 2>&1 &
   echo -e "      로그: ${user_log}"
 
-  # 2) 관리자/콜센터 CS
+  # 2) 관리자/콜센터 CS (Vite preview)
   local admin_log="${LOG_DIR}/ecare24_frontend_admin_${TODAY}.log"
-  echo -e "▶ [2/3] 관리자 & CS 포털 (:30011, Vite) 백그라운드 기동..."
+  echo -e "▶ [2/3] 관리자 & CS 포털 (:30011, Vite preview) 운영 기동..."
   cd "${PROJECT_DIR}/frontend_admin"
-  nohup env HOSTNAME="$run_host" PORT=30011 npm run dev > "$admin_log" 2>&1 &
+  nohup env NODE_ENV=production HOSTNAME="$run_host" PORT=30011 npm run start > "$admin_log" 2>&1 &
   echo -e "      로그: ${admin_log}"
 
-  # 3) 모바일 시뮬레이터
+  # 3) 모바일 시뮬레이터 (Vite preview)
   local mobile_log="${LOG_DIR}/ecare24_mobileApp_${TODAY}.log"
-  echo -e "▶ [3/3] 모바일 웹 시뮬레이터 (:30012, Vite) 백그라운드 기동..."
+  echo -e "▶ [3/3] 모바일 웹 시뮬레이터 (:30012, Vite preview) 운영 기동..."
   cd "${PROJECT_DIR}/mobileApp"
-  nohup env HOSTNAME="$run_host" PORT=30012 npm run dev > "$mobile_log" 2>&1 &
+  nohup env NODE_ENV=production HOSTNAME="$run_host" PORT=30012 npm run start > "$mobile_log" 2>&1 &
   echo -e "      로그: ${mobile_log}"
 
   cd "${PROJECT_DIR}"
@@ -396,13 +439,13 @@ run_dev_all() {
 
   echo ""
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
-  echo -e "${COLOR_GREEN} 🎉 3대 서비스 일괄 기동 현황${COLOR_RESET}"
+  echo -e "${COLOR_GREEN} 🎉 3대 서비스 [운영 모드] 일괄 가동 현황${COLOR_RESET}"
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
-  check_health 30010 "수강생 포털 (Next.js)"
-  check_health 30011 "관리자 & 콜센터 CS (Vite)"
-  check_health 30012 "모바일 웹 앱 (Vite)"
+  check_health 30010 "수강생 포털 (Next.js 14 Production)"
+  check_health 30011 "관리자 & CS 포털 (Vite Preview)"
+  check_health 30012 "모바일 웹 앱 (Vite Preview)"
   echo ""
-  echo -e " 🌐 로컬 접속 주소:"
+  echo -e " 🌐 운영 접속 주소:"
   echo -e "    • 수강생 웹 포털      : ${COLOR_CYAN}http://${run_host}:30010${COLOR_RESET}"
   echo -e "    • 관리자 & 콜센터 CS  : ${COLOR_CYAN}http://${run_host}:30011${COLOR_RESET}"
   echo -e "    • 모바일 웹 시뮬레이터 : ${COLOR_CYAN}http://${run_host}:30012${COLOR_RESET}"
@@ -412,17 +455,100 @@ run_dev_all() {
   echo -e "${COLOR_CYAN}=================================================================${COLOR_RESET}"
 }
 
-# 3. 개별 또는 일괄 빌드/컴파일 (build / compile)
+# ==============================================================================
+# 3. [개발 모드] 개별/일괄 개발 서버 기동 (NODE_ENV=development, npm run dev)
+# ==============================================================================
+run_dev_single() {
+  local target_key=$1
+  local daemon_mode=${2:-false}
+  local custom_port=${PORT:-}
+
+  local target_info
+  target_info=$(resolve_target "$target_key")
+
+  if [ "$target_info" = "invalid" ]; then
+    echo -e "${COLOR_RED}❌ 알 수 없는 대상입니다: '${target_key}'${COLOR_RESET}"
+    exit 1
+  fi
+
+  read -r dir default_port type name <<< "$target_info"
+  local run_port=${custom_port:-$default_port}
+  local run_host="${DEFAULT_HOST}"
+  local clean_name="${name//_/ }"
+
+  echo -e "${COLOR_CYAN}-----------------------------------------------------------------${COLOR_RESET}"
+  echo -e "💻 [개발 모드 기동] ${COLOR_BOLD}${clean_name}${COLOR_RESET} (Development Dev)"
+  echo -e "   • 디렉터리 : ${PROJECT_DIR}/${dir}"
+  echo -e "   • 포트     : :${run_port}"
+  echo -e "${COLOR_CYAN}-----------------------------------------------------------------${COLOR_RESET}"
+
+  if is_port_in_use "$run_port"; then
+    stop_port "$run_port" "$clean_name"
+    sleep 1
+  fi
+
+  cd "${PROJECT_DIR}/${dir}" || exit 1
+  export NODE_ENV=development
+  export HOSTNAME="$run_host"
+  export PORT="$run_port"
+
+  if [ "$daemon_mode" = true ]; then
+    local log_file="${LOG_DIR}/ecare24_${dir}_${TODAY}.log"
+    nohup npm run dev > "$log_file" 2>&1 &
+    local pid=$!
+    echo -e "${COLOR_GREEN}✓ 백그라운드 등록 완료 (PID: ${pid})${COLOR_RESET}"
+    sleep 2
+    check_health "$run_port" "$clean_name"
+  else
+    exec npm run dev
+  fi
+}
+
+run_dev_all() {
+  print_header
+  echo -e "${COLOR_BOLD}💻 모든 포트 [개발 모드(dev)] 일괄 백그라운드 기동 시작...${COLOR_RESET}"
+  echo ""
+
+  for p in 30010 30011 30012; do
+    if is_port_in_use "$p"; then stop_port "$p" "서비스"; fi
+  done
+  sleep 1
+
+  local run_host="${DEFAULT_HOST}"
+  export HOSTNAME="$run_host"
+  export NODE_ENV=development
+
+  cd "${PROJECT_DIR}/frontend_user"
+  nohup env HOSTNAME="$run_host" PORT=30010 npm run dev > "${LOG_DIR}/ecare24_frontend_user_${TODAY}.log" 2>&1 &
+  cd "${PROJECT_DIR}/frontend_admin"
+  nohup env HOSTNAME="$run_host" PORT=30011 npm run dev > "${LOG_DIR}/ecare24_frontend_admin_${TODAY}.log" 2>&1 &
+  cd "${PROJECT_DIR}/mobileApp"
+  nohup env HOSTNAME="$run_host" PORT=30012 npm run dev > "${LOG_DIR}/ecare24_mobileApp_${TODAY}.log" 2>&1 &
+  cd "${PROJECT_DIR}"
+
+  echo -n "⏳ 개발 서버 초기화 대기 중"
+  for i in {1..8}; do
+    if is_port_in_use 30010 && is_port_in_use 30011 && is_port_in_use 30012; then break; fi
+    echo -n "."
+    sleep 1
+  done
+  echo ""
+  show_status
+}
+
+# ==============================================================================
+# 4. [컴파일 모드] 개별 또는 일괄 빌드/컴파일 (build / compile)
+# ==============================================================================
 run_build() {
   local target_key=$1
 
   print_header
-  echo -e "${COLOR_MAGENTA}📦 [컴파일 / 빌드 모드] 프로덕션 빌드 및 타입체크 검증 시작${COLOR_RESET}"
+  echo -e "${COLOR_MAGENTA}📦 [컴파일 / 빌드 모드] 프로덕션 번들 생성 및 타입체크 검증 시작${COLOR_RESET}"
   echo ""
 
-  # Next.js와 Vite는 dev 서버와 build가 .next 및 dist 캐시를 공유하므로 충돌 방지
-  if is_port_in_use 30010; then
-    echo -e "${COLOR_YELLOW}⚠️  기동 중인 dev 서버와의 캐시 충돌 방지를 위해 기존 프로세스를 일시 정리합니다.${COLOR_RESET}"
+  # 기동 중인 프로세스와의 .next/dist 파일 잠금 충돌 방지
+  if is_port_in_use 30010 || is_port_in_use 30011 || is_port_in_use 30012; then
+    echo -e "${COLOR_YELLOW}⚠️  빌드 캐시 충돌 방지를 위해 기존 프로세스를 일시 정리합니다.${COLOR_RESET}"
     stop_port 30010 "frontend_user" >/dev/null 2>&1 || true
     stop_port 30011 "frontend_admin" >/dev/null 2>&1 || true
     stop_port 30012 "mobileApp" >/dev/null 2>&1 || true
@@ -449,6 +575,7 @@ run_build() {
 
     # 2. frontend_admin
     echo -e "▶ [2/3] frontend_admin (관리자/CS, Vite build) 컴파일 중..."
+    rm -rf "${PROJECT_DIR}/frontend_admin/dist"
     if (cd "${PROJECT_DIR}/frontend_admin" && npm run build); then
       echo -e "${COLOR_GREEN}✓ frontend_admin 컴파일 성공!${COLOR_RESET}\n"
       ((success_count++))
@@ -459,6 +586,7 @@ run_build() {
 
     # 3. mobileApp
     echo -e "▶ [3/3] mobileApp (모바일 웹, Vite build) 컴파일 중..."
+    rm -rf "${PROJECT_DIR}/mobileApp/dist"
     if (cd "${PROJECT_DIR}/mobileApp" && npm run build); then
       echo -e "${COLOR_GREEN}✓ mobileApp 컴파일 성공!${COLOR_RESET}\n"
       ((success_count++))
@@ -489,6 +617,7 @@ run_build() {
 
     echo -e "▶ [${clean_name}] 디렉터리: ${dir} 컴파일 중..."
     cd "${PROJECT_DIR}/${dir}" || exit 1
+    rm -rf .next dist 2>/dev/null || true
 
     if npm run build; then
       echo ""
@@ -501,7 +630,9 @@ run_build() {
   fi
 }
 
-# 4. 일괄 또는 개별 서비스 중지 (stop)
+# ==============================================================================
+# 5. [서비스 중지] (stop)
+# ==============================================================================
 run_stop() {
   local target_key=${1:-all}
 
@@ -510,13 +641,9 @@ run_stop() {
   echo ""
 
   if [ "$target_key" = "all" ]; then
-    if [ -f "${PROJECT_DIR}/stop_server.sh" ]; then
-      bash "${PROJECT_DIR}/stop_server.sh"
-    else
-      stop_port 30010 "frontend_user"
-      stop_port 30011 "frontend_admin"
-      stop_port 30012 "mobileApp"
-    fi
+    stop_port 30010 "frontend_user (수강생 포털)"
+    stop_port 30011 "frontend_admin (관리자/CS 포털)"
+    stop_port 30012 "mobileApp (모바일 시뮬레이터)"
   else
     local target_info
     target_info=$(resolve_target "$target_key")
@@ -535,78 +662,80 @@ run_stop() {
   fi
 }
 
+# ==============================================================================
 # 대화형 메뉴 (Interactive Mode)
+# ==============================================================================
 run_interactive_menu() {
   print_header
   echo -e "${COLOR_BOLD}원하시는 작업을 번호로 선택하세요:${COLOR_RESET}"
   echo ""
-  echo -e " ${COLOR_CYAN}[개발 서버 실행 (dev)]${COLOR_RESET}"
-  echo -e "   1) 🚀 모든 포트 일괄 기동 (30010, 30011, 30012 백그라운드)"
-  echo -e "   2) 💻 수강생 웹 포털 개별 기동 (:30010 Next.js, 실시간 콘솔)"
-  echo -e "   3) 💻 관리자 & CS 개별 기동 (:30011 Vite, 실시간 콘솔)"
-  echo -e "   4) 💻 모바일 웹 시뮬레이터 개별 기동 (:30012 Vite, 실시간 콘솔)"
+  echo -e " ${COLOR_GREEN}[운영 서버 모드 (Production - 권장)]${COLOR_RESET}"
+  echo -e "   1) 🚀 모든 포트 일괄 운영 기동 (30010, 30011, 30012 Production Start)"
+  echo -e "   2) 🌐 수강생 웹 포털 운영 기동 (:30010 Next.js start)"
+  echo -e "   3) 🌐 관리자 & CS 운영 기동 (:30011 Vite preview)"
+  echo -e "   4) 🌐 모바일 웹 시뮬레이터 운영 기동 (:30012 Vite preview)"
   echo ""
-  echo -e " ${COLOR_MAGENTA}[컴파일 및 빌드 검증 (build)]${COLOR_RESET}"
-  echo -e "   5) 📦 모든 포트 일괄 컴파일 (Build All: Next.js + Vite 2종)"
-  echo -e "   6) 📦 수강생 웹 포털 개별 컴파일 (Build :30010)"
-  echo -e "   7) 📦 관리자 & CS 포털 개별 컴파일 (Build :30011)"
-  echo -e "   8) 📦 모바일 웹 시뮬레이터 개별 컴파일 (Build :30012)"
+  echo -e " ${COLOR_CYAN}[개발 모드 (Development)]${COLOR_RESET}"
+  echo -e "   5) 💻 모든 포트 일괄 개발 서버 기동 (Dev All, HMR 지원)"
+  echo -e "   6) 💻 수강생 웹 포털 개발 기동 (:30010 dev)"
+  echo -e "   7) 💻 관리자 & CS 포털 개발 기동 (:30011 dev)"
+  echo -e "   8) 💻 모바일 웹 시뮬레이터 개발 기동 (:30012 dev)"
+  echo ""
+  echo -e " ${COLOR_MAGENTA}[컴파일 및 빌드 검증]${COLOR_RESET}"
+  echo -e "   9) 📦 모든 서비스 일괄 컴파일 / 빌드 (Build All)"
   echo ""
   echo -e " ${COLOR_YELLOW}[관리 및 진단]${COLOR_RESET}"
-  echo -e "   9) 🔍 현재 포트 점유 상태 및 헬스체크 (Status)"
-  echo -e "  10) 🛑 모든 포트 서비스 일괄 종료 (Stop All)"
+  echo -e "  10) 🔍 현재 포트 점유 상태 및 헬스체크 (Status)"
+  echo -e "  11) 🛑 모든 포트 서비스 일괄 종료 (Stop All)"
   echo -e "   0) 🚪 종료 (Exit)"
   echo ""
-  echo -n -e "${COLOR_BOLD}선택 번호 입력 [0-10]: ${COLOR_RESET}"
+  echo -n -e "${COLOR_BOLD}선택 번호 입력 [0-11]: ${COLOR_RESET}"
 
   read -r choice
   echo ""
 
   case "$choice" in
-    1) run_dev_all ;;
-    2) run_dev_single 30010 false ;;
-    3) run_dev_single 30011 false ;;
-    4) run_dev_single 30012 false ;;
-    5) run_build all ;;
-    6) run_build 30010 ;;
-    7) run_build 30011 ;;
-    8) run_build 30012 ;;
-    9) show_status ;;
-    10) run_stop all ;;
+    1) run_prod_all ;;
+    2) run_prod_single 30010 false ;;
+    3) run_prod_single 30011 false ;;
+    4) run_prod_single 30012 false ;;
+    5) run_dev_all ;;
+    6) run_dev_single 30010 false ;;
+    7) run_dev_single 30011 false ;;
+    8) run_dev_single 30012 false ;;
+    9) run_build all ;;
+    10) show_status ;;
+    11) run_stop all ;;
     0) echo "종료합니다."; exit 0 ;;
     *) echo -e "${COLOR_RED}올바른 번호를 선택해주세요.${COLOR_RESET}"; exit 1 ;;
   esac
 }
 
+# ==============================================================================
 # CLI 파라미터 파싱 및 라우팅
+# ==============================================================================
 main() {
+  local script_invoked
+  script_invoked=$(basename "${BASH_SOURCE[0]:-$0}")
+
+  # 기본 모드는 운영(prod) 모드!
+  local action="prod"
+  if [[ "$script_invoked" =~ compile ]]; then
+    action="build"
+  fi
+
   # 인자가 전혀 없는 경우 -> 대화형 메뉴 (터미널이 연결되어 있을 때)
   if [ $# -eq 0 ]; then
     if [ -t 0 ]; then
       run_interactive_menu
     else
-      # 파이프 또는 비대화형 환경인 경우 사용법 출력
-      print_header
-      echo -e "${COLOR_BOLD}사용법:${COLOR_RESET}"
-      echo -e "  $0 all                       : 모든 포트 일괄 기동"
-      echo -e "  $0 <30010|30011|30012>       : 해당 포트 개별 실시간 콘솔 기동"
-      echo -e "  $0 <30010|30011|30012> -d    : 해당 포트 백그라운드(데몬) 기동"
-      echo -e "  $0 compile [all|포트]        : 빌드/컴파일 검증"
-      echo -e "  $0 stop [all|포트]           : 프로세스 중지"
-      echo -e "  $0 status                    : 상태 점검"
+      # 비대화형 환경에서 인자 없이 실행 시 운영 일괄 기동
+      run_prod_all
     fi
     exit 0
   fi
 
-  local script_invoked
-  script_invoked=$(basename "${BASH_SOURCE[0]:-$0}")
-
-  local action="dev"
-  if [[ "$script_invoked" =~ compile ]]; then
-    action="build"
-  fi
-
-  local target=""
+  local target="all"
   local daemon=false
 
   # 첫 번째 인자 검사
@@ -616,8 +745,13 @@ main() {
       shift
       target="${1:-all}"
       ;;
-    dev|run|start)
+    dev)
       action="dev"
+      shift
+      target="${1:-all}"
+      ;;
+    prod|production|start)
+      action="prod"
       shift
       target="${1:-all}"
       ;;
@@ -636,9 +770,9 @@ main() {
       run_stop "$target"
       sleep 1
       if [ "$target" = "all" ]; then
-        run_dev_all
+        run_prod_all
       else
-        run_dev_single "$target" true
+        run_prod_single "$target" true
       fi
       exit 0
       ;;
@@ -653,11 +787,19 @@ main() {
       ;;
   esac
 
-  # 추가 옵션 파싱 (-d, --daemon, -b, --bg 등)
+  # 추가 옵션 파싱 (-d, --daemon, --dev 등)
   while [ $# -gt 0 ]; do
     case "$1" in
       -d|--daemon|-b|--bg|--background)
         daemon=true
+        shift
+        ;;
+      --dev|-dev)
+        action="dev"
+        shift
+        ;;
+      --prod|-prod)
+        action="prod"
         shift
         ;;
       *)
@@ -679,6 +821,13 @@ main() {
         run_dev_all
       else
         run_dev_single "$target" "$daemon"
+      fi
+      ;;
+    prod)
+      if [ "$target" = "all" ]; then
+        run_prod_all
+      else
+        run_prod_single "$target" "$daemon"
       fi
       ;;
   esac
