@@ -71,10 +71,10 @@ export default function CurriculumPage() {
             </div>
             <UiBadge serialId="P20-CURR-BTN01" label="[P20-CURR-BTN01]">
               <a
-                href="/#courses"
+                href="#flow"
                 className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-sm hover:bg-emerald-700 shadow-sm transition"
               >
-                <span>단일 수강신청 바로가기</span>
+                <span>수강신청 바로가기</span>
                 <ChevronRight className="w-4 h-4" />
               </a>
             </UiBadge>
@@ -84,7 +84,7 @@ export default function CurriculumPage() {
         {/* ==================================================================
             1. 핵심: 수강 신청과 수료 절차 다이어그램 (P20-SEC01-FLOW)
             ================================================================== */}
-        <div className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
+        <div id="flow" className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
           <UiBadge serialId="P20-CURR-SEC01" label="[P20-CURR-SEC01]">
             <div className="border-b border-slate-200 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>

@@ -1,77 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
-  Brain,
-  Wind,
-  HeartPulse,
-  Bone,
-  Apple,
-  Droplet,
-  Activity,
-  ShieldAlert,
-  UserCheck,
-  Biohazard,
-  Gauge,
-  Flame,
-  Users,
-  Sun,
-  Smile,
-  HelpCircle,
   PlayCircle,
-  Clock,
-  ArrowRight,
+  PhoneCall,
+  ChevronRight,
   ShieldCheck,
   CheckCircle,
-  MapPin,
-  Building2,
-  ExternalLink,
-  ChevronRight,
-  Search,
-  PhoneCall,
-  Sparkles,
 } from 'lucide-react';
-import {
-  MOCK_DISEASES,
-  MOCK_GOLDEN_RULES,
-  formatPriceKRW,
-} from '@ecare24/utils';
+import { MOCK_GOLDEN_RULES } from '@ecare24/utils';
 import UiBadge from '../components/UiBadge';
 
-const iconMap: Record<string, React.ReactNode> = {
-  Brain: <Brain className="w-5 h-5 text-indigo-600" />,
-  Wind: <Wind className="w-5 h-5 text-sky-600" />,
-  HeartPulse: <HeartPulse className="w-5 h-5 text-rose-600" />,
-  Bone: <Bone className="w-5 h-5 text-amber-600" />,
-  Apple: <Apple className="w-5 h-5 text-emerald-600" />,
-  Droplet: <Droplet className="w-5 h-5 text-blue-600" />,
-  Activity: <Activity className="w-5 h-6 text-purple-600" />,
-  ShieldAlert: <ShieldAlert className="w-5 h-5 text-red-600" />,
-  UserCheck: <UserCheck className="w-5 h-5 text-violet-600" />,
-  Biohazard: <Biohazard className="w-5 h-5 text-orange-600" />,
-  Gauge: <Gauge className="w-5 h-5 text-cyan-600" />,
-  Flame: <Flame className="w-5 h-5 text-amber-600" />,
-  Users: <Users className="w-5 h-5 text-teal-600" />,
-  Sun: <Sun className="w-5 h-5 text-amber-500" />,
-  Smile: <Smile className="w-5 h-5 text-pink-600" />,
-  HelpCircle: <HelpCircle className="w-5 h-5 text-indigo-600" />,
-};
-
 export default function HomePage() {
-  const [guideSearchQuery, setGuideSearchQuery] = useState('');
-
-  // 16대 자격 트랙 검색 필터
-  const filteredDiseases = MOCK_DISEASES.filter(
-    (d) =>
-      d.nameKo.includes(guideSearchQuery) ||
-      d.shortDesc.includes(guideSearchQuery) ||
-      d.code.toLowerCase().includes(guideSearchQuery.toLowerCase())
-  );
-
   return (
     <div className="bg-slate-50 min-h-screen pb-24 text-slate-900">
       {/* ====================================================================
-          [P01-SEC00] 원클릭 이어보기 바 (단순화)
+          [P01-SEC00] 원클릭 이어보기 바
           ==================================================================== */}
       <div
         data-serial-id="P01-SEC00-FLT01"
@@ -91,7 +35,7 @@ export default function HomePage() {
 
           <UiBadge serialId="P01-SEC00-BTN01" label="[P01-SEC00-BTN01]">
             <a
-              href="/courses/course-01-neuro"
+              href="/curriculum"
               className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-full text-xs font-bold transition shadow shrink-0"
             >
               <PlayCircle className="w-3.5 h-3.5" />
@@ -106,7 +50,7 @@ export default function HomePage() {
           ==================================================================== */}
       <section
         data-serial-id="P01-SEC01-HERO"
-        className="bg-gradient-to-b from-emerald-50/60 via-slate-50 to-slate-50 pt-10 pb-14 px-4 sm:px-8 border-b border-slate-200"
+        className="bg-gradient-to-b from-emerald-50/60 via-slate-50 to-slate-50 pt-12 pb-16 px-4 sm:px-8 border-b border-slate-200"
       >
         <div className="max-w-5xl mx-auto text-center space-y-4">
           <UiBadge serialId="P01-SEC01-TIT01" label="[P01-SEC01-TIT01]">
@@ -123,14 +67,14 @@ export default function HomePage() {
             대학병원 표준 임상 간호 지침서 및 임상간호사 실습평가 연계
           </p>
 
-          {/* 원클릭 핵심 액션 버튼 */}
+          {/* 원클릭 핵심 액션 버튼 (단일 수강신청 -> 수강신청 변경) */}
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <UiBadge serialId="P01-SEC01-BTN01" label="[P01-SEC01-BTN01]">
               <a
-                href="#courses"
+                href="/curriculum"
                 className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-8 py-3.5 rounded-xl shadow-lg transition text-base"
               >
-                <span>돌봄종사자 단일 수강신청 바로가기</span>
+                <span>돌봄종사자 수강신청 바로가기</span>
                 <ChevronRight className="w-5 h-5" />
               </a>
             </UiBadge>
@@ -148,114 +92,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ====================================================================
-          [P01-SEC02] 교육체계 안내: 16대 자격 트랙 (각 총 8시간 이수)
-          ==================================================================== */}
-      <section
-        id="curriculum"
-        data-serial-id="P01-SEC02-CURR"
-        className="max-w-7xl mx-auto px-4 sm:px-8 pt-14"
-      >
-        <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-4 mb-6 border-b border-slate-200 pb-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 mb-1">
-              <Sparkles className="w-4 h-4" />
-              <span>체계적인 임상 돌봄 교육과정</span>
-            </div>
-            <UiBadge serialId="P01-SEC02-TIT01" label="[P01-SEC02-TIT01]">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                질환별 전문 돌봄 교육과정 <span className="text-emerald-700">(각 총 8시간)</span>
-              </h2>
-            </UiBadge>
-            <p className="text-xs sm:text-sm text-slate-600 mt-1">
-              각 과정은 <strong>이론 4시간 + 실기 4시간 = 총 8시간</strong>으로 구성되어 질환별 핵심 임상케어를 단기 집중 이수합니다.
-            </p>
-          </div>
-
-          {/* 질환 검색 필터창 & 교육체계 상세 바로가기 */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-            <a
-              href="/curriculum"
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black flex items-center justify-center gap-1.5 shadow-sm transition"
-            >
-              <span>교육 체계 &amp; 수료 절차도 보기</span>
-              <ChevronRight className="w-4 h-4" />
-            </a>
-            <div className="w-full sm:w-64 relative">
-              <input
-                type="text"
-                value={guideSearchQuery}
-                onChange={(e) => setGuideSearchQuery(e.target.value)}
-                placeholder="질환명 검색 (예: 뇌졸중, 치매)"
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
-              />
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-            </div>
-          </div>
-        </div>
-
-        {/* 16대 질환군 트랙 카드 그리드 (각 총 8시간 명시) */}
-        <div id="courses" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {filteredDiseases.map((disease) => (
-            <UiBadge
-              key={disease.id}
-              serialId={`P01-SEC02-CRD${disease.id.toString().padStart(2, '0')}`}
-              label={`[P01-SEC02-CRD${disease.id.toString().padStart(2, '0')}]`}
-              className="w-full"
-            >
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-emerald-500 hover:shadow-md transition flex flex-col justify-between h-full">
-                <div>
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                      {iconMap[disease.iconName] || <Brain className="w-5 h-5 text-emerald-600" />}
-                    </div>
-                    <span className="bg-emerald-100 text-emerald-800 text-[11px] font-extrabold px-2 py-0.5 rounded-full border border-emerald-200">
-                      총 8시간 이수
-                    </span>
-                  </div>
-
-                  <div className="text-[11px] font-mono text-slate-400 font-semibold">{disease.code}</div>
-                  <h3 className="font-extrabold text-base text-slate-900 leading-snug mt-0.5">
-                    {disease.nameKo}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                    {disease.shortDesc}
-                  </p>
-
-                  <div className="mt-3 pt-2.5 border-t border-slate-100 text-xs flex justify-between text-slate-600">
-                    <span>이론 4h + 실기 4h</span>
-                    <strong className="text-emerald-700">8시간 트랙</strong>
-                  </div>
-                </div>
-
-                <div className="mt-3.5 pt-2 border-t border-slate-100">
-                  <a
-                    href={`/courses/course-${disease.code.slice(0, 2).toLowerCase()}-${
-                      disease.code.includes('NEURO')
-                        ? 'neuro'
-                        : disease.code.includes('GASTRO')
-                        ? 'gastro'
-                        : disease.code.includes('URO')
-                        ? 'uro'
-                        : disease.code.includes('PSYCH')
-                        ? 'psych'
-                        : 'geriatric'
-                    }`}
-                    className="w-full flex items-center justify-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-bold transition shadow-sm"
-                  >
-                    <span>수강신청 & 과정보기</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-            </UiBadge>
-          ))}
-        </div>
-      </section>
-
-      {/* ====================================================================
-          [P01-SEC03] 교육원 소개 섹션 (ecarecti.co.kr 참조 5대 하위메뉴 포함 관계)
-          ==================================================================== */}
       {/* ====================================================================
           [P01-SEC03] 교육원 소개 배너 (/about 별도 페이지 연계)
           ==================================================================== */}
@@ -292,7 +128,7 @@ export default function HomePage() {
       </section>
 
       {/* ====================================================================
-          [P01-SEC04] 10대 골든 룰 & 돌봄 지침서 퀵 가이드
+          [P01-SEC04] 10대 골든 룰 퀵 가이드
           ==================================================================== */}
       <section
         data-serial-id="P01-SEC04-GOLD"
