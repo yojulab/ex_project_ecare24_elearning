@@ -266,19 +266,15 @@ export default function RootLayout({
         </footer>
 
         {/* ==================================================================
-            의뢰자 소통용 UI 인스펙터 플로팅 독 버튼
+            의뢰자 소통용 UI inspect 플로팅 토글 버튼
             ================================================================== */}
         <div
           className={`ui-inspector-floating-dock ${isInspectorActive ? 'active' : ''}`}
           onClick={toggleInspector}
-          title="클릭하거나 Alt+I 단축키를 눌러 화면 요소별 일련번호 뱃지를 표시/숨김 토글합니다."
+          title="단축키 Alt+I 로 UI inspect 모드를 켜고 끌 수 있습니다"
         >
-          <Sparkles className="w-4 h-4 text-amber-300" />
-          <span>
-            UI 인스펙터 [Alt + I]:{' '}
-            <strong className={isInspectorActive ? 'text-emerald-300' : 'text-amber-200'}>
-              {isInspectorActive ? 'ON (뱃지 클릭시 ID 복사)' : 'OFF'}
-            </strong>
+          <span className="font-semibold text-xs tracking-tight">
+            {isInspectorActive ? '🏷️ UI inspect ON (Alt+I)' : '🏷️ UI inspect (Alt+I)'}
           </span>
         </div>
       </body>

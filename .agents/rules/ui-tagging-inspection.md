@@ -30,16 +30,24 @@
 
 모든 프론트엔드 빌드 시 아래 인스펙션 오버레이 메커니즘을 내장합니다.
 
-### 2-1. 단축키 토글 (Toggle Shortcut)
-- **전역 단축키**: **`Alt + I`** (Inspection의 I) 또는 **`Ctrl + Shift + T`**
-- **동작**:
-  - 기본 상태: 비활성화 (운영/학습자 뷰에 방해되지 않도록 숨김).
-  - 단축키 입력 시: 화면의 모든 태그에 부여된 시각적 뱃지가 부드러운 페이드인 애니메이션과 함께 즉시 표시됨. 재입력 시 숨김.
+### 2-1. 단축키 토글 (Toggle Shortcut) 및 FAB 버튼
+- **전역 단축키**: **`Alt + I`** (UI inspect 모드 토글) 또는 **`Ctrl + Shift + T`**
+- **플로팅 FAB 버튼 규격**:
+  - 기본 상태(OFF): `🏷️ UI inspect (Alt+I)`
+  - 활성화 상태(ON): `🏷️ UI inspect ON (Alt+I)`
+  - 툴팁 안내: `단축키 Alt+I 로 UI inspect 모드를 켜고 끌 수 있습니다`
+- **토스트 알림 규격**:
+  - 활성화: `🔍 UI inspect 활성화 (클릭 시 4대 정보 복사)`
+  - 비활성화: `UI inspect 비활성화 (숨김)`
 
-### 2-2. 뱃지 시각 스타일 (Badge Styling)
-- **위치**: 해당 태그 요소의 좌상단(Top-Left)에 떠 있는 플로팅 핀 형태.
-- **디자인**: 고대비 다크 바이올렛/네온 블루 배경, 흰색 텍스트, 11px 폰트, 둥근 모서리(border-radius: 4px).
-- **마우스 호버**: 스케일 1.1배 확대 및 `"클릭 시 ID 복사"` 툴팁 노출.
+### 2-2. 뱃지 시각 스타일 및 위치 규격 (Badge Styling & Positioning)
+- **위치 일관성 원칙**: 메뉴, 내비게이션, 본문 카드 등 모든 컴포넌트에서 **좌상단(Top-Left Pin: `top: -6px; left: -4px;`)**으로 위치 통일 (우측 끝 세로 중앙 등 변칙 배치 절대 금지).
+- **디자인 규격**:
+  - **폰트**: 9.5px (ui-monospace, 700 bold)
+  - **패딩**: 2.5px 5.5px (컴팩트 1단계 축소 규격)
+  - **모서리**: border-radius: 4px
+  - **배경/테두리**: 고대비 다크 바이올렛/인디고 배경 (`#4f46e5`), 1px 반투명 화이트 보더
+- **마우스 호버**: 스케일 1.1배 확대 및 툴팁 노출.
 
 ### 2-3. 원클릭 클립보드 복사 (Click to Copy)
 - **동작**:
@@ -51,7 +59,7 @@
      - URI: http://localhost:30010/curriculum
      - 항목명: 16대 질환 무료 수강
      ```
-  3. 뱃지 라벨이 1.2초간 녹색 **`[Copied! ✓]`**로 바뀌며 하단에 상세 토스트 알림 발생(`📋 [P01-SEC03-BTN02] 정보 복사 완료! (일련번호/페이지/URI/항목명)`).
+  3. 뱃지 라벨이 1.2초간 녹색 **`[Copied! ✓]`**로 바뀌며 하단에 상세 토스트 알림 발생(`📋 [P01-SEC03-BTN02] 4대 정보 복사 완료! (일련번호/페이지/URI/항목명)`).
 
 ---
 
@@ -95,7 +103,7 @@
   function toggleInspector() {
     isInspectMode = !isInspectMode;
     document.body.classList.toggle('ui-inspect-active', isInspectMode);
-    showToast(isInspectMode ? '🔍 UI 일련번호 뱃지 활성화 (Alt+I로 닫기)' : 'UI 일련번호 뱃지 숨김');
+    showToast(isInspectMode ? '🔍 UI inspect 활성화 (클릭 시 4대 정보 복사)' : 'UI inspect 비활성화 (숨김)');
   }
 
   // 2. 뱃지 클릭 시 4대 정보 클립보드 복사 이벤트 위임
@@ -132,7 +140,7 @@
         badge.innerText = originalText;
         badge.classList.remove('copied');
       }, 1200);
-      showToast(`📋 [${serialId}] 정보 복사 완료! (일련번호/페이지/URI/항목명)`);
+      showToast(`📋 [${serialId}] 4대 정보 복사 완료! (일련번호/페이지/URI/항목명)`);
     });
   });
 
@@ -156,15 +164,15 @@
 .ui-serial-badge {
   display: none;
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: -6px;
+  left: -4px;
   z-index: 99999;
   background: #4f46e5;
   color: #ffffff;
-  font-size: 11px;
+  font-size: 9.5px;
   font-family: monospace;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 2.5px 5.5px;
   border-radius: 4px;
   cursor: pointer;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);

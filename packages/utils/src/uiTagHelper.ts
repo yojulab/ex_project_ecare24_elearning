@@ -228,7 +228,7 @@ export async function copyTagIdToClipboard(
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       await navigator.clipboard.writeText(copyText);
       showUiInspectorToast(
-        `📋 [${serialId}] 정보 복사 완료! (일련번호/페이지/URI/항목명)`,
+        `📋 [${serialId}] 4대 정보 복사 완료! (일련번호/페이지/URI/항목명)`,
         options.durationMs || 2200
       );
       return true;
@@ -283,8 +283,8 @@ export function initUiInspectorGlobalListener(): () => void {
       document.body.classList.toggle('ui-inspect-active', isInspectMode);
       showUiInspectorToast(
         isInspectMode
-          ? '🔍 UI 일련번호 뱃지 활성화 (Alt+I로 닫기)'
-          : 'UI 일련번호 뱃지 숨김'
+          ? '🔍 UI inspect 활성화 (클릭 시 4대 정보 복사)'
+          : 'UI inspect 비활성화 (숨김)'
       );
     }
   };

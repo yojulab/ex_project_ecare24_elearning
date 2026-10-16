@@ -134,7 +134,7 @@ export const SilverHeader: React.FC<SilverHeaderProps> = ({
             </button>
           </UiBadge>
 
-          {/* UI Inspection Mode Toggle */}
+          {/* UI inspect 모드 토글 */}
           <UiBadge serialId="P40-HDR-INSPECT">
             <button
               onClick={() => setUiInspection(!uiInspection)}
@@ -143,9 +143,9 @@ export const SilverHeader: React.FC<SilverHeaderProps> = ({
                   ? 'bg-purple-600 text-white border-purple-700 shadow-sm animate-pulse'
                   : 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100'
               }`}
-              title="UI 일련번호 태깅 인스펙터 토글 (Alt + I)"
+              title="단축키 Alt+I 로 UI inspect 모드를 켜고 끌 수 있습니다"
             >
-              UI ID
+              🏷️ {uiInspection ? 'UI inspect ON' : 'UI inspect'}
             </button>
           </UiBadge>
 

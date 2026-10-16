@@ -275,7 +275,7 @@ export const CallCenterScreen: React.FC = () => {
           </UiBadge>
 
           {/* 단축키 가이드 툴팁 */}
-          <Tooltip title="단축키 안내: Alt+1(환불), Alt+2(응시자격), Alt+3(알림톡), Alt+S(저장), Alt+I(UI인스펙터)">
+          <Tooltip title="단축키 안내: Alt+1(환불), Alt+2(응시자격), Alt+3(알림톡), Alt+S(저장), Alt+I(UI inspect)">
             <Tag color="purple" className="cursor-pointer text-xs font-mono font-bold">
               단축키: Alt+1~3 / Alt+S
             </Tag>

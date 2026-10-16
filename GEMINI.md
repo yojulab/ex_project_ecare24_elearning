@@ -79,5 +79,6 @@
 | **2026-10-13** | 개별 패키지 빌드 이슈 해결 및 폰트 CDN 정규화 | `mobileApp`, `frontend_user`, `frontend_admin`, `package.json` | Google Fonts 부재 Pretendard 제거 및 jsdelivr 분리(400 에러 해결), postinstall .bin 자동 링크(vite: not found 방지), TS antd 모듈 인식 보장 |
 | **2026-10-13** | 외부 도메인 차단 방지 Vite allowedHosts 전체 허용 | `frontend_admin/vite.config.ts`, `mobileApp/vite.config.ts`, `GEMINI.md` | third.axfoundly.com 등 터널/외부 호스트 차단 방지를 위해 server 및 preview allowedHosts: true 전면 적용 |
 | **2026-10-13** | UI 인스펙터 뱃지 복사 시 4대 정보(일련번호, 페이지명, URI, 항목명) 확장 | `packages/utils/uiTagHelper.ts`, `UiBadge.tsx`, `ui-tagging-inspection.md`, `GEMINI.md` | 뱃지 클릭 시 단일 ID 대신 일련번호, 페이지명, URI, 항목명이 정돈된 텍스트로 자동 추출·복사되도록 고도화 |
+| **2026-10-16** | UI inspect 시스템 규격 고도화 및 용어·사이즈·위치 통일 | 전체 웹/앱/관리자/규칙, `docs/UI-Inspects.md` | 'UI inspect' 용어 통일, 뱃지 사이즈 9.5px/2.5px 5.5px 콤팩트화, 관리자 좌측 메뉴 뱃지 좌상단 핀 위치 일치화 |
 
 
