@@ -56,41 +56,34 @@ ensure_bin_links
 # 포트 활성 여부 점검 (도커 최소 환경 호환 3중 안전망)
 is_port_in_use() {
   local port=$1
-  if (bash -c "(echo > /dev/tcp/127.0.0.1/${port}) >/dev/null 2>&1" 2>/dev/null); then
-    return 0
-  fi
   if command -v python3 >/dev/null 2>&1; then
     if python3 -c "import socket; s=socket.socket(); s.settimeout(0.3); exit(0 if s.connect_ex(('127.0.0.1', ${port}))==0 else 1)" 2>/dev/null; then
       return 0
     fi
   fi
-  if command -v ss >/dev/null 2>&1 && ss -tlpn 2>/dev/null | grep -q ":${port} "; then
-    return 0
+  if command -v timeout >/dev/null 2>&1; then
+    if timeout 0.3 bash -c "(: > /dev/tcp/127.0.0.1/${port}) >/dev/null 2>&1" 2>/dev/null; then
+      return 0
+    fi
   fi
   return 1
 }
 
-# 포트 점유 PID 획득 (fuser -> lsof -> ss -> pgrep 순차 확인)
+# 포트 점유 PID 획득 (pgrep 우선 -> timeout fuser 보조)
 get_port_pids() {
   local port=$1
   local pids=""
 
-  if command -v fuser >/dev/null 2>&1; then
-    pids=$(fuser "${port}/tcp" 2>/dev/null || true)
+  case "$port" in
+    30010) pids=$(pgrep -f "(next.*30010|next-server.*14|frontend_user)" 2>/dev/null || true) ;;
+    30011) pids=$(pgrep -f "(vite.*30011|frontend_admin)" 2>/dev/null || true) ;;
+    30012) pids=$(pgrep -f "(vite.*30012|mobileApp)" 2>/dev/null || true) ;;
+  esac
+
+  if [ -z "$pids" ] && command -v timeout >/dev/null 2>&1 && command -v fuser >/dev/null 2>&1; then
+    pids=$(timeout 0.5 fuser "${port}/tcp" 2>/dev/null || true)
   fi
-  if [ -z "$pids" ] && command -v lsof >/dev/null 2>&1; then
-    pids=$(lsof -ti ":${port}" 2>/dev/null || true)
-  fi
-  if [ -z "$pids" ] && command -v ss >/dev/null 2>&1; then
-    pids=$(ss -tlpn 2>/dev/null | grep ":${port} " | grep -o 'pid=[0-9]*' | cut -d= -f2 || true)
-  fi
-  if [ -z "$pids" ]; then
-    case "$port" in
-      30010) pids=$(pgrep -f "(next.*30010|next-server.*14|frontend_user)" 2>/dev/null || true) ;;
-      30011) pids=$(pgrep -f "(vite.*30011|frontend_admin)" 2>/dev/null || true) ;;
-      30012) pids=$(pgrep -f "(vite.*30012|mobileApp)" 2>/dev/null || true) ;;
-    esac
-  fi
+
   echo "$pids" | tr '\n' ' ' | xargs
 }
 

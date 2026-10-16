@@ -90,10 +90,10 @@ export const App: React.FC = () => {
       : 'font-scale-md';
 
   return (
-    <div className={`min-h-screen ${highContrast ? 'high-contrast' : ''}`}>
+    <div className={`min-h-screen flex flex-col ${highContrast ? 'high-contrast' : ''}`}>
       <MobileDeviceFrame isDeviceFrame={isDeviceFrame}>
         <div
-          className={`flex-1 flex flex-col h-full overflow-hidden ${fontClass} ${
+          className={`flex-1 flex flex-col min-h-0 w-full ${fontClass} ${
             highContrast ? 'high-contrast' : ''
           }`}
         >
@@ -114,7 +114,7 @@ export const App: React.FC = () => {
           )}
 
           {/* Main View Area */}
-          <main className="flex-1 flex flex-col overflow-hidden relative">
+          <main className="flex-1 flex flex-col overflow-y-auto relative min-h-0">
             {activeSubScreen === 'video' ? (
               <VideoPlayerScreen
                 videoInfo={videoParams}

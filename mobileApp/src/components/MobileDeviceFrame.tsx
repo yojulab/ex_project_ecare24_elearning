@@ -11,8 +11,8 @@ export const MobileDeviceFrame: React.FC<MobileDeviceFrameProps> = ({
 }) => {
   if (!isDeviceFrame) {
     return (
-      <div className="w-full min-h-screen bg-slate-900 flex justify-center">
-        <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl flex flex-col relative overflow-hidden">
+      <div className="w-full min-h-screen bg-slate-100 sm:bg-slate-900 flex justify-center">
+        <div className="w-full max-w-md bg-slate-50 min-h-screen shadow-2xl flex flex-col relative">
           {children}
         </div>
       </div>
