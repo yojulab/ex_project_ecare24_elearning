@@ -76,7 +76,10 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"
         />
       </head>
-      <body className="font-scale-normal bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased">
+      <body
+        className="font-scale-normal bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased"
+        data-service-name="한국돌봄종사자양성교육원"
+      >
         {/* ==================================================================
             실버 접근성 보조 탑바 (P00-SEC00) - WCAG AAA 준수
             ================================================================== */}
