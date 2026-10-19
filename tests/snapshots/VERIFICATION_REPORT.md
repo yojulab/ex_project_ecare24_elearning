@@ -1,6 +1,6 @@
 # eCare24 Playwright Headless 중요 화면 자동 캡처 검증 보고서
 
-- **검증 일시**: 2026-10-19T14:08:32.798Z
+- **검증 일시**: 2026-10-19T14:39:54.052Z
 - **실행 모드**: Playwright Headless (Chromium arm64, --no-sandbox)
 - **총 대상 화면**: 21개
 - **성공**: 21건 / **실패**: 0건
@@ -17,11 +17,11 @@
 | 6 | 수강생 포털 (웹) | [06_user_mypage_certs.png](./06_user_mypage_certs.png) | `200 OK` | 298.2 KB | 마이페이지 - 직능원 민간자격증 발급 현황 및 뷰어 |
 | 7 | 수강생 포털 (웹) | [07_user_tv24_shorts.png](./07_user_tv24_shorts.png) | `200 OK` | 270.4 KB | 간병24TV - 숏폼 러닝 및 HeyGen AI 임상 교육 비디오 |
 | 8 | 수강생 포털 (웹) | [08_user_verify.png](./08_user_verify.png) | `200 OK` | 288.1 KB | 직능원 민간자격증 고유등록번호 진위 검증 서비스 |
-| 9 | 수강생 포털 (웹) | [09_user_course_detail.png](./09_user_course_detail.png) | `200 OK` | 387.6 KB | 과정 상세 / HeyGen AI 전문강사 영상 플레이어 |
+| 9 | 수강생 포털 (웹) | [09_user_course_detail.png](./09_user_course_detail.png) | `200 OK` | 381.7 KB | 과정 상세 / HeyGen AI 전문강사 영상 플레이어 |
 | 10 | 수강생 포털 (웹) | [10_user_ui_inspect_mode.png](./10_user_ui_inspect_mode.png) | `200 OK` | 343.4 KB | Alt+I 단축키 가동 후 UI inspect 일련번호 뱃지 오버레이 모드 |
 | 11 | 관리자/CS 포털 (웹) | [11_admin_dashboard.png](./11_admin_dashboard.png) | `200 OK` | 239.4 KB | 관리자 대시보드 (KPI 통계 카드, 실시간 결제/상담 큐) |
 | 12 | 관리자/CS 포털 (웹) | [12_admin_callcenter.png](./12_admin_callcenter.png) | `200 OK` | 449.1 KB | 콜센터 CS 3분할 원스크린 포털 (고객정보/CTI, 진도율, 상담메모) |
-| 13 | 관리자/CS 포털 (웹) | [13_admin_curriculum.png](./13_admin_curriculum.png) | `200 OK` | 508.8 KB | 교육과정 관리 (정규과정 및 16대 질환 전문 트랙 편성) |
+| 13 | 관리자/CS 포털 (웹) | [13_admin_curriculum.png](./13_admin_curriculum.png) | `200 OK` | 502.2 KB | 교육과정 관리 (정규과정 및 16대 질환 전문 트랙 편성) |
 | 14 | 관리자/CS 포털 (웹) | [14_admin_cert_registry.png](./14_admin_cert_registry.png) | `200 OK` | 161.3 KB | 직능원 보고용 자격증 발급 대장 관리 |
 | 15 | 관리자/CS 포털 (웹) | [15_admin_payments.png](./15_admin_payments.png) | `200 OK` | 208.4 KB | 수강료 수납 및 무통장 입금확인 관리 (원클릭 결제승인) |
 | 16 | 관리자/CS 포털 (웹) | [16_admin_popups.png](./16_admin_popups.png) | `200 OK` | 152.3 KB | 팝업 및 배너 공지 관리 (채널별 노출 및 우선순위 제어) |

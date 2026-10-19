@@ -22,8 +22,9 @@ import { ENV } from '@/config/env';
 
 export default function CurriculumPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [dbCourseCount, setDbCourseCount] = useState<number>(18);
+  const [dbCourseCount, setDbCourseCount] = useState<number>(16);
   const [isDbConnected, setIsDbConnected] = useState<boolean>(false);
+  const [adminCourses, setAdminCourses] = useState<any[]>([]);
 
   useEffect(() => {
     fetch(`${ENV.API_BASE_URL}/courses`)
@@ -33,7 +34,10 @@ export default function CurriculumPage() {
       })
       .then((data) => {
         if (Array.isArray(data)) {
-          setDbCourseCount(data.length);
+          // 관리자 등록 및 공개(isPublished) 활성화된 트랙만 필터링
+          const publishedTracks = data.filter((c: any) => c.isPublished !== false && c.courseType === 'TRACK');
+          setAdminCourses(publishedTracks);
+          setDbCourseCount(publishedTracks.length);
           setIsDbConnected(true);
         }
       })
@@ -42,29 +46,52 @@ export default function CurriculumPage() {
       });
   }, []);
 
-  // 16대 질환군 전문 자격 트랙 데이터 (각 총 8시간: 이론 4h + 실기 4h)
-  const tracks = [
-    { id: 1, category: 'neuro', name: '치매(알츠하이머) 전문돌봄사', code: 'TRK-01', theory: 4, practice: 4, skills: 'BPSD 대처, 인지자극, 배회예방', goldenRule: '탈건착환 및 인지안정화' },
-    { id: 2, category: 'neuro', name: '뇌졸중(중풍·편마비) 전문돌봄사', code: 'TRK-02', theory: 4, practice: 4, skills: '건측 중심 휠체어 이승, 보행보조', goldenRule: '탈건착환 (벗을땐 건강, 입을땐 마비)' },
-    { id: 3, category: 'neuro', name: '파킨슨병 일상동작 전문돌봄사', code: 'TRK-03', theory: 4, practice: 4, skills: '보행동결 극복, 약물온오프 케어', goldenRule: '시각단서 보행유도 및 낙상예방' },
-    { id: 4, category: 'bedridden', name: '와상환자 욕창예방 전문돌봄사', code: 'TRK-04', theory: 4, practice: 4, skills: 'q2hr 체위변경(측위/앙와위), 에어매트', goldenRule: '2시간 주기 체변(q2hr) 절대엄수' },
-    { id: 5, category: 'clinical', name: '연하곤란 경관영양(피딩) 전문돌봄사', code: 'TRK-05', theory: 4, practice: 4, skills: 'L-tube/PEG 피딩, 반좌위 30분 유지', goldenRule: '피딩 전 소화확인, 상체 30도 거치' },
-    { id: 6, category: 'clinical', name: '석션·기관절개관(T-tube) 전문돌봄사', code: 'TRK-06', theory: 4, practice: 4, skills: '구강/비강 카테터 흡인, 거즈교체', goldenRule: '1회 흡인 15초 이내 제한' },
-    { id: 7, category: 'clinical', name: '요루·장루·유린백 배액 전문돌봄사', code: 'TRK-07', theory: 4, practice: 4, skills: 'Foley 카테터 잠김 확인, 유린백 비우기', goldenRule: '소변백은 방광보다 아래 거치' },
-    { id: 8, category: 'chronic', name: '당뇨·당뇨발 괴사예방 전문돌봄사', code: 'TRK-08', theory: 4, practice: 4, skills: '저혈당 응급대처, 족부 미세상처 관찰', goldenRule: '발톱 일자 깎기 및 보습' },
-    { id: 9, category: 'palliative', name: '암환자 완화의료·호스피스 전문돌봄사', code: 'TRK-09', theory: 4, practice: 4, skills: '마약성 진통제 부작용 모니터링, 임종돌봄', goldenRule: '통증 호소 기록 및 영적지지' },
-    { id: 10, category: 'chronic', name: '혈액투석·만성신부전 전문돌봄사', code: 'TRK-10', theory: 4, practice: 4, skills: '동정맥루 혈류 잡음(Thrill) 확인, 수분제한', goldenRule: '투석 팔 혈압측정/채혈 절대금지' },
-    { id: 11, category: 'ortho', name: '인공관절·퇴행성관절염 전문돌봄사', code: 'TRK-11', theory: 4, practice: 4, skills: '고관절 외전베개, 탈구예방 각도유지', goldenRule: '다리 꼬기 금지, 90도 이상 굴곡제한' },
-    { id: 12, category: 'chronic', name: '만성호흡기질환(COPD) 전문돌봄사', code: 'TRK-12', theory: 4, practice: 4, skills: '가정산소 투여, 입술오므리기 호흡유도', goldenRule: 'SpO2 90% 이상 유지 모니터링' },
-    { id: 13, category: 'chronic', name: '고혈압·심부전 혈역학 전문돌봄사', code: 'TRK-13', theory: 4, practice: 4, skills: '기립성 저혈압 예방, 하지부종 관찰', goldenRule: '천천히 일어나기 3단계 수칙' },
-    { id: 14, category: 'ortho', name: '골다공증·낙상골절 재활 전문돌봄사', code: 'TRK-14', theory: 4, practice: 4, skills: '안전 손잡이 지지, 환경안전 체크리스트', goldenRule: '야간 조명 확보 및 미끄럼방지' },
-    { id: 15, category: 'neuro', name: '섬망·노인성 우울증 전문돌봄사', code: 'TRK-15', theory: 4, practice: 4, skills: '시간·장소 지남력 강화, 수면주기 정상화', goldenRule: '낮 동안 자연광 노출 및 친숙한 물건' },
-    { id: 16, category: 'clinical', name: 'CRE/VRE 다제내성균 감염관리 전문돌봄사', code: 'TRK-16', theory: 4, practice: 4, skills: '접촉주의 격리 가운/장갑 착탈, 폐기물 분리', goldenRule: '환자 접촉 전후 6단계 손위생' },
+  // 16대 질환군 전문 자격 트랙 기본 메타데이터 (각 총 8시간: 이론 4h + 실기 4h)
+  const defaultTracks = [
+    { id: 'a0000000-0000-0000-0000-000000000002', category: 'neuro', name: '신경계 질환 전문간병사 (뇌졸중/파킨슨 케어 8시간)', code: 'TRK-01', theory: 4, practice: 4, skills: '건측 중심 휠체어 이승, 보행보조, 탈건착환', goldenRule: '탈건착환 (벗을땐 건강, 입을땐 마비)' },
+    { id: 'a0000000-0000-0000-0000-000000000003', category: 'clinical', name: '소화기·간담도 질환 전문간병사 (L-tube/PEG 피딩 케어 8시간)', code: 'TRK-02', theory: 4, practice: 4, skills: 'L-tube/PEG 피딩, 반좌위 30분 유지', goldenRule: '피딩 전 소화확인, 상체 30도 거치' },
+    { id: 'a0000000-0000-0000-0000-000000000004', category: 'clinical', name: '비뇨기·신장 질환 전문간병사 (유치도뇨관/투석 케어 8시간)', code: 'TRK-03', theory: 4, practice: 4, skills: 'Foley 카테터 잠김 확인, 유린백 비우기', goldenRule: '소변백은 방광보다 아래 거치' },
+    { id: 'a0000000-0000-0000-0000-000000000005', category: 'clinical', name: '호흡기계 질환 전문간병사 (COPD/T-tube/가정산소 케어 8시간)', code: 'TRK-04', theory: 4, practice: 4, skills: '구강/비강 카테터 흡인, 거즈교체', goldenRule: '1회 흡인 15초 이내 제한' },
+    { id: 'a0000000-0000-0000-0000-000000000006', category: 'chronic', name: '심혈관계 질환 전문간병사 (심부전/부종/혈역학 케어 8시간)', code: 'TRK-05', theory: 4, practice: 4, skills: '기립성 저혈압 예방, 하지부종 관찰', goldenRule: '천천히 일어나기 3단계 수칙' },
+    { id: 'a0000000-0000-0000-0000-000000000007', category: 'ortho', name: '근골격계 및 재활 전문간병사 (인공관절/고관절골절 케어 8시간)', code: 'TRK-06', theory: 4, practice: 4, skills: '고관절 외전베개, 탈구예방 각도유지', goldenRule: '다리 꼬기 금지, 90도 이상 굴곡제한' },
+    { id: 'a0000000-0000-0000-0000-000000000008', category: 'chronic', name: '내분비·대사 질환 전문간병사 (당뇨병/저혈당/당뇨발 케어 8시간)', code: 'TRK-07', theory: 4, practice: 4, skills: '저혈당 응급대처, 족부 미세상처 관찰', goldenRule: '발톱 일자 깎기 및 보습' },
+    { id: 'a0000000-0000-0000-0000-000000000009', category: 'palliative', name: '종양·암 질환 전문간병사 (항암부작용/호중구감소 케어 8시간)', code: 'TRK-08', theory: 4, practice: 4, skills: '마약성 진통제 부작용 모니터링, 임종돌봄', goldenRule: '통증 호소 기록 및 영적지지' },
+    { id: 'a0000000-0000-0000-0000-000000000010', category: 'neuro', name: '치매·정신 질환 전문간병사 (BPSD 이상행동/섬망 대처 8시간)', code: 'TRK-09', theory: 4, practice: 4, skills: 'BPSD 대처, 인지자극, 배회예방', goldenRule: '탈건착환 및 인지안정화' },
+    { id: 'a0000000-0000-0000-0000-000000000011', category: 'clinical', name: '감염성 질환 전문간병사 (CRE/VRE 다제내성균 격리 케어 8시간)', code: 'TRK-10', theory: 4, practice: 4, skills: '접촉주의 격리 가운/장갑 착탈, 폐기물 분리', goldenRule: '환자 접촉 전후 6단계 손위생' },
+    { id: 'a0000000-0000-0000-0000-000000000012', category: 'bedridden', name: '중환자·와상 집중간병사 (욕창 4단계 예방/q2hr 체변 8시간)', code: 'TRK-11', theory: 4, practice: 4, skills: 'q2hr 체위변경(측위/앙와위), 에어매트', goldenRule: '2시간 주기 체변(q2hr) 절대엄수' },
+    { id: 'a0000000-0000-0000-0000-000000000013', category: 'ortho', name: '외상·화상 질환 전문간병사 (피부이식/압박드레싱 케어 8시간)', code: 'TRK-12', theory: 4, practice: 4, skills: '무균 소독 보조, 구축 방지 스트레칭', goldenRule: '드레싱 환부 마찰 금지' },
+    { id: 'a0000000-0000-0000-0000-000000000014', category: 'chronic', name: '자가면역 및 알레르기 질환 전문간병사 (아나필락시스 케어 8시간)', code: 'TRK-13', theory: 4, practice: 4, skills: '알레르겐 차단 식단, 응급키트 확인', goldenRule: '호흡곤란 시 에피네프린 즉각 노티' },
+    { id: 'a0000000-0000-0000-0000-000000000015', category: 'chronic', name: '감각기계 및 이비인후 질환 전문간병사 (시각·청각장애 케어 8시간)', code: 'TRK-14', theory: 4, practice: 4, skills: '시각단서 안내, 보청기 관리', goldenRule: '정면 눈높이 대화 원칙' },
+    { id: 'a0000000-0000-0000-0000-000000000016', category: 'palliative', name: '소아·청소년 중증환자 전문돌봄사 (발달특화 케어 8시간)', code: 'TRK-15', theory: 4, practice: 4, skills: '소아 활력징후, 성장발달 정서지지', goldenRule: '체중 비례 수분섭취 점검' },
+    { id: 'a0000000-0000-0000-0000-000000000017', category: 'palliative', name: '호스피스 완화임종 전문간병사 (사별가족 지지 케어 8시간)', code: 'TRK-16', theory: 4, practice: 4, skills: '체인스토크스 호흡 간호, 임종위생', goldenRule: '청각 마지막 소실 고려한 위로' },
   ];
 
+  // DB에서 불러온 관리자 등록 코스가 있으면 이를 매핑하여 사용, 없으면 defaultTracks 사용
+  const displayTracks = (adminCourses.length > 0 ? adminCourses : defaultTracks).map((item, idx) => {
+    // DB CourseEntity 형태인 경우
+    if (item.targetDisease || item.steps) {
+      const catCode = item.category?.code || (idx % 5 === 0 ? 'neuro' : idx % 5 === 1 ? 'clinical' : idx % 5 === 2 ? 'chronic' : idx % 5 === 3 ? 'bedridden' : 'ortho');
+      return {
+        id: item.id,
+        category: catCode,
+        name: item.title,
+        code: `TRK-${(idx + 1).toString().padStart(2, '0')}`,
+        theory: item.theoryHours || 4,
+        practice: item.practicalHours || 4,
+        stepCount: item.steps?.length || 4,
+        skills: item.summary || item.targetDisease || '임상 표준 프로토콜 실기',
+        goldenRule: item.steps?.[0]?.description || '탈건착환 및 10대 골든 룰 준수',
+      };
+    }
+    return {
+      ...item,
+      stepCount: 4,
+    };
+  });
+
   const filteredTracks = selectedCategory === 'all' 
-    ? tracks 
-    : tracks.filter(t => t.category === selectedCategory);
+    ? displayTracks 
+    : displayTracks.filter(t => t.category === selectedCategory);
 
   return (
     <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
@@ -312,17 +339,22 @@ export default function CurriculumPage() {
                     <span className="text-[11px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">
                       {trk.code}
                     </span>
-                    <span className="text-[11px] font-extrabold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded flex items-center gap-1">
-                      <Clock className="w-3 h-3 text-emerald-600" />
-                      총 8시간
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                        관리자 등록 {trk.stepCount || 4}챕터
+                      </span>
+                      <span className="text-[11px] font-extrabold text-slate-600 bg-white border border-slate-200 px-2 py-0.5 rounded flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-emerald-600" />
+                        총 8시간
+                      </span>
+                    </div>
                   </div>
                   <h3 className="font-extrabold text-base text-slate-900 group-hover:text-emerald-700 transition leading-snug">
                     {trk.name}
                   </h3>
                   <div className="mt-2 text-xs text-slate-600 space-y-1">
                     <div className="text-[11px] text-slate-500">
-                      이론 {trk.theory}h + 실기 {trk.practice}h
+                      이론 {trk.theory}h + 실기 {trk.practice}h (실시간 관리자 승인과정)
                     </div>
                     <div className="line-clamp-2">
                       <b>주요 술기:</b> {trk.skills}

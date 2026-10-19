@@ -9,6 +9,7 @@ import {
   NoticeEntity,
   PopupNoticeEntity,
   SystemSettingEntity,
+  ExamQuestionEntity,
 } from '../../database/entities';
 import { PublicDataController } from './public-data.controller';
 
@@ -23,6 +24,7 @@ import { PublicDataController } from './public-data.controller';
       NoticeEntity,
       PopupNoticeEntity,
       SystemSettingEntity,
+      ExamQuestionEntity,
     ]),
   ],
   controllers: [PublicDataController],

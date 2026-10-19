@@ -11,6 +11,7 @@ import {
   InquiryEntity,
   CertificateEntity,
   CertApplicationEntity,
+  CourseEntity,
 } from '../../database/entities';
 import { AdminController } from './admin.controller';
 
@@ -27,6 +28,7 @@ import { AdminController } from './admin.controller';
       InquiryEntity,
       CertificateEntity,
       CertApplicationEntity,
+      CourseEntity,
     ]),
   ],
   controllers: [AdminController],

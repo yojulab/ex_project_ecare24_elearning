@@ -15,3 +15,4 @@ export * from './caregiver-term.entity';
 export * from './system-setting.entity';
 export * from './inquiry.entity';
 export * from './certificate.entity';
+export * from './exam-question.entity';

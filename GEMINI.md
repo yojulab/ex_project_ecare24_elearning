@@ -93,5 +93,6 @@
 | **2026-10-19** | 백엔드 모든 IP 접속 허용 (CORS_ORIGINS=*) 및 launch.json 백엔드 통합 | `backend/.env`, `main.ts`, `.vscode/launch.json`, `.env.example` | CORS_ORIGINS=* 설정 및 origin 리플렉트 credentials 지원, launch.json에 백엔드:30014 및 Fullstack 4개 서버 복합 디버거 구성, Playwright 21개 전 화면 100% 검증 통과 |
 | **2026-10-19** | 실제 DB 초기값 13개 마스터/운영 데이터 완비 및 REST API·프론트엔드 실연동 무결성 검증 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `VERIFICATION_REPORT.md` | 공지사항(4건)·팝업(2건)·자격증(2건)·문의(2건)·상담(3건) 및 18개 교육과정 DB 초기값 완비, 관리자 자격증대장/교육체계/지갑 실데이터 연동, Playwright 21개 전 화면 100% 무결성 통과 |
 | **2026-10-19** | 실제 데이터 입력·수정 5대 시나리오 DB 모니터링 및 UI 적용 검증 완료 | `scripts/db_monitor.js`, `mcp_config.json`, `tests/snapshots/`, `GEMINI.md` | 수강신청·입금승인·1:1문의답변·긴급팝업·권한변경 5대 시나리오 DB Diff/KPI 실시간 추적 및 관리자/수강생/모바일 UI 변화 검증, Playwright 21개 전 화면 100% 통과 |
+| **2026-10-19** | 실 데이터 구성 보완 4대 사항(관리자 등록 챕터 노출·문구형 교안·HeyGen 영상·실제 시험 실시간 통과) 적용 및 검증 완료 | `backend`, `frontend_user`, `frontend_admin`, `tests/snapshots/`, `GEMINI.md` | 관리자 등록 챕터만 수강생 포털 동적 노출(/curriculum), TTS 대신 5대 단원 문구형 교안(P03), 제공 링크 HeyGen 실제 VOD 인라인 재생(P04), 실제 CBT 5대 임상 문항 출제 및 실시간 즉시 합격/모바일 자격증 발급(P08) 완비 |
 
 

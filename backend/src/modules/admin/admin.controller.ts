@@ -25,6 +25,7 @@ import {
   InquiryEntity,
   CertificateEntity,
   CertApplicationEntity,
+  CourseEntity,
 } from '../../database/entities';
 
 @Controller('admin')
@@ -51,6 +52,8 @@ export class AdminController {
     private certRepo: Repository<CertificateEntity>,
     @InjectRepository(CertApplicationEntity)
     private certAppRepo: Repository<CertApplicationEntity>,
+    @InjectRepository(CourseEntity)
+    private courseRepo: Repository<CourseEntity>,
   ) {}
 
   // 1. 대시보드 KPI 및 대기 큐
@@ -296,5 +299,34 @@ export class AdminController {
       ...body,
       authorId: admin.id,
     });
+  }
+
+  // 15. 관리자 교육과정/챕터 목록 조회
+  @Get('courses')
+  @RequirePermissions('COURSE_READ')
+  async getCourses() {
+    return this.courseRepo.find({
+      relations: ['category', 'steps', 'videos'],
+      order: { courseType: 'ASC', createdAt: 'ASC' },
+    });
+  }
+
+  // 16. 교육과정 공개/비공개 토글 (관리자 등록 챕터 노출 제어)
+  @Put('courses/:id/publish')
+  @RequirePermissions('COURSE_WRITE')
+  async toggleCoursePublish(@Param('id') id: string) {
+    const course = await this.courseRepo.findOne({ where: { id } });
+    if (!course) {
+      throw new NotFoundException('교육과정을 찾을 수 없습니다.');
+    }
+    course.isPublished = !course.isPublished;
+    await this.courseRepo.save(course);
+    return {
+      success: true,
+      id: course.id,
+      title: course.title,
+      isPublished: course.isPublished,
+      message: `교육과정 [${course.title}]이(가) ${course.isPublished ? '공개(수강생 포털 노출)' : '비공개(수강생 포털 미노출)'}로 전환되었습니다.`,
+    };
   }
 }
