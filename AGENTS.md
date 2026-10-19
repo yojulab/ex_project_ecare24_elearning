@@ -28,3 +28,7 @@
    - 백그라운드 태스크나 메시지를 기다릴 때 루프를 돌며 상태를 조회하지 않는다. Antigravity의 반응형 웨이크업(Reactive Wakeup) 시스템에 맡기고 도구 호출을 종료한다.
 9. **자가 진화 참여**:
    - 작업 완료 후 오류 패턴이나 사용자 피드백이 발생하면 [harness-evolve](file:///apps/project_ecare24_elearning/.agents/skills/harness-evolve/SKILL.md) 스킬을 통해 시스템 지식으로 일반화하여 환류한다.
+10. **Playwright Headless 무인 자동 검증 및 21개 중요 화면 캡처 의무화**:
+    - 모든 UI/API 변경 및 주요 마일스톤 완료 시 반드시 `npm run test:capture`(`tests/capture_screens.js`)를 실행하여 수강생 포털(10개), 관리자 포털(7개), 모바일 시뮬레이터(3개), 백엔드 API 문서(1개) 등 총 21개 중요 화면의 무결성(HTTP 200, 렌더링 에러 0건)을 기계적으로 자동 캡처·검증한다.
+    - 리눅스 arm64 컨테이너 환경의 안정적 무인 실행을 위해 필수 브라우저 4대 런치 옵션(`--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage`, `--disable-gpu`)을 준수한다.
+

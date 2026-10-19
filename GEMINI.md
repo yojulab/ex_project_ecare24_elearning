@@ -42,6 +42,9 @@
    - `backend/` (NestJS Clean Architecture, 8대 핵심 모듈, PostgreSQL 16+ DDL)
    - `mobileApp/` (React Native 실버 터치, 오프라인 교안 캐싱, 숏폼 스와이프)
    - `tests/` (Playwright Headless 중요 화면 자동 캡처 슈트)
+6. **Playwright Headless 무인 자동 검증 및 중요 화면 캡처 원칙**:
+   - 화면/기능 변경 시 `npm run test:capture`(`tests/capture_screens.js`)를 실행하여 수강생 웹(10개), 관리자/CS 포털(7개), 모바일 시뮬레이터(3개), 백엔드 API 문서(1개) 등 **총 21개 중요 화면의 무결성(HTTP 200, 렌더링 에러 0건)을 기계적으로 자동 캡처·검증**하고 스냅샷(`tests/snapshots/`)과 검증 리포트(`VERIFICATION_REPORT.md`)를 갱신 보존한다.
+   - Linux arm64 컨테이너 환경의 안정적 무인 실행을 위해 필수 브라우저 4대 런치 옵션(`--no-sandbox`, `--disable-setuid-sandbox`, `--disable-dev-shm-usage`, `--disable-gpu`)을 준수한다.
 
 ---
 
@@ -54,7 +57,7 @@
 | **Callcenter CS Specialist** | Gemini Pro/Flash | 관리자 및 콜센터 포털(`frontend_admin`) 3분할 원스크린 레이아웃, CTI 팝업 연동, 상담 단축키(Alt+1~3, Alt+S), 임상 약어 템플릿, **콜센터 UI 일련번호 설계** |
 | **Caregiver Cert Specialist** | Gemini Pro | 16대 질환군 4단계 커리큘럼, 직능원(pqi.or.kr) 민간자격 관리규정, CBT 출제 및 과락 판정 엔진, 임상 용어 Care Point 반영 |
 | **Media TV24 Specialist** | Gemini Flash | 간병24TV 유튜브 API 연동, 1분 숏폼 스와이프 플레이어 및 무료 교안 유입 퍼널 설계 |
-| **Quality & E2E Assurer** | Gemini Pro | Playwright Headless 16개 질환/콜센터 자동 캡처 시나리오, **UI 일련번호 기반 안정적 셀렉터 검증**, 보안/개인정보 암호화 감사 |
+| **Quality & E2E Assurer** | Gemini Pro | Playwright Headless 21개 중요 화면 자동 캡처 슈트(`test:capture`), **UI 일련번호 기반 안정적 셀렉터 검증**, 보안/개인정보 암호화 감사 |
 
 ---
 
@@ -83,5 +86,6 @@
 | **2026-10-17** | UI inspect 복사 문구 형식 고도화 및 SPA 해시(#tab=...) 딥링킹 | `packages/utils/uiTagHelper.ts`, `mobileApp`, `frontend_admin`, `frontend_user`, `UI-Inspects.md` | 복사 시 `{페이지명} ({화면코드}) - {서비스명}` 결합, 모바일/관리자 탭 전환 시 URL hash 실시간 동기화, 항목명 사전 매핑 탑재 |
 | **2026-10-19** | 메뉴 보완(마이페이지·로그인·관리자 LNB) 및 RESTful backend 구성 계획 수립 | `docs/architecture/BACKEND_AND_MENU_PLAN.md`, `ddl/02_auth_payment_admin_schema.sql` | NestJS+TypeORM, 역할 없는 사용자별 권한 리스트, 무통장 납부, 목업 전면 정리·DB 시드 명령, .env 규격, HeyGen 영상 연동 설계 |
 | **2026-10-19** | RESTful backend 구축 및 권한 매트릭스·마이페이지·관리자 LNB 전면 연동 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `GEMINI.md` | NestJS 10 RESTful API(:30013), PostgreSQL 17 DB/시드(25개 권한 마스터, HeyGen 2편 바인딩), 학생 마이페이지(6개 탭), 관리자 LNB 10개 메뉴 및 무통장 입금확인/권한매트릭스 화면 연동 완료 |
+| **2026-10-19** | Playwright Headless 21개 중요 화면 자동 캡처 검증 및 무인 환경 이슈 해결 | `tests/capture_screens.js`, `tests/snapshots/`, `GEMINI.md`, `AGENTS.md` | Linux arm64 컨테이너 전용 4대 옵션(--no-sandbox 등) 적용, 21개 전 화면 100% 캡처 및 검증 리포트 자동 생성 구축 |
 
 

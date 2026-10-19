@@ -40,6 +40,11 @@
     "db:reset": "npm run db:reset --workspace=backend",
     "port": "bash run_port.sh",
     "tunnel:share": "bash scripts/start_tunnels.sh",
-    "tunnel:status": "bash scripts/status_tunnels.sh"
+    "tunnel:status": "bash scripts/status_tunnels.sh",
+    "test:capture": "node tests/capture_screens.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "playwright": "^1.64.1"
   }
 }
