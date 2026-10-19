@@ -16,13 +16,19 @@ async function bootstrap() {
   // 2. Cookie Parser
   app.use(cookieParser());
 
-  // 3. CORS
+  // 3. CORS (모든 IP 및 도메인 접속 허용)
   const corsOrigins = configService.get<string[]>('corsOrigins');
+  const isAllowAll =
+    !corsOrigins ||
+    corsOrigins.length === 0 ||
+    corsOrigins.includes('*') ||
+    corsOrigins[0] === '*';
+
   app.enableCors({
-    origin: corsOrigins && corsOrigins[0] !== '*' ? corsOrigins : true,
+    origin: isAllowAll ? true : corsOrigins,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type, Accept, Authorization',
+    allowedHeaders: 'Content-Type, Accept, Authorization, X-Requested-With',
   });
 
   // 4. Global ValidationPipe

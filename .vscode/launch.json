@@ -32,6 +32,16 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
+      "name": "Backend: NestJS REST API (Port 30014)",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:dev"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
       "name": "(선택) Chrome 디버거 연결 (Attach only - Port 9222)",
       "type": "chrome",
       "request": "attach",
@@ -41,8 +51,9 @@
   ],
   "compounds": [
     {
-      "name": "Fullstack: 3개 서버 동시 실행 (:30010, :30011, :30012)",
+      "name": "Fullstack: 4개 서버 동시 실행 (:30010, :30011, :30012, :30014)",
       "configurations": [
+        "Backend: NestJS REST API (Port 30014)",
         "Frontend User: Next.js (Port 30010)",
         "Frontend Admin: React Admin Vite (Port 30011)",
         "mobileApp: Mobile Web Simulator (Port 30012)"
