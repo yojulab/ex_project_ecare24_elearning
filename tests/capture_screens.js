@@ -185,11 +185,11 @@ const SCREENS = [
     desc: '모바일 MY 마이페이지 탭 (수강생 진도, 수납 상태, 모바일 자격증)',
   },
 
-  // 4. 엔터프라이즈 REST 백엔드 문서 (:30013)
+  // 4. 엔터프라이즈 REST 백엔드 문서 (:30014)
   {
     category: '엔터프라이즈 백엔드 API',
     name: '21_backend_swagger_docs',
-    url: 'http://localhost:30013/api/docs',
+    url: 'http://localhost:30014/api/docs',
     viewport: { width: 1440, height: 900 },
     waitForSelector: 'body',
     desc: 'NestJS OpenAPI (Swagger) 인터랙티브 REST API 문서',

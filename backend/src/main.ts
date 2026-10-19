@@ -59,7 +59,7 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = configService.get<number>('port') || 30013;
+  const port = configService.get<number>('port') || 30014;
   await app.listen(port, '0.0.0.0');
 
   console.log(`🚀 [BACKEND] eCare24 REST API 서버가 시작되었습니다.`);

@@ -1,7 +1,7 @@
 # 🧭 메뉴 보완 및 Backend 구성 계획서 (Rev 1.0)
 
 > **문서 번호**: `ECARE24-ARCH-2026-002`  ·  **작성일**: 2026-10-19
-> **대상**: `frontend_user`(30010) · `frontend_admin`(30011) · `mobileApp`(30012) · **`backend`(30013, 신규)**
+> **대상**: `frontend_user`(30010) · `frontend_admin`(30011) · `mobileApp`(30012) · **`backend`(30014, 신규)**
 > **선행 문서**: [REVISED_IA_AND_MENU_SPECIFICATION.md](file:///apps/ex_project_ecare24_elearning/docs/ux/REVISED_IA_AND_MENU_SPECIFICATION.md), [01_master_schema.sql](file:///apps/ex_project_ecare24_elearning/docs/architecture/ddl/01_master_schema.sql)
 > **DDL 확장안**: [02_auth_payment_admin_schema.sql](file:///apps/ex_project_ecare24_elearning/docs/architecture/ddl/02_auth_payment_admin_schema.sql)
 >
@@ -315,7 +315,7 @@ stateDiagram-v2
 ```dotenv
 # ---------- backend/.env.example ----------
 NODE_ENV=development
-PORT=30013
+PORT=30014
 API_PREFIX=/api/v1
 CORS_ORIGINS=http://localhost:30010,http://localhost:30011,http://localhost:30012
 
@@ -349,9 +349,9 @@ ALIMTALK_API_KEY=
 SWAGGER_ENABLED=true
 
 # ---------- frontend_user/.env.example ----------
-NEXT_PUBLIC_API_BASE_URL=http://localhost:30013/api/v1
+NEXT_PUBLIC_API_BASE_URL=http://localhost:30014/api/v1
 # ---------- frontend_admin/.env.example, mobileApp/.env.example ----------
-VITE_API_BASE_URL=http://localhost:30013/api/v1
+VITE_API_BASE_URL=http://localhost:30014/api/v1
 VITE_USER_PORTAL_URL=http://localhost:30010
 ```
 
@@ -373,8 +373,8 @@ VITE_USER_PORTAL_URL=http://localhost:30010
 ```bash
 npm run db:init        # = bash run_port.sh db init   → create + migrate + seed
 npm run db:reset       # = bash run_port.sh db reset  → 확인 프롬프트 후 초기화
-npm run dev:api        # = bash run_port.sh dev 30013
-./run_port.sh start all   # 30010~30013 일괄 기동 (backend 포함)
+npm run dev:api        # = bash run_port.sh dev 30014
+./run_port.sh start all   # 30010~30014 일괄 기동 (backend 포함)
 ```
 
 ### 8-3. 시드 원칙

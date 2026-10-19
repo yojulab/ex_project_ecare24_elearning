@@ -3,7 +3,7 @@ import { Card, Table, Checkbox, Button, Tag, message, Alert } from 'antd';
 import { ShieldCheck, Save, RefreshCw, KeyRound } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
 
-const API_BASE = 'http://localhost:30013/api/v1';
+const API_BASE = 'http://localhost:30014/api/v1';
 
 export const PermissionMatrix: React.FC = () => {
   const [permissions, setPermissions] = useState<any[]>([]);

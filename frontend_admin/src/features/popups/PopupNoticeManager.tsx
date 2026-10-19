@@ -3,7 +3,7 @@ import { Table, Button, Tag, Card, Modal, Form, Input, DatePicker, Switch, messa
 import { Bell, Plus, RefreshCw, Eye } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
 
-const API_BASE = 'http://localhost:30013/api/v1';
+const API_BASE = 'http://localhost:30014/api/v1';
 
 export const PopupNoticeManager: React.FC = () => {
   const [popups, setPopups] = useState<any[]>([]);

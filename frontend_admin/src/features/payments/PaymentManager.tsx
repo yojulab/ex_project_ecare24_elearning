@@ -3,7 +3,7 @@ import { Table, Button, Tag, Card, message, Modal, Input } from 'antd';
 import { CreditCard, CheckCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
 
-const API_BASE = 'http://localhost:30013/api/v1';
+const API_BASE = 'http://localhost:30014/api/v1';
 
 export const PaymentManager: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);

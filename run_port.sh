@@ -78,7 +78,7 @@ get_port_pids() {
     30010) pids=$(pgrep -f "(next.*30010|next-server.*14|frontend_user)" 2>/dev/null || true) ;;
     30011) pids=$(pgrep -f "(vite.*30011|frontend_admin)" 2>/dev/null || true) ;;
     30012) pids=$(pgrep -f "(vite.*30012|mobileApp)" 2>/dev/null || true) ;;
-    30013) pids=$(pgrep -f "(dist/main|backend)" 2>/dev/null || true) ;;
+    30014) pids=$(pgrep -f "(dist/main|backend)" 2>/dev/null || true) ;;
   esac
 
   if [ -z "$pids" ] && command -v timeout >/dev/null 2>&1 && command -v fuser >/dev/null 2>&1; then
@@ -95,7 +95,7 @@ get_service_meta() {
     30010) echo "frontend_user:수강생 포털 (Next.js):.next/BUILD_ID" ;;
     30011) echo "frontend_admin:관리자/CS 포털 (Vite):dist/index.html" ;;
     30012) echo "mobileApp:모바일 시뮬레이터 (Vite):dist/index.html" ;;
-    30013) echo "backend:엔터프라이즈 REST API (NestJS):dist/main.js" ;;
+    30014) echo "backend:엔터프라이즈 REST API (NestJS):dist/main.js" ;;
     *)     echo "unknown:알 수 없음:" ;;
   esac
 }
@@ -141,16 +141,16 @@ cmd_build() {
     30010|user)    build_service 30010 ;;
     30011|admin)   build_service 30011 ;;
     30012|mobile)  build_service 30012 ;;
-    30013|api|backend) build_service 30013 ;;
+    30014|api|backend) build_service 30014 ;;
     all)
       build_service 30010
       build_service 30011
       build_service 30012
-      build_service 30013
+      build_service 30014
       echo -e "${GREEN}${BOLD}🎉 모든 서비스 컴파일 완료!${NC}"
       ;;
     *)
-      echo -e "${RED}잘못된 대상입니다: ${target} (사용 가능: all, 30010, 30011, 30012, 30013)${NC}"
+      echo -e "${RED}잘못된 대상입니다: ${target} (사용 가능: all, 30010, 30011, 30012, 30014)${NC}"
       exit 1
       ;;
   esac
@@ -188,12 +188,12 @@ cmd_stop() {
     30010|user)    stop_service 30010 ;;
     30011|admin)   stop_service 30011 ;;
     30012|mobile)  stop_service 30012 ;;
-    30013|api|backend) stop_service 30013 ;;
+    30014|api|backend) stop_service 30014 ;;
     all)
       stop_service 30010
       stop_service 30011
       stop_service 30012
-      stop_service 30013
+      stop_service 30014
       ;;
     *)
       echo -e "${RED}잘못된 대상입니다: ${target}${NC}"
@@ -230,7 +230,7 @@ start_service() {
   if [ "$mode" = "prod" ]; then
     nohup env NODE_ENV=production HOSTNAME="0.0.0.0" PORT="$port" npm run start > "$log_file" 2>&1 &
   else
-    if [ "$port" = "30013" ]; then
+    if [ "$port" = "30014" ]; then
       nohup env NODE_ENV=development PORT="$port" npm run start:dev > "$log_file" 2>&1 &
     else
       nohup env NODE_ENV=development HOSTNAME="0.0.0.0" PORT="$port" npm run dev > "$log_file" 2>&1 &
@@ -264,9 +264,9 @@ cmd_start() {
     30010|user)    start_service 30010 "$mode" ;;
     30011|admin)   start_service 30011 "$mode" ;;
     30012|mobile)  start_service 30012 "$mode" ;;
-    30013|api|backend) start_service 30013 "$mode" ;;
+    30014|api|backend) start_service 30014 "$mode" ;;
     all)
-      start_service 30013 "$mode" # 백엔드 우선 기동
+      start_service 30014 "$mode" # 백엔드 우선 기동
       start_service 30010 "$mode"
       start_service 30011 "$mode"
       start_service 30012 "$mode"
@@ -286,7 +286,7 @@ cmd_status() {
   echo -e "${CYAN} 🏥 eCare24 통합 서비스 상태 점검 (status)${NC}"
   echo -e "${CYAN}=================================================================${NC}"
 
-  for port in 30013 30010 30011 30012; do
+  for port in 30014 30010 30011 30012; do
     local meta
     meta=$(get_service_meta "$port")
     local title=$(echo "$meta" | cut -d: -f2)
@@ -301,7 +301,7 @@ cmd_status() {
   done
 
   echo -e "\n🌐 접속 URL:"
-  echo -e "   - 백엔드 REST API : http://0.0.0.0:30013/api/v1 (문서: /api/docs)"
+  echo -e "   - 백엔드 REST API : http://0.0.0.0:30014/api/v1 (문서: /api/docs)"
   echo -e "   - 수강생 포털     : http://0.0.0.0:30010"
   echo -e "   - 관리자 포털     : http://0.0.0.0:30011"
   echo -e "   - 모바일 포털     : http://0.0.0.0:30012"
@@ -341,7 +341,7 @@ case "$MAIN_ARG" in
   status)
     cmd_status
     ;;
-  30010|30011|30012|30013|all)
+  30010|30011|30012|30014|all)
     # 인자로 포트나 all만 넘긴 경우 운영 모드 start 기본 실행
     cmd_start "prod" "$MAIN_ARG"
     ;;
@@ -354,11 +354,11 @@ case "$MAIN_ARG" in
     echo -e "   • ./run_port.sh stop all         (전체 프로세스 종료)"
     echo -e "   • ./run_port.sh restart all      (전체 재시작)"
     echo -e "   • ./run_port.sh status           (가동 상태 점검)"
-    echo -e "   ※ 대상 자리에 30010, 30011, 30012를 지정하여 개별 제어 가능\n"
+    echo -e "   ※ 대상 자리에 30010, 30011, 30012, 30014를 지정하여 개별 제어 가능\n"
     ;;
   *)
     echo -e "${RED}알 수 없는 명령어: ${MAIN_ARG}${NC}"
-    echo -e "사용법: ./run_port.sh [start|dev|build|stop|restart|status] [all|30010|30011|30012]"
+    echo -e "사용법: ./run_port.sh [start|dev|build|stop|restart|status] [all|30010|30011|30012|30014]"
     exit 1
     ;;
 esac

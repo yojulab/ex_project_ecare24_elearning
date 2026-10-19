@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
 
-const API_BASE = 'http://localhost:30013/api/v1';
+const API_BASE = 'http://localhost:30014/api/v1';
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<'SUMMARY' | 'COURSES' | 'PAYMENTS' | 'CERTS' | 'INQUIRY' | 'PROFILE'>('SUMMARY');

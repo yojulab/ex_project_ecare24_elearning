@@ -1,6 +1,6 @@
 # eCare24 Playwright Headless 중요 화면 자동 캡처 검증 보고서
 
-- **검증 일시**: 2026-10-19T08:01:09.449Z
+- **검증 일시**: 2026-10-19T10:10:34.379Z
 - **실행 모드**: Playwright Headless (Chromium arm64, --no-sandbox)
 - **총 대상 화면**: 21개
 - **성공**: 21건 / **실패**: 0건
@@ -22,10 +22,10 @@
 | 11 | 관리자/CS 포털 (웹) | [11_admin_dashboard.png](./11_admin_dashboard.png) | `200 OK` | 238.1 KB | 관리자 대시보드 (KPI 통계 카드, 실시간 결제/상담 큐) |
 | 12 | 관리자/CS 포털 (웹) | [12_admin_callcenter.png](./12_admin_callcenter.png) | `200 OK` | 449.8 KB | 콜센터 CS 3분할 원스크린 포털 (고객정보/CTI, 진도율, 상담메모) |
 | 13 | 관리자/CS 포털 (웹) | [13_admin_curriculum.png](./13_admin_curriculum.png) | `200 OK` | 509.4 KB | 교육과정 관리 (정규과정 및 16대 질환 전문 트랙 편성) |
-| 14 | 관리자/CS 포털 (웹) | [14_admin_cert_registry.png](./14_admin_cert_registry.png) | `200 OK` | 150.5 KB | 직능원 보고용 자격증 발급 대장 관리 |
-| 15 | 관리자/CS 포털 (웹) | [15_admin_payments.png](./15_admin_payments.png) | `200 OK` | 183.5 KB | 수강료 수납 및 무통장 입금확인 관리 (원클릭 결제승인) |
-| 16 | 관리자/CS 포털 (웹) | [16_admin_popups.png](./16_admin_popups.png) | `200 OK` | 108.2 KB | 팝업 및 배너 공지 관리 (채널별 노출 및 우선순위 제어) |
-| 17 | 관리자/CS 포털 (웹) | [17_admin_permissions.png](./17_admin_permissions.png) | `200 OK` | 374.3 KB | 세분화 권한 매트릭스 관리 (25개 권한 마스터 사용자별 할당) |
+| 14 | 관리자/CS 포털 (웹) | [14_admin_cert_registry.png](./14_admin_cert_registry.png) | `200 OK` | 150.6 KB | 직능원 보고용 자격증 발급 대장 관리 |
+| 15 | 관리자/CS 포털 (웹) | [15_admin_payments.png](./15_admin_payments.png) | `200 OK` | 183.7 KB | 수강료 수납 및 무통장 입금확인 관리 (원클릭 결제승인) |
+| 16 | 관리자/CS 포털 (웹) | [16_admin_popups.png](./16_admin_popups.png) | `200 OK` | 108.3 KB | 팝업 및 배너 공지 관리 (채널별 노출 및 우선순위 제어) |
+| 17 | 관리자/CS 포털 (웹) | [17_admin_permissions.png](./17_admin_permissions.png) | `200 OK` | 374.4 KB | 세분화 권한 매트릭스 관리 (25개 권한 마스터 사용자별 할당) |
 | 18 | 모바일 시뮬레이터 (앱) | [18_mobile_home.png](./18_mobile_home.png) | `200 OK` | 273.2 KB | 모바일 홈 화면 (실버 터치 UI, 직관적 배너 및 추천 강의) |
 | 19 | 모바일 시뮬레이터 (앱) | [19_mobile_curriculum.png](./19_mobile_curriculum.png) | `200 OK` | 190.6 KB | 모바일 교육과정 탭 (16대 질환군 전문 트랙 및 교안) |
 | 20 | 모바일 시뮬레이터 (앱) | [20_mobile_my.png](./20_mobile_my.png) | `200 OK` | 273.2 KB | 모바일 MY 마이페이지 탭 (수강생 진도, 수납 상태, 모바일 자격증) |

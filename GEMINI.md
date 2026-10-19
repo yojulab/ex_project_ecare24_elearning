@@ -88,5 +88,6 @@
 | **2026-10-19** | RESTful backend 구축 및 권한 매트릭스·마이페이지·관리자 LNB 전면 연동 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `GEMINI.md` | NestJS 10 RESTful API(:30013), PostgreSQL 17 DB/시드(25개 권한 마스터, HeyGen 2편 바인딩), 학생 마이페이지(6개 탭), 관리자 LNB 10개 메뉴 및 무통장 입금확인/권한매트릭스 화면 연동 완료 |
 | **2026-10-19** | Playwright Headless 21개 중요 화면 자동 캡처 검증 및 무인 환경 이슈 해결 | `tests/capture_screens.js`, `tests/snapshots/`, `GEMINI.md`, `AGENTS.md` | Linux arm64 컨테이너 전용 4대 옵션(--no-sandbox 등) 적용, 21개 전 화면 100% 캡처 및 검증 리포트 자동 생성 구축 |
 | **2026-10-19** | 세세한 엔티티 관계도 검증 및 수강/결제 라이프사이클 이슈 해결 | `backend` 엔티티, `frontend_user`, `docs/architecture/ENTITY_RELATIONSHIP_VERIFICATION.md`, `GEMINI.md` | TypeORM 양방향 Relation 보강(User, Course, Category, Cert, Inquiry), enrollment PENDING 상태 전이 및 마이페이지 동적 수강목록 연동, E2E 라이프사이클 100% 입증 |
+| **2026-10-19** | 엔터프라이즈 백엔드 REST API 포트 30013 -> 30014 전면 이전 및 검증 | `backend`, `frontend_admin`, `frontend_user`, `run_port.sh`, `package.json`, `tests` | 백엔드 API 기본 포트를 30014로 변경, run_port.sh/Swagger/관리자/수강생 포털 연동 완료 및 Playwright 21개 전 화면 100% 무결성 검증 통과 |
 
 
