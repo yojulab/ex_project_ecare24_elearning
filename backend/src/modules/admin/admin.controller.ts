@@ -5,6 +5,7 @@ import {
   Put,
   Param,
   Body,
+  Query,
   UseGuards,
   NotFoundException,
   BadRequestException,
@@ -22,6 +23,8 @@ import {
   PopupNoticeEntity,
   NoticeEntity,
   InquiryEntity,
+  CertificateEntity,
+  CertApplicationEntity,
 } from '../../database/entities';
 
 @Controller('admin')
@@ -44,6 +47,10 @@ export class AdminController {
     private noticeRepo: Repository<NoticeEntity>,
     @InjectRepository(InquiryEntity)
     private inquiryRepo: Repository<InquiryEntity>,
+    @InjectRepository(CertificateEntity)
+    private certRepo: Repository<CertificateEntity>,
+    @InjectRepository(CertApplicationEntity)
+    private certAppRepo: Repository<CertApplicationEntity>,
   ) {}
 
   // 1. 대시보드 KPI 및 대기 큐
@@ -157,7 +164,6 @@ export class AdminController {
     @Body() body: { permissions: string[] },
     @CurrentUser() admin: any,
   ) {
-    // 기존 권한 삭제 후 신규 권한 등록
     await this.userPermRepo.delete({ userId });
 
     if (body.permissions && body.permissions.length > 0) {
@@ -169,7 +175,6 @@ export class AdminController {
       await this.userPermRepo.save(permsToInsert);
     }
 
-    // 사용자의 토큰 버전을 올려서 다음 요청 시 새 권한이 즉시 반영되도록 처리
     await this.userRepo.increment({ id: userId }, 'tokenVersion', 1);
 
     return {
@@ -210,6 +215,85 @@ export class AdminController {
       ...body,
       startsAt: new Date(body.startsAt),
       endsAt: new Date(body.endsAt),
+      authorId: admin.id,
+    });
+  }
+
+  // 10. 직능원(pqi.or.kr) 자격증 발급 대장 조회
+  @Get('certificates')
+  @RequirePermissions('CERT_REVIEW')
+  async getCertificates(@Query('q') q?: string) {
+    const qb = this.certRepo
+      .createQueryBuilder('cert')
+      .leftJoinAndSelect('cert.user', 'user')
+      .leftJoinAndSelect('cert.course', 'course')
+      .leftJoinAndSelect('cert.category', 'category');
+
+    if (q) {
+      qb.where(
+        'cert.certificateNo LIKE :q OR cert.qualificationName LIKE :q OR user.fullName LIKE :q',
+        { q: `%${q}%` }
+      );
+    }
+
+    return qb.orderBy('cert.issuedAt', 'DESC').getMany();
+  }
+
+  // 11. 1:1 상담 문의 목록 조회
+  @Get('inquiries')
+  @RequirePermissions('COUNSEL_HANDLE')
+  async getInquiries() {
+    return this.inquiryRepo.find({
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  // 12. 1:1 상담 문의 답변 등록
+  @Post('inquiries/:id/answer')
+  @RequirePermissions('COUNSEL_HANDLE')
+  async answerInquiry(
+    @Param('id') id: string,
+    @Body() body: { answer: string },
+    @CurrentUser() admin: any,
+  ) {
+    const inq = await this.inquiryRepo.findOne({ where: { id } });
+    if (!inq) {
+      throw new NotFoundException('문의를 찾을 수 없습니다.');
+    }
+    inq.answer = body.answer;
+    inq.status = 'ANSWERED';
+    inq.answeredBy = admin.id;
+    inq.answeredAt = new Date();
+    await this.inquiryRepo.save(inq);
+    return { success: true, inquiry: inq };
+  }
+
+  // 13. 공지사항 목록 관리
+  @Get('notices')
+  @RequirePermissions('NOTICE_MANAGE')
+  async getNotices() {
+    return this.noticeRepo.find({
+      order: { isPinned: 'DESC', createdAt: 'DESC' },
+    });
+  }
+
+  // 14. 공지사항 등록
+  @Post('notices')
+  @RequirePermissions('NOTICE_MANAGE')
+  async createNotice(
+    @Body()
+    body: {
+      title: string;
+      content: string;
+      category?: string;
+      isPinned?: boolean;
+      isPublished?: boolean;
+    },
+    @CurrentUser() admin: any,
+  ) {
+    return this.noticeRepo.save({
+      ...body,
       authorId: admin.id,
     });
   }

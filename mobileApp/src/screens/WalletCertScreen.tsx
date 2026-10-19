@@ -16,18 +16,58 @@ import {
 export const WalletCertScreen: React.FC = () => {
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [walletAdded, setWalletAdded] = useState(false);
+  const [isDbLoaded, setIsDbLoaded] = useState(false);
 
-  const certData = {
-    regNumber: '제 2026-004821 호',
-    pqiRegId: '보건복지부 직능원 등록 제2026-0482호',
+  const [certData, setCertData] = useState({
+    regNumber: '제 2026-00892 호',
+    pqiRegId: '보건복지부 직능원 등록 제2026-0892호',
     title: '신경계 전문간병사 1급',
     diseaseName: '신경계(뇌졸중/편마비) 질환군 집중 케어',
-    holderName: '홍 길 동',
-    birthDate: '1972. 05. 14',
-    issueDate: '2026년 10월 12일',
-    organization: '사단법인 한국전문간병협회 · (주)eCare24',
-    verifyUrl: 'https://ecare24.kr/verify?cert=CERT-2026-01-004821',
-  };
+    holderName: '김 영 희',
+    birthDate: '1975. 06. 12',
+    issueDate: '2026년 10월 19일',
+    organization: '한국돌봄종사자양성교육원',
+    verifyUrl: `${ENV.API_BASE_URL.replace('/api/v1', '')}/verify?cert=EC24-CERT-2026-00892`,
+  });
+
+  React.useEffect(() => {
+    const fetchLiveCert = async () => {
+      try {
+        const loginRes = await fetch(`${ENV.API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginId: 'student01', password: 'password123!' }),
+        });
+        if (!loginRes.ok) return;
+        const { accessToken } = await loginRes.json();
+
+        const certRes = await fetch(`${ENV.API_BASE_URL}/me/certificates`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        if (certRes.ok) {
+          const data = await certRes.json();
+          if (data.certificates && data.certificates.length > 0) {
+            const first = data.certificates[0];
+            setCertData({
+              regNumber: first.certificateNo,
+              pqiRegId: `직능원 등록 ${first.registryNo}`,
+              title: first.qualificationName,
+              diseaseName: first.course?.targetDisease || '16대 표준 질환군 전문 케어',
+              holderName: '김 영 희',
+              birthDate: '1975. 06. 12',
+              issueDate: first.issuedAt?.slice(0, 10) || '2026-10-19',
+              organization: '한국돌봄종사자양성교육원',
+              verifyUrl: `${ENV.API_BASE_URL.replace('/api/v1', '')}/verify?cert=${first.certificateNo}`,
+            });
+            setIsDbLoaded(true);
+          }
+        }
+      } catch {
+        // Fallback 유지
+      }
+    };
+    fetchLiveCert();
+  }, []);
 
   const handleDownloadPdf = () => {
     setDownloadSuccess(true);

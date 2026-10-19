@@ -9,6 +9,8 @@ import {
   PopupNoticeEntity,
   NoticeEntity,
   InquiryEntity,
+  CertificateEntity,
+  CertApplicationEntity,
 } from '../../database/entities';
 import { AdminController } from './admin.controller';
 
@@ -23,6 +25,8 @@ import { AdminController } from './admin.controller';
       PopupNoticeEntity,
       NoticeEntity,
       InquiryEntity,
+      CertificateEntity,
+      CertApplicationEntity,
     ]),
   ],
   controllers: [AdminController],

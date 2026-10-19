@@ -51,3 +51,4 @@ vite.config.d.ts
 
 # 프로세스 PID 파일
 *.pid
+tests/snapshots/

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   GraduationCap, 
   CheckCircle2, 
@@ -14,12 +14,33 @@ import {
   Stethoscope, 
   AlertCircle,
   ChevronRight,
-  UserCheck
+  UserCheck,
+  Database
 } from 'lucide-react';
 import UiBadge from '@/components/UiBadge';
+import { ENV } from '@/config/env';
 
 export default function CurriculumPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [dbCourseCount, setDbCourseCount] = useState<number>(18);
+  const [isDbConnected, setIsDbConnected] = useState<boolean>(false);
+
+  useEffect(() => {
+    fetch(`${ENV.API_BASE_URL}/courses`)
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error('API offline');
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setDbCourseCount(data.length);
+          setIsDbConnected(true);
+        }
+      })
+      .catch(() => {
+        setIsDbConnected(false);
+      });
+  }, []);
 
   // 16대 질환군 전문 자격 트랙 데이터 (각 총 8시간: 이론 4h + 실기 4h)
   const tracks = [
