@@ -89,5 +89,6 @@
 | **2026-10-19** | Playwright Headless 21개 중요 화면 자동 캡처 검증 및 무인 환경 이슈 해결 | `tests/capture_screens.js`, `tests/snapshots/`, `GEMINI.md`, `AGENTS.md` | Linux arm64 컨테이너 전용 4대 옵션(--no-sandbox 등) 적용, 21개 전 화면 100% 캡처 및 검증 리포트 자동 생성 구축 |
 | **2026-10-19** | 세세한 엔티티 관계도 검증 및 수강/결제 라이프사이클 이슈 해결 | `backend` 엔티티, `frontend_user`, `docs/architecture/ENTITY_RELATIONSHIP_VERIFICATION.md`, `GEMINI.md` | TypeORM 양방향 Relation 보강(User, Course, Category, Cert, Inquiry), enrollment PENDING 상태 전이 및 마이페이지 동적 수강목록 연동, E2E 라이프사이클 100% 입증 |
 | **2026-10-19** | 엔터프라이즈 백엔드 REST API 포트 30013 -> 30014 전면 이전 및 검증 | `backend`, `frontend_admin`, `frontend_user`, `run_port.sh`, `package.json`, `tests` | 백엔드 API 기본 포트를 30014로 변경, run_port.sh/Swagger/관리자/수강생 포털 연동 완료 및 Playwright 21개 전 화면 100% 무결성 검증 통과 |
+| **2026-10-19** | 각 서버 주요 환경 변수 .env 관리 일원화 및 코드 내 하드코딩 URI 전면 정리 | 전체 서버/웹/앱/테스트, `.env.example`, `src/config/env.ts` | REST API 엔드포인트 URI 환경 변수화(NEXT_PUBLIC_API_BASE_URL, VITE_API_BASE_URL, EXPO_PUBLIC_API_URL), 패키지별 .env/.env.example 구축, Playwright 21개 전 화면 무결성 검증 완료 |
 
 

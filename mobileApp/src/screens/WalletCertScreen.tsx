@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UiBadge } from '../components/UiBadge';
+import { ENV } from '../config/env';
 import {
   Award,
   QrCode,
@@ -153,7 +154,7 @@ export const WalletCertScreen: React.FC = () => {
               </div>
             </div>
             <a
-              href="http://localhost:30010/verify"
+              href={ENV.CERT_VERIFY_URL}
               target="_blank"
               rel="noreferrer"
               className="p-2 rounded-xl bg-slate-700 text-slate-200 hover:text-white"

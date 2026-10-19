@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, ExternalLink } from 'lucide-react';
+import { ENV } from '../config/env';
 
-const API_BASE = 'http://localhost:30014/api/v1';
+const API_BASE = ENV.API_BASE_URL;
 
 export const PopupLayer: React.FC = () => {
   const [popups, setPopups] = useState<any[]>([]);

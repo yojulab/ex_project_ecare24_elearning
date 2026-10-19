@@ -11,8 +11,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
+import { ENV } from '../../config/env';
 
-const API_BASE = 'http://localhost:30014/api/v1';
+const API_BASE = ENV.API_BASE_URL;
 
 export const DashboardScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -200,11 +201,11 @@ export const DashboardScreen: React.FC = () => {
         >
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">API 엔드포인트:</span>
-            <span className="font-mono font-semibold text-indigo-600">http://0.0.0.0:30014/api/v1</span>
+            <span className="font-mono font-semibold text-indigo-600">{ENV.API_BASE_URL}</span>
           </div>
           <div className="flex justify-between py-1.5 border-b border-slate-100">
             <span className="text-slate-500">Swagger API 문서:</span>
-            <a href="http://localhost:30014/api/docs" target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">
+            <a href={ENV.API_DOCS_URL} target="_blank" rel="noreferrer" className="text-indigo-600 underline font-semibold">
               /api/docs 바로가기 ↗
             </a>
           </div>

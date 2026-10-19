@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Tag, Card, Modal, Form, Input, DatePicker, Switch, message } from 'antd';
 import { Bell, Plus, RefreshCw, Eye } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
+import { ENV } from '../../config/env';
 
-const API_BASE = 'http://localhost:30014/api/v1';
+const API_BASE = ENV.API_BASE_URL;
 
 export const PopupNoticeManager: React.FC = () => {
   const [popups, setPopups] = useState<any[]>([]);

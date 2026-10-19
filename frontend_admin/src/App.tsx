@@ -20,6 +20,7 @@ import PaymentManager from './features/payments/PaymentManager';
 import PopupNoticeManager from './features/popups/PopupNoticeManager';
 import PermissionMatrix from './features/permissions/PermissionMatrix';
 import UiBadge from './components/UiBadge';
+import { ENV } from './config/env';
 
 export type AdminTab =
   | 'DASHBOARD'
@@ -130,12 +131,12 @@ export const App: React.FC = () => {
           </div>
 
           <a
-            href="http://localhost:30010"
+            href={ENV.USER_PORTAL_URL}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-semibold underline text-xs transition"
           >
-            <span>수강생 포털 (:30010)</span>
+            <span>수강생 포털 바로가기</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -258,7 +259,7 @@ export const App: React.FC = () => {
           </div>
 
           <div className="p-3 border-t border-slate-800 text-[11px] text-slate-500">
-            <div>REST API: :30014</div>
+            <div className="truncate" title={ENV.API_BASE_URL}>REST API: {ENV.API_BASE_URL}</div>
             <div>PostgreSQL 17 Clean DB</div>
           </div>
         </aside>

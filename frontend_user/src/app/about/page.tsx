@@ -17,6 +17,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import UiBadge from '@/components/UiBadge';
+import { ENV } from '@/config/env';
 
 export default function AboutPage() {
   const [activeTab, setActiveTab] = useState<'intro' | 'greeting' | 'org' | 'map' | 'sites'>('intro');
@@ -369,7 +370,7 @@ export default function AboutPage() {
                 </a>
 
                 <a
-                  href="http://localhost:30011"
+                  href={ENV.ADMIN_PORTAL_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:shadow-md transition bg-slate-50 group flex items-start justify-between"
