@@ -1,8 +1,8 @@
 import React from 'react';
 import { UiBadge } from './UiBadge';
-import { Home, Building2, BookOpen, BookMarked, Award } from 'lucide-react';
+import { Home, Building2, BookOpen, BookMarked, Award, User } from 'lucide-react';
 
-export type TabType = 'home' | 'about' | 'curriculum' | 'guide' | 'cert' | 'apply' | 'practice' | 'course' | 'exam' | 'wallet' | 'tv24';
+export type TabType = 'home' | 'about' | 'curriculum' | 'guide' | 'cert' | 'my' | 'apply' | 'practice' | 'course' | 'exam' | 'wallet' | 'tv24';
 
 interface MobileTabBarProps {
   currentTab: TabType;
@@ -15,10 +15,10 @@ export const MobileTabBar: React.FC<MobileTabBarProps> = ({
 }) => {
   const tabs = [
     { id: 'home' as TabType, label: '홈', icon: Home, tag: 'P40-TAB-HOME' },
-    { id: 'about' as TabType, label: '교육원소개', icon: Building2, tag: 'P40-TAB-ABOUT' },
     { id: 'curriculum' as TabType, label: '교육 체계', icon: BookOpen, tag: 'P40-TAB-CURR' },
     { id: 'guide' as TabType, label: '돌봄 지침서', icon: BookMarked, tag: 'P40-TAB-GUIDE' },
     { id: 'cert' as TabType, label: '자격증', icon: Award, tag: 'P40-TAB-CERT' },
+    { id: 'my' as TabType, label: 'MY', icon: User, tag: 'P40-TAB-MY' },
   ];
 
   return (

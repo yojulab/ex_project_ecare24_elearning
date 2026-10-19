@@ -82,5 +82,6 @@
 | **2026-10-16** | UI inspect 시스템 규격 고도화 및 용어·사이즈·위치 통일 | 전체 웹/앱/관리자/규칙, `docs/UI-Inspects.md` | 'UI inspect' 용어 통일, 뱃지 사이즈 9.5px/2.5px 5.5px 콤팩트화, 관리자 좌측 메뉴 뱃지 좌상단 핀 위치 일치화 |
 | **2026-10-17** | UI inspect 복사 문구 형식 고도화 및 SPA 해시(#tab=...) 딥링킹 | `packages/utils/uiTagHelper.ts`, `mobileApp`, `frontend_admin`, `frontend_user`, `UI-Inspects.md` | 복사 시 `{페이지명} ({화면코드}) - {서비스명}` 결합, 모바일/관리자 탭 전환 시 URL hash 실시간 동기화, 항목명 사전 매핑 탑재 |
 | **2026-10-19** | 메뉴 보완(마이페이지·로그인·관리자 LNB) 및 RESTful backend 구성 계획 수립 | `docs/architecture/BACKEND_AND_MENU_PLAN.md`, `ddl/02_auth_payment_admin_schema.sql` | NestJS+TypeORM, 역할 없는 사용자별 권한 리스트, 무통장 납부, 목업 전면 정리·DB 시드 명령, .env 규격, HeyGen 영상 연동 설계 |
+| **2026-10-19** | RESTful backend 구축 및 권한 매트릭스·마이페이지·관리자 LNB 전면 연동 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `GEMINI.md` | NestJS 10 RESTful API(:30013), PostgreSQL 17 DB/시드(25개 권한 마스터, HeyGen 2편 바인딩), 학생 마이페이지(6개 탭), 관리자 LNB 10개 메뉴 및 무통장 입금확인/권한매트릭스 화면 연동 완료 |
 
 

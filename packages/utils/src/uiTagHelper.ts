@@ -47,6 +47,12 @@ export const SCREEN_META_MAP: Record<
   P06: { pageName: '디지털 CBT 자격시험', serviceName: '한국돌봄종사자양성교육원' },
   P07: { pageName: '간병24TV 숏폼 러닝', serviceName: '한국돌봄종사자양성교육원' },
   P08: { pageName: '나의 강의실 / 수료증', serviceName: '한국돌봄종사자양성교육원' },
+  P10: { pageName: '마이페이지 현황 요약', serviceName: '한국돌봄종사자양성교육원' },
+  P11: { pageName: '수강 진행 상황', serviceName: '한국돌봄종사자양성교육원' },
+  P12: { pageName: '수강료 납부 상황', serviceName: '한국돌봄종사자양성교육원' },
+  P13: { pageName: '자격증 발급 상황', serviceName: '한국돌봄종사자양성교육원' },
+  P14: { pageName: '1:1 상담 / 문의 내역', serviceName: '한국돌봄종사자양성교육원' },
+  P15: { pageName: '회원정보 관리', serviceName: '한국돌봄종사자양성교육원' },
 
   // 관리자 & 콜센터 CS 포털 (frontend_admin / 30011)
   P20: { pageName: '관리자 통합 내비게이션', serviceName: 'eCare24 관리자' },
@@ -55,6 +61,11 @@ export const SCREEN_META_MAP: Record<
   P52: { pageName: '콜센터 CS 원스크린 포털', serviceName: 'eCare24 관리자' },
   P53: { pageName: '직능원 자격증 발급 대장', serviceName: 'eCare24 관리자' },
   P54: { pageName: 'CBT 출제 및 채점 엔진', serviceName: 'eCare24 관리자' },
+  P55: { pageName: '수강생 관리', serviceName: 'eCare24 관리자' },
+  P56: { pageName: '수강료 납부 및 입금확인', serviceName: 'eCare24 관리자' },
+  P57: { pageName: '실습 및 간호사 평가', serviceName: 'eCare24 관리자' },
+  P58: { pageName: '팝업 공지 관리', serviceName: 'eCare24 관리자' },
+  P59: { pageName: '권한 매트릭스 관리', serviceName: 'eCare24 관리자' },
 
   // 모바일 앱 (mobileApp / 30012)
   P40: { pageName: '모바일 헤더 / 탭바', serviceName: 'eCare24 스마트러닝' },
@@ -65,6 +76,7 @@ export const SCREEN_META_MAP: Record<
   P45: { pageName: '모바일 자격증 지갑', serviceName: 'eCare24 스마트러닝' },
   P46: { pageName: '간병24TV 숏폼 러닝', serviceName: 'eCare24 스마트러닝' },
   P47: { pageName: '돌봄 교안 / 지침서', serviceName: 'eCare24 스마트러닝' },
+  P48: { pageName: '모바일 마이페이지', serviceName: 'eCare24 스마트러닝' },
 
   // 표준 범용 예시 호환
   S03: { pageName: '홈 대시보드', serviceName: 'WorkshopSync' },
@@ -78,12 +90,12 @@ const ROUTE_PAGE_NAME_MAP: Record<string, string> = {
   '/about': '교육원 소개',
   '/curriculum': '교육 체계 / 커리큘럼',
   '/apply': '수강신청',
+  '/mypage': '마이페이지 / 수강생 포털',
   '/exam': '디지털 CBT 자격시험',
   '/course': '과정 상세 / 학습',
   '/courses': '과정 목록',
   '/shorts': '간병24TV 숏폼 러닝',
   '/tv24': '간병24TV 숏폼 러닝',
-  '/mypage': '나의 강의실 / 수료증',
   '/admin': '관리자 포털',
   '/admin/dashboard': '관리자 대시보드',
   '/admin/callcenter': '콜센터 CS 원스크린 포털',
@@ -107,6 +119,17 @@ const HASH_PAGE_NAME_MAP: Record<string, string> = {
   wallet: '모바일 자격증 지갑',
   tv24: '간병24TV 숏폼 러닝',
   callcenter: '콜센터 CS 원스크린 포털',
+  my: '마이페이지 / 수강생 포털',
+  mypage: '마이페이지 / 수강생 포털',
+  dashboard: '관리자 대시보드',
+  students: '수강생 관리',
+  courses: '교육과정 관리',
+  payments: '수강료 수납 / 무통장 입금관리',
+  permissions: '권한 매트릭스 관리',
+  popups: '팝업 / 배너 공지 관리',
+  notices: '공지사항 관리',
+  settings: '시스템 환경설정',
+  logs: '접근 및 작업 로그',
 };
 
 /**

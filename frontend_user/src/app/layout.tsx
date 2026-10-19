@@ -12,9 +12,11 @@ import {
   Headphones,
   CheckCircle2,
   ShieldCheck,
+  User,
 } from 'lucide-react';
 import { initUiInspectorGlobalListener } from '@ecare24/utils';
 import UiBadge from '../components/UiBadge';
+import { PopupLayer } from '../components/PopupLayer';
 
 export default function RootLayout({
   children,
@@ -223,19 +225,36 @@ export default function RootLayout({
                   <span>자격증 신청/검증</span>
                 </a>
               </UiBadge>
+
+              {/* 5. 마이페이지 (신규) */}
+              <UiBadge serialId="P00-SEC01-LNK06" label="[P00-SEC01-LNK06]">
+                <a
+                  href="/mypage"
+                  className="flex items-center gap-1.5 hover:text-indigo-600 transition text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100"
+                >
+                  <User className="w-4 h-4 text-indigo-600" />
+                  <span>마이페이지</span>
+                </a>
+              </UiBadge>
             </nav>
 
             {/* 수강생 프로필 / 빠른 액션 */}
             <div className="flex items-center gap-3">
               <UiBadge serialId="P00-SEC01-BTN03" label="[P00-SEC01-BTN03]">
-                <div className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold">
+                <a
+                  href="/mypage"
+                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold transition"
+                >
                   <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>박순자 돌봄교육생님</span>
-                </div>
+                  <span>김영희 돌봄교육생님 (MY)</span>
+                </a>
               </UiBadge>
             </div>
           </div>
         </header>
+
+        {/* 팝업 공지 레이어 연동 */}
+        <PopupLayer />
 
         {/* 본문 콘텐츠 (기본 바탕색 통일) */}
         <main className="flex-1 bg-slate-50">{children}</main>

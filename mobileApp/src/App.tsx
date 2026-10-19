@@ -11,6 +11,7 @@ import { TV24ShortsScreen } from './screens/TV24ShortsScreen';
 import { CourseMaterialScreen } from './screens/CourseMaterialScreen';
 import { AboutScreen } from './screens/AboutScreen';
 import { CurriculumScreen } from './screens/CurriculumScreen';
+import { MyScreen } from './screens/MyScreen';
 
 export const App: React.FC = () => {
   // Navigation State
@@ -141,6 +142,8 @@ export const App: React.FC = () => {
       ? '디지털 CBT 모의시험'
       : currentTab === 'cert' || currentTab === 'wallet'
       ? '모바일 자격증 지갑'
+      : currentTab === 'my'
+      ? '모바일 마이페이지 (P48)'
       : '홈 대시보드';
 
   return (
@@ -222,6 +225,8 @@ export const App: React.FC = () => {
               />
             ) : currentTab === 'cert' || currentTab === 'wallet' ? (
               <WalletCertScreen />
+            ) : currentTab === 'my' ? (
+              <MyScreen onNavigateCourse={() => handleSelectTab('curriculum')} />
             ) : null}
           </main>
 

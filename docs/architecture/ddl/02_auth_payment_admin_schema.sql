@@ -95,6 +95,12 @@ ALTER TABLE courses
     ADD COLUMN thumbnail_url  VARCHAR(500),
     ADD COLUMN is_published   BOOLEAN NOT NULL DEFAULT FALSE;
 
+ALTER TABLE curriculum_steps
+    ADD COLUMN IF NOT EXISTS description TEXT;
+
+ALTER TABLE exam_questions
+    ADD COLUMN IF NOT EXISTS scenario TEXT;
+
 CREATE TABLE course_videos (
     id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     course_id        UUID NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
