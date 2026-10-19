@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { CourseEntity } from './course.entity';
+import { DiseaseCategoryEntity } from './disease-category.entity';
 
 @Entity('certificates')
 export class CertificateEntity {
@@ -50,13 +51,17 @@ export class CertificateEntity {
   })
   status: 'VALID' | 'RENEWAL_DUE' | 'EXPIRED' | 'REVOKED';
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (u) => u.certificates)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 
-  @ManyToOne(() => CourseEntity)
+  @ManyToOne(() => CourseEntity, (c) => c.certificates)
   @JoinColumn({ name: 'course_id' })
   course: CourseEntity;
+
+  @ManyToOne(() => DiseaseCategoryEntity, { nullable: true })
+  @JoinColumn({ name: 'category_id' })
+  category: DiseaseCategoryEntity;
 }
 
 @Entity('cert_applications')

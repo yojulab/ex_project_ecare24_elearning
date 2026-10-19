@@ -1,4 +1,5 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { CourseEntity } from './course.entity';
 
 @Entity('disease_categories')
 export class DiseaseCategoryEntity {
@@ -25,4 +26,7 @@ export class DiseaseCategoryEntity {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
+
+  @OneToMany(() => CourseEntity, (course) => course.category)
+  courses: CourseEntity[];
 }

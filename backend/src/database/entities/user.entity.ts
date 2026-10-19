@@ -9,6 +9,8 @@ import {
 import { UserPermissionEntity } from './user-permission.entity';
 import { CourseEnrollmentEntity } from './course-enrollment.entity';
 import { PaymentEntity } from './payment.entity';
+import { CertificateEntity } from './certificate.entity';
+import { InquiryEntity } from './inquiry.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -81,4 +83,10 @@ export class UserEntity {
 
   @OneToMany(() => PaymentEntity, (p) => p.user)
   payments: PaymentEntity[];
+
+  @OneToMany(() => CertificateEntity, (c) => c.user)
+  certificates: CertificateEntity[];
+
+  @OneToMany(() => InquiryEntity, (i) => i.user)
+  inquiries: InquiryEntity[];
 }

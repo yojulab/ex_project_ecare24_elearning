@@ -37,7 +37,7 @@ export class InquiryEntity {
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (user) => user.inquiries)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
 }

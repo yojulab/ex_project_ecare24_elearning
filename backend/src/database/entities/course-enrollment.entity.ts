@@ -23,8 +23,8 @@ export class CourseEnrollmentEntity {
   @Column({ name: 'course_id', type: 'uuid' })
   courseId: string;
 
-  @Column({ length: 20, default: 'ACTIVE' })
-  status: 'ACTIVE' | 'COMPLETED' | 'CANCELED' | 'EXPIRED';
+  @Column({ length: 20, default: 'PENDING' })
+  status: 'PENDING' | 'ACTIVE' | 'COMPLETED' | 'CANCELED' | 'EXPIRED';
 
   @Column({ name: 'enrolled_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   enrolledAt: Date;

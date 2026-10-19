@@ -11,6 +11,8 @@ import {
 import { DiseaseCategoryEntity } from './disease-category.entity';
 import { CurriculumStepEntity } from './curriculum-step.entity';
 import { CourseVideoEntity } from './course-video.entity';
+import { CourseEnrollmentEntity } from './course-enrollment.entity';
+import { CertificateEntity } from './certificate.entity';
 
 @Entity('courses')
 export class CourseEntity {
@@ -76,7 +78,7 @@ export class CourseEntity {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne(() => DiseaseCategoryEntity, { nullable: true })
+  @ManyToOne(() => DiseaseCategoryEntity, (cat) => cat.courses, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: DiseaseCategoryEntity;
 
@@ -85,4 +87,10 @@ export class CourseEntity {
 
   @OneToMany(() => CourseVideoEntity, (video) => video.course)
   videos: CourseVideoEntity[];
+
+  @OneToMany(() => CourseEnrollmentEntity, (ce) => ce.course)
+  enrollments: CourseEnrollmentEntity[];
+
+  @OneToMany(() => CertificateEntity, (c) => c.course)
+  certificates: CertificateEntity[];
 }

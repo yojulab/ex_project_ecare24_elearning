@@ -75,12 +75,13 @@ export class MeController {
   async getSummary(@CurrentUser() user: any) {
     const enrollments = await this.enrollmentRepo.find({
       where: { userId: user.id },
-      relations: ['course', 'course.videos'],
+      relations: ['course', 'course.category', 'course.videos'],
       order: { enrolledAt: 'DESC' },
     });
 
     const payments = await this.paymentRepo.find({
       where: { userId: user.id },
+      relations: ['enrollment', 'enrollment.course'],
       order: { createdAt: 'DESC' },
     });
 
@@ -135,11 +136,11 @@ export class MeController {
       throw new BadRequestException('이미 등록되었거나 신청 중인 교육과정입니다.');
     }
 
-    // 1. 수강 등록 생성
+    // 1. 수강 등록 생성 (유료 과정은 입금 대기 PENDING, 무료 과정은 즉시 ACTIVE)
     const enrollment = await this.enrollmentRepo.save({
       userId: user.id,
       courseId: course.id,
-      status: course.price > 0 ? 'ACTIVE' : 'ACTIVE', // 입금 확인 전이라도 수강생 대시보드에 청구 매핑
+      status: course.price > 0 ? 'PENDING' : 'ACTIVE',
     });
 
     // 2. 무통장 입금 청구 생성 (PENDING)

@@ -87,5 +87,6 @@
 | **2026-10-19** | 메뉴 보완(마이페이지·로그인·관리자 LNB) 및 RESTful backend 구성 계획 수립 | `docs/architecture/BACKEND_AND_MENU_PLAN.md`, `ddl/02_auth_payment_admin_schema.sql` | NestJS+TypeORM, 역할 없는 사용자별 권한 리스트, 무통장 납부, 목업 전면 정리·DB 시드 명령, .env 규격, HeyGen 영상 연동 설계 |
 | **2026-10-19** | RESTful backend 구축 및 권한 매트릭스·마이페이지·관리자 LNB 전면 연동 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `GEMINI.md` | NestJS 10 RESTful API(:30013), PostgreSQL 17 DB/시드(25개 권한 마스터, HeyGen 2편 바인딩), 학생 마이페이지(6개 탭), 관리자 LNB 10개 메뉴 및 무통장 입금확인/권한매트릭스 화면 연동 완료 |
 | **2026-10-19** | Playwright Headless 21개 중요 화면 자동 캡처 검증 및 무인 환경 이슈 해결 | `tests/capture_screens.js`, `tests/snapshots/`, `GEMINI.md`, `AGENTS.md` | Linux arm64 컨테이너 전용 4대 옵션(--no-sandbox 등) 적용, 21개 전 화면 100% 캡처 및 검증 리포트 자동 생성 구축 |
+| **2026-10-19** | 세세한 엔티티 관계도 검증 및 수강/결제 라이프사이클 이슈 해결 | `backend` 엔티티, `frontend_user`, `docs/architecture/ENTITY_RELATIONSHIP_VERIFICATION.md`, `GEMINI.md` | TypeORM 양방향 Relation 보강(User, Course, Category, Cert, Inquiry), enrollment PENDING 상태 전이 및 마이페이지 동적 수강목록 연동, E2E 라이프사이클 100% 입증 |
 
 

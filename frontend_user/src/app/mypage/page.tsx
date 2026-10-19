@@ -345,42 +345,75 @@ export default function MyPage() {
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                 <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-indigo-600" />
-                  <span>내 수강 과정 목록 ({courses.length || 1}개)</span>
+                  <span>내 수강 과정 목록 ({courses.length}개)</span>
                 </h3>
 
-                <div className="divide-y divide-slate-100">
-                  <div className="py-4 space-y-3">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <span className="text-xs font-bold text-indigo-600">총 240시간 규격</span>
-                        <h4 className="text-base font-bold text-slate-900">돌봄종사자양성자 정규 통합과정</h4>
-                        <p className="text-xs text-slate-500">수강 기간: 180일 (2026.10.19 ~ 2027.04.19)</p>
-                      </div>
-                      <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg border border-emerald-200">
-                        이수 진행 중
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                        <div className="text-slate-500 text-[11px]">Step 1. 이론교안</div>
-                        <div className="font-bold text-indigo-600 mt-1">45% 완료</div>
-                      </div>
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                        <div className="text-slate-500 text-[11px]">Step 2. 실기 VOD</div>
-                        <div className="font-bold text-slate-700 mt-1">HeyGen 시청 중</div>
-                      </div>
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                        <div className="text-slate-500 text-[11px]">Step 3. 모의고사</div>
-                        <div className="font-bold text-slate-400 mt-1">미응시 (대기)</div>
-                      </div>
-                      <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
-                        <div className="text-slate-500 text-[11px]">Step 4. 현장실습</div>
-                        <div className="font-bold text-slate-400 mt-1">간호사 평가 대기</div>
-                      </div>
-                    </div>
+                {courses.length === 0 ? (
+                  <div className="py-12 text-center text-slate-400 text-xs">
+                    신청된 수강 과정이 없습니다.
                   </div>
-                </div>
+                ) : (
+                  <div className="divide-y divide-slate-100">
+                    {courses.map((enr) => {
+                      const c = enr.course || {};
+                      const isTrack = c.courseType === 'TRACK';
+                      return (
+                        <div key={enr.id} className="py-4 space-y-3">
+                          <div className="flex justify-between items-start gap-4">
+                            <div>
+                              <span className="text-xs font-bold text-indigo-600">
+                                {isTrack ? '16대 질환 전문 트랙 (8h)' : `총 ${c.requiredHours || 240}시간 규격`}
+                              </span>
+                              <h4 className="text-base font-bold text-slate-900 mt-0.5">
+                                {c.title || '교육과정'}
+                              </h4>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {c.targetDisease && `중점 케어: ${c.targetDisease} | `}
+                                등록일: {new Date(enr.enrolledAt || enr.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <span
+                              className={`px-2.5 py-1 text-xs font-bold rounded-lg border shrink-0 ${
+                                enr.status === 'ACTIVE'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : enr.status === 'PENDING'
+                                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                  : 'bg-slate-50 text-slate-700 border-slate-200'
+                              }`}
+                            >
+                              {enr.status === 'ACTIVE'
+                                ? '이수 진행 중'
+                                : enr.status === 'PENDING'
+                                ? '입금 대기 중'
+                                : enr.status}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                              <div className="text-slate-500 text-[11px]">Step 1. 이론 ({c.theoryHours || 0}h)</div>
+                              <div className="font-bold text-indigo-600 mt-1">교안 학습 중</div>
+                            </div>
+                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                              <div className="text-slate-500 text-[11px]">Step 2. 실기 ({c.practicalHours || 0}h)</div>
+                              <div className="font-bold text-slate-700 mt-1">
+                                {c.videos && c.videos.length > 0 ? `HeyGen AI (${c.videos.length}편)` : 'HeyGen 실기 VOD'}
+                              </div>
+                            </div>
+                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                              <div className="text-slate-500 text-[11px]">Step 3. 모의고사</div>
+                              <div className="font-bold text-slate-600 mt-1">디지털 CBT 대기</div>
+                            </div>
+                            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                              <div className="text-slate-500 text-[11px]">Step 4. 현장실습 ({c.practicumHours || 0}h)</div>
+                              <div className="font-bold text-slate-600 mt-1">간호사 실습평가</div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           )}
