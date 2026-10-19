@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "postgres-ecare24": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://ecare24_app:ecare24_secret_2026@localhost:5432/ecare24"
+      ],
+      "env": {
+        "DEBUG": "false"
+      }
+    }
+  }
+}
