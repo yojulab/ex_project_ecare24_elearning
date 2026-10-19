@@ -81,5 +81,6 @@
 | **2026-10-13** | UI 인스펙터 뱃지 복사 시 4대 정보(일련번호, 페이지명, URI, 항목명) 확장 | `packages/utils/uiTagHelper.ts`, `UiBadge.tsx`, `ui-tagging-inspection.md`, `GEMINI.md` | 뱃지 클릭 시 단일 ID 대신 일련번호, 페이지명, URI, 항목명이 정돈된 텍스트로 자동 추출·복사되도록 고도화 |
 | **2026-10-16** | UI inspect 시스템 규격 고도화 및 용어·사이즈·위치 통일 | 전체 웹/앱/관리자/규칙, `docs/UI-Inspects.md` | 'UI inspect' 용어 통일, 뱃지 사이즈 9.5px/2.5px 5.5px 콤팩트화, 관리자 좌측 메뉴 뱃지 좌상단 핀 위치 일치화 |
 | **2026-10-17** | UI inspect 복사 문구 형식 고도화 및 SPA 해시(#tab=...) 딥링킹 | `packages/utils/uiTagHelper.ts`, `mobileApp`, `frontend_admin`, `frontend_user`, `UI-Inspects.md` | 복사 시 `{페이지명} ({화면코드}) - {서비스명}` 결합, 모바일/관리자 탭 전환 시 URL hash 실시간 동기화, 항목명 사전 매핑 탑재 |
+| **2026-10-19** | 메뉴 보완(마이페이지·로그인·관리자 LNB) 및 RESTful backend 구성 계획 수립 | `docs/architecture/BACKEND_AND_MENU_PLAN.md`, `ddl/02_auth_payment_admin_schema.sql` | NestJS+TypeORM, 역할 없는 사용자별 권한 리스트, 무통장 납부, 목업 전면 정리·DB 시드 명령, .env 규격, HeyGen 영상 연동 설계 |
 
 
