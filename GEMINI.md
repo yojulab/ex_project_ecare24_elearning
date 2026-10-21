@@ -95,6 +95,8 @@
 | **2026-10-19** | 실제 데이터 입력·수정 5대 시나리오 DB 모니터링 및 UI 적용 검증 완료 | `scripts/db_monitor.js`, `mcp_config.json`, `tests/snapshots/`, `GEMINI.md` | 수강신청·입금승인·1:1문의답변·긴급팝업·권한변경 5대 시나리오 DB Diff/KPI 실시간 추적 및 관리자/수강생/모바일 UI 변화 검증, Playwright 21개 전 화면 100% 통과 |
 | **2026-10-19** | 실 데이터 구성 보완 4대 사항(관리자 등록 챕터 노출·문구형 교안·HeyGen 영상·실제 시험 실시간 통과) 적용 및 검증 완료 | `backend`, `frontend_user`, `frontend_admin`, `tests/snapshots/`, `GEMINI.md` | 관리자 등록 챕터만 수강생 포털 동적 노출(/curriculum), TTS 대신 5대 단원 문구형 교안(P03), 제공 링크 HeyGen 실제 VOD 인라인 재생(P04), 실제 CBT 5대 임상 문항 출제 및 실시간 즉시 합격/모바일 자격증 발급(P08) 완비 |
 | **2026-10-21** | 회의 수정요청(CR) 4건 및 16개 자격증 체계 보완 계획 수립 완료 | `docs/architecture/PHASE2_CHANGE_REQUEST_PLAN.md`, `ddl/03_phase2_change_request.sql`, `GEMINI.md` | 지침서 메뉴 삭제→공통수칙 흡수, 롱폼→숏폼 마이크로러닝, 20문항 소그룹 CBT, 실데이터 3종 검증, 이론+실습 이수 게이트 등 전 서버 보완 계획서 승인 및 DDL 명세 완비 |
+| **2026-10-21** | Playwright Headless 전 서버 기능 무결성 종합 검증 및 21개 스냅샷 100% 통과 | `tests/comprehensive_e2e_inspection.js`, `tests/snapshots/`, `GEMINI.md` | 백엔드 JWT 인증·공개/보호 API, 수강생 실버 UX(폰트/고대비/인스펙트), HeyGen 인라인 VOD, CBT 시험/실시간 합격증, 관리자 10대 메뉴/승인, 모바일 탭 등 총 41개 항목 무결성(이슈 0건) 입증 |
+
 
 
 
