@@ -17,6 +17,7 @@ import {
 import { initUiInspectorGlobalListener } from '@ecare24/utils';
 import UiBadge from '../components/UiBadge';
 import { PopupLayer } from '../components/PopupLayer';
+import { AuthModal } from '../components/AuthModal';
 
 export default function RootLayout({
   children,
@@ -26,6 +27,29 @@ export default function RootLayout({
   const [fontScale, setFontScale] = useState<'normal' | 'large' | 'larger'>('normal');
   const [highContrast, setHighContrast] = useState(false);
   const [isInspectorActive, setIsInspectorActive] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
+
+  useEffect(() => {
+    // 세션 로드 (없을 경우 기본 체험 계정 김영희)
+    const storedUser = localStorage.getItem('user_info');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      // 기본 초기 데모 로그인 상태 제공
+      setCurrentUser({
+        id: 'user-std-01',
+        loginId: 'student01',
+        fullName: '김영희',
+        userType: 'STUDENT',
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const cleanup = initUiInspectorGlobalListener();
@@ -204,18 +228,7 @@ export default function RootLayout({
                 </a>
               </UiBadge>
 
-              {/* 3. 돌봄 지침서 (간결화) */}
-              <UiBadge serialId="P00-SEC01-LNK04" label="[P00-SEC01-LNK04]">
-                <a
-                  href="/tv24"
-                  className="flex items-center gap-1.5 hover:text-emerald-600 transition"
-                >
-                  <Video className="w-4 h-4 text-indigo-500" />
-                  <span>돌봄 지침서</span>
-                </a>
-              </UiBadge>
-
-              {/* 4. 자격증 신청/검증 */}
+              {/* 3. 자격증 신청/검증 */}
               <UiBadge serialId="P00-SEC01-LNK05" label="[P00-SEC01-LNK05]">
                 <a
                   href="/verify"
@@ -238,23 +251,74 @@ export default function RootLayout({
               </UiBadge>
             </nav>
 
-            {/* 수강생 프로필 / 빠른 액션 */}
-            <div className="flex items-center gap-3">
-              <UiBadge serialId="P00-SEC01-BTN03" label="[P00-SEC01-BTN03]">
-                <a
-                  href="/mypage"
-                  className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold transition"
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  <span>김영희 돌봄교육생님 (MY)</span>
-                </a>
-              </UiBadge>
+            {/* 수강생 프로필 / 빠른 액션 (로그인, 회원가입, 로그아웃) */}
+            <div className="flex items-center gap-2">
+              {currentUser ? (
+                <>
+                  <UiBadge serialId="P00-SEC01-BTN03" label="[P00-SEC01-BTN03]">
+                    <a
+                      href="/mypage"
+                      className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold transition"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span>{currentUser.fullName || '김영희'} 돌봄교육생님 (MY)</span>
+                    </a>
+                  </UiBadge>
+                  <UiBadge serialId="P00-SEC01-BTN-LOGOUT" label="[P00-SEC01-BTN-LOGOUT]">
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('access_token');
+                        localStorage.removeItem('user_info');
+                        setCurrentUser(null);
+                      }}
+                      className="text-xs text-slate-500 hover:text-rose-600 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-rose-200 transition font-bold"
+                    >
+                      로그아웃
+                    </button>
+                  </UiBadge>
+                </>
+              ) : (
+                <>
+                  <UiBadge serialId="P00-SEC01-BTN-LOGIN" label="[P00-SEC01-BTN-LOGIN]">
+                    <button
+                      onClick={() => {
+                        setAuthModalTab('LOGIN');
+                        setIsAuthModalOpen(true);
+                      }}
+                      className="text-xs text-slate-700 hover:text-emerald-700 bg-white hover:bg-emerald-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-emerald-300 font-bold transition shadow-2xs"
+                    >
+                      로그인
+                    </button>
+                  </UiBadge>
+                  <UiBadge serialId="P00-SEC01-BTN-SIGNUP" label="[P00-SEC01-BTN-SIGNUP]">
+                    <button
+                      onClick={() => {
+                        setAuthModalTab('SIGNUP');
+                        setIsAuthModalOpen(true);
+                      }}
+                      className="text-xs text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-full font-bold transition shadow-xs"
+                    >
+                      회원가입
+                    </button>
+                  </UiBadge>
+                </>
+              )}
             </div>
           </div>
         </header>
 
         {/* 팝업 공지 레이어 연동 */}
         <PopupLayer />
+
+        {/* 수강생 로그인 및 회원가입 모달 */}
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          initialTab={authModalTab}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={(user) => {
+            setCurrentUser(user);
+          }}
+        />
 
         {/* 본문 콘텐츠 (기본 바탕색 통일) */}
         <main className="flex-1 bg-slate-50">{children}</main>

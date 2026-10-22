@@ -199,12 +199,29 @@ export class AuthService {
       status: 'ACTIVE',
     });
 
+    const payload: JwtPayload = {
+      sub: user.id,
+      loginId: user.loginId,
+      userType: user.userType,
+      tokenVersion: user.tokenVersion || 0,
+      permissions: [],
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('jwt.accessSecret'),
+      expiresIn: this.configService.get<string>('jwt.accessExpiresIn') || '15m',
+    });
+
     return {
-      message: '회원가입이 완료되었습니다. 로그인해 주세요.',
+      message: '회원가입이 완료되었습니다.',
+      accessToken,
       user: {
         id: user.id,
         loginId: user.loginId,
         fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        userType: user.userType,
+        permissions: [],
       },
     };
   }

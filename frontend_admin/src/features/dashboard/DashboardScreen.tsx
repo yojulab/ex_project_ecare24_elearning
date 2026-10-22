@@ -215,7 +215,7 @@ export const DashboardScreen: React.FC = () => {
           </div>
           <div className="flex justify-between py-1.5">
             <span className="text-slate-500">교육 영상 연동:</span>
-            <span className="font-semibold text-slate-800">HeyGen AI 비디오 2편 (embedUrl 바인딩 완료)</span>
+            <span className="font-semibold text-slate-800">표준 임상 실기 비디오 (embedUrl 바인딩 완료)</span>
           </div>
         </Card>
       </div>

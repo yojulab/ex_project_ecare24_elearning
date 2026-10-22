@@ -234,7 +234,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { step: 1, name: '1. 정규 심화교안 (문구형)', icon: <BookOpen className="w-4 h-4" /> },
-              { step: 2, name: '2. 4K 실기 VOD (HeyGen)', icon: <Video className="w-4 h-4" /> },
+              { step: 2, name: '2. 4K 실기 VOD (표준 임상)', icon: <Video className="w-4 h-4" /> },
               { step: 3, name: '3. 실전 모의고사 (30문항)', icon: <FileCheck className="w-4 h-4" /> },
               { step: 4, name: '4. 정규 자격검정 (30문항)', icon: <Award className="w-4 h-4" /> },
             ].map((s) => (
@@ -357,7 +357,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                   <span className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-black">
                     視
                   </span>
-                  Step 2. 4K 핵심 실기 시뮬레이션 VOD (HeyGen 공식 교육)
+                  Step 2. 4K 핵심 실기 시뮬레이션 VOD (표준 임상 교육)
                 </h2>
               </UiBadge>
               <p className="text-xs text-slate-500 mt-1">
@@ -403,7 +403,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
                     rel="noreferrer"
                     className="inline-flex items-center gap-1.5 text-blue-700 font-bold hover:underline"
                   >
-                    <span>HeyGen 원본 고화질 새창 열기</span>
+                    <span>표준 임상 고화질 새창 열기</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>

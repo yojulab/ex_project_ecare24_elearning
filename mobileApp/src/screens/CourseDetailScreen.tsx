@@ -101,7 +101,7 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
           </div>
           <div className="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
             <span className="text-[10px] text-slate-300 block">실기 VOD</span>
-            <span className="font-black text-yellow-300">4시간 (HeyGen)</span>
+            <span className="font-black text-yellow-300">4시간 (실기 VOD)</span>
           </div>
           <div className="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
             <span className="text-[10px] text-slate-300 block">시험 검정</span>
@@ -110,13 +110,13 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
         </div>
       </div>
 
-      {/* HeyGen VOD 및 공식 강사 안내 */}
+      {/* 실기 VOD 및 공식 강사 안내 */}
       <div className="p-4">
         <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-black text-emerald-900 flex items-center gap-1">
               <Video size={15} className="text-emerald-700" />
-              <span>HeyGen AI 공식 실기 교육 VOD</span>
+              <span>표준 임상 공식 실기 교육 VOD</span>
             </span>
             <span className="text-[11px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
               {track.id.endsWith('03') ? '1분 50초' : '1분 15초'}
@@ -203,7 +203,7 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
             </div>
 
             <p className="mt-2 text-xs font-medium text-slate-600">
-              {track.videoTitle} (HeyGen 공식 실기 시뮬레이션)
+              {track.videoTitle} (표준 임상 공식 실기 시뮬레이션)
             </p>
 
             <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">

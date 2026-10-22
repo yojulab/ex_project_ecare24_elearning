@@ -11,7 +11,7 @@ export const CurriculumScreen: React.FC<CurriculumScreenProps> = ({ onSelectCour
   const steps = [
     { num: '01', title: '수강 신청', desc: '공식 3대 실데이터 트랙 선택 및 접수', badge: '온라인 접수' },
     { num: '02', title: '이론 교안 (4h)', desc: '5개 챕터 정규 문구형 전문 교안', badge: '모바일 이어보기' },
-    { num: '03', title: '실기 훈련 (4h)', desc: 'HeyGen 공식 4K 실기 VOD 시연', badge: '총 8시간 이수' },
+    { num: '03', title: '실기 훈련 (4h)', desc: '표준 임상 4K 실기 VOD 시연', badge: '총 8시간 이수' },
     { num: '04', title: '실전 모의평가', desc: '상황별 30문항 CBT 자가진단', badge: '무제한 응시' },
     { num: '05', title: '자격증 발급', desc: '정규 검정 60점 이상 합격 즉시 발급', badge: '공식 배지 발급' },
   ];
@@ -128,7 +128,7 @@ export const CurriculumScreen: React.FC<CurriculumScreenProps> = ({ onSelectCour
                 <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600 w-full">
                   <div className="flex items-center gap-1 text-emerald-700 font-bold">
                     <BookOpen className="w-3 h-3" />
-                    <span>교안 5장 + HeyGen VOD + 시험 60문항</span>
+                    <span>교안 5장 + 실기 VOD + 시험 60문항</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-emerald-600 shrink-0" />
                 </div>

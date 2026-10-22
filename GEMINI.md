@@ -98,6 +98,7 @@
 | **2026-10-21** | Playwright Headless 전 서버 기능 무결성 종합 검증 및 21개 스냅샷 100% 통과 | `tests/comprehensive_e2e_inspection.js`, `tests/snapshots/`, `GEMINI.md` | 백엔드 JWT 인증·공개/보호 API, 수강생 실버 UX(폰트/고대비/인스펙트), HeyGen 인라인 VOD, CBT 시험/실시간 합격증, 관리자 10대 메뉴/승인, 모바일 탭 등 총 41개 항목 무결성(이슈 0건) 입증 |
 | **2026-10-22** | 공식 3대 실데이터 트랙 전면 구축 및 관리자/수강생/모바일/백엔드 개편 | `backend`, `frontend_admin`, `frontend_user`, `mobileApp`, `packages/utils`, `GEMINI.md` | 제공된 3개 실데이터 트랙(폐질환·치매·근골격계) 외 모든 목업 제거, 15개 챕터 교안/HeyGen VOD·스크립트/180문항 CBT 문제은행 적재, 관리자 교안·VOD·문제은행 인스펙터 고도화 및 Playwright 21개 전 화면 100% 무결성 검증 통과 |
 | **2026-10-22** | 등록·수정·삭제(CRUD) 기능 보완 및 Playwright 5대 시나리오 무인 검증 100% 통과 | `backend`, `frontend_admin`, `tests/test_crud_scenarios.js`, `GEMINI.md` | 팝업·트랙·문제은행·수강결제·문의 CRUD 엔드포인트 및 관리자 UI 구축, 계정 시드/모달 오버레이 이슈 해결, Playwright Headless 5대 시나리오(12개 스냅샷) 100% PASS 입증 |
+| **2026-10-22** | 회원가입·돌봄지킴이삭제·HeyGen문구삭제·P22문제은행 모의/평가 탭 분리 완비 | 전 프로젝트 (`user`, `admin`, `mobile`, `backend`), `tests`, `GEMINI.md` | 수강생/관리자/모바일 회원가입·로그인·로그아웃 전면 연동, '돌봄 지침서/지킴이' 메뉴 웹/앱 완전 삭제, HeyGen 외래 문구 완전 삭제 및 표준 임상 VOD 대체, [P22-SEC02-DET01] 모의(30)/평가(30) 탭 분리 및 입력/수정 모달 구축, Playwright 20개 전 항목 100% PASS 및 21개 전 화면 캡처 검증 완료 |
 
 
 

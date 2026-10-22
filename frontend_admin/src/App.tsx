@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Tag, Avatar } from 'antd';
+import { Button, Tag, Avatar, message } from 'antd';
 import {
   LayoutDashboard,
   Headphones,
@@ -21,6 +21,7 @@ import PopupNoticeManager from './features/popups/PopupNoticeManager';
 import PermissionMatrix from './features/permissions/PermissionMatrix';
 import UiBadge from './components/UiBadge';
 import { ENV } from './config/env';
+import { AdminAuthModal } from './features/auth/AdminAuthModal';
 
 export type AdminTab =
   | 'DASHBOARD'
@@ -34,6 +35,12 @@ export type AdminTab =
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
   const [isInspectorActive, setIsInspectorActive] = useState(false);
+  const [adminUser, setAdminUser] = useState<any>({
+    fullName: '시스템관리자',
+    loginId: 'admin',
+    userType: 'ADMIN',
+  });
+  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
 
   // URL Hash (#tab=...) 동기화
   useEffect(() => {
@@ -123,12 +130,44 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-slate-300">
-            <Avatar size="small" className="bg-indigo-600 font-bold">관</Avatar>
-            <span className="font-semibold">시스템관리자(admin)</span>
-            <Tag color="cyan" className="mr-0 text-[10px] font-mono">25개 전권 보유</Tag>
+            <Avatar size="small" className="bg-indigo-600 font-bold">
+              {adminUser?.fullName?.[0] || '관'}
+            </Avatar>
+            <span className="font-semibold">
+              {adminUser?.fullName || '시스템관리자'}({adminUser?.loginId || 'admin'})
+            </span>
+            <Tag color="cyan" className="mr-0 text-[10px] font-mono">
+              25개 전권 보유
+            </Tag>
           </div>
+
+          <UiBadge serialId="P50-SEC01-BTN-LOGOUT" label="[P50-SEC01-BTN-LOGOUT]">
+            <Button
+              size="small"
+              danger
+              onClick={() => {
+                localStorage.removeItem('ecare24_admin_token');
+                localStorage.removeItem('admin_user_info');
+                message.info('관리자 계정에서 로그아웃되었습니다.');
+                setIsAdminAuthModalOpen(true);
+              }}
+              className="text-xs"
+            >
+              로그아웃
+            </Button>
+          </UiBadge>
+
+          <UiBadge serialId="P50-SEC01-BTN-AUTH" label="[P50-SEC01-BTN-AUTH]">
+            <Button
+              size="small"
+              onClick={() => setIsAdminAuthModalOpen(true)}
+              className="text-xs border-indigo-700 text-indigo-300 hover:text-white hover:bg-indigo-900 bg-slate-900"
+            >
+              계정 변경 / 가입
+            </Button>
+          </UiBadge>
 
           <a
             href={ENV.USER_PORTAL_URL}
@@ -136,7 +175,7 @@ export const App: React.FC = () => {
             rel="noreferrer"
             className="flex items-center gap-1 text-indigo-400 hover:text-indigo-300 font-semibold underline text-xs transition"
           >
-            <span>수강생 포털 바로가기</span>
+            <span>수강생 포털</span>
             <ExternalLink className="w-3 h-3" />
           </a>
         </div>
@@ -207,7 +246,7 @@ export const App: React.FC = () => {
                 }`}
               >
                 <BookOpen className="w-4 h-4" />
-                <span>16대 질환 커리큘럼 & HeyGen</span>
+                <span>16대 질환 커리큘럼 & 실기 VOD</span>
               </button>
             </UiBadge>
 
@@ -290,6 +329,13 @@ export const App: React.FC = () => {
           {isInspectorActive ? '🏷️ UI inspect ON (Alt+I)' : '🏷️ UI inspect (Alt+I)'}
         </span>
       </div>
+
+      {/* 관리자 로그인 및 직원 등록 모달 */}
+      <AdminAuthModal
+        open={isAdminAuthModalOpen}
+        onCancel={() => setIsAdminAuthModalOpen(false)}
+        onLoginSuccess={(user) => setAdminUser(user)}
+      />
     </div>
   );
 };

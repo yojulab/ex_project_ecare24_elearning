@@ -322,7 +322,7 @@ export default function MyPage() {
                     <Sparkles className="w-5 h-5 text-indigo-600 shrink-0" />
                     <div>
                       <div className="font-bold text-slate-900">
-                        대학병원 임상 간호사 AI 튜터 (HeyGen 교육영상)
+                        대학병원 임상 간호사 전문 튜터 (표준 임상 교육영상)
                       </div>
                       <div className="text-slate-500 text-[11px]">
                         10대 골든 룰(체변, L-tube 피딩, 유린백 거치, 석션 15초) 실기 VOD
@@ -398,7 +398,7 @@ export default function MyPage() {
                             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">
                               <div className="text-slate-500 text-[11px]">Step 2. 실기 ({c.practicalHours || 0}h)</div>
                               <div className="font-bold text-slate-700 mt-1">
-                                {c.videos && c.videos.length > 0 ? `HeyGen AI (${c.videos.length}편)` : 'HeyGen 실기 VOD'}
+                                {c.videos && c.videos.length > 0 ? `표준 임상 실기 (${c.videos.length}편)` : '임상 실기 VOD'}
                               </div>
                             </div>
                             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center">

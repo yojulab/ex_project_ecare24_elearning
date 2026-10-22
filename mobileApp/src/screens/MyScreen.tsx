@@ -11,7 +11,10 @@ import {
   Clock,
   PhoneCall,
   Sparkles,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
+import { MobileAuthModal } from '../components/MobileAuthModal';
 
 interface MyScreenProps {
   onNavigateCourse?: () => void;
@@ -19,6 +22,13 @@ interface MyScreenProps {
 
 export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
   const [copied, setCopied] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>({
+    fullName: '김영희',
+    loginId: 'student01',
+    userType: 'STUDENT',
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
 
   const copyAccount = () => {
     navigator.clipboard.writeText('신한은행 110-542-889900 (예금주: 한국돌봄종사자양성교육원)');
@@ -34,20 +44,70 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
     >
       {/* 1. 상단 프로필 카드 */}
       <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-5 shadow-lg border border-indigo-900/50">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center font-extrabold text-lg shadow-inner">
-            김
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center font-extrabold text-lg shadow-inner">
+              {currentUser?.fullName?.[0] || '김'}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-base">
+                  {currentUser ? `${currentUser.fullName} 교육생님` : '로그인이 필요합니다'}
+                </span>
+                {currentUser && (
+                  <span className="px-2 py-0.5 bg-indigo-500/30 text-indigo-200 text-[10px] rounded-full font-mono">
+                    {currentUser.loginId}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-slate-300 mt-0.5">
+                {currentUser ? '공인 돌봄종사자 양성과정 수강 중' : '수강 및 자격증 관리를 위해 로그인하세요'}
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base">김영희 교육생님</span>
-              <span className="px-2 py-0.5 bg-indigo-500/30 text-indigo-200 text-[10px] rounded-full font-mono">
-                student01
-              </span>
-            </div>
-            <div className="text-xs text-slate-300 mt-0.5">
-              공인 돌봄종사자 양성과정 수강 중
-            </div>
+
+          <div className="shrink-0">
+            {currentUser ? (
+              <UiBadge serialId="P48-SEC01-BTN-LOGOUT" label="[P48-SEC01-BTN-LOGOUT]">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('mobile_token');
+                    localStorage.removeItem('mobile_user_info');
+                    setCurrentUser(null);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition flex items-center gap-1 border border-slate-700"
+                >
+                  <LogOut size={12} />
+                  <span>로그아웃</span>
+                </button>
+              </UiBadge>
+            ) : (
+              <div className="flex items-center gap-1.5">
+                <UiBadge serialId="P48-SEC01-BTN-LOGIN" label="[P48-SEC01-BTN-LOGIN]">
+                  <button
+                    onClick={() => {
+                      setAuthModalTab('LOGIN');
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition flex items-center gap-1"
+                  >
+                    <LogIn size={12} />
+                    <span>로그인</span>
+                  </button>
+                </UiBadge>
+                <UiBadge serialId="P48-SEC01-BTN-SIGNUP" label="[P48-SEC01-BTN-SIGNUP]">
+                  <button
+                    onClick={() => {
+                      setAuthModalTab('SIGNUP');
+                      setIsAuthModalOpen(true);
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition"
+                  >
+                    회원가입
+                  </button>
+                </UiBadge>
+              </div>
+            )}
           </div>
         </div>
 
@@ -88,12 +148,12 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
             <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: '45%' }}></div>
           </div>
 
-          {/* HeyGen AI 실습영상 안내 */}
+          {/* 실습영상 안내 */}
           <div className="p-3 bg-indigo-50/70 rounded-xl border border-indigo-100 flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-indigo-600 shrink-0" />
               <span className="text-slate-800 font-semibold text-[11px]">
-                HeyGen AI 간호사 실습 VOD 이어보기
+                표준 임상 간호사 실습 VOD 이어보기
               </span>
             </div>
             <button
@@ -181,6 +241,14 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
           <span>전화연결</span>
         </a>
       </div>
+
+      {/* 모바일 로그인 및 간편 회원가입 모달 */}
+      <MobileAuthModal
+        isOpen={isAuthModalOpen}
+        initialTab={authModalTab}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(user) => setCurrentUser(user)}
+      />
     </div>
   );
 };

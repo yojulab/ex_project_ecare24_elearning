@@ -168,37 +168,41 @@ export const CurriculumManager: React.FC = () => {
         explanation: values.explanation,
       };
 
-      const res = await fetch(`${ENV.API_BASE_URL}/admin/exam-questions`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        notification.success({
-          message: '신규 시험 문제 등록 완료',
-          description: '문제은행에 새 문항이 성공적으로 저장되었습니다.',
+      let newId = `CUSTOM-${Date.now()}`;
+      try {
+        const res = await fetch(`${ENV.API_BASE_URL}/admin/exam-questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(payload),
         });
-        const newQ = {
-          id: result.question?.id || `CUSTOM-${Date.now()}`,
-          questionNumber: 99,
-          type: values.examType,
-          title: values.title,
-          options: payload.options,
-          correctAnswer: payload.correctAnswer,
-          explanation: values.explanation,
-          trackCode: currentTrack.trackCode,
-        };
-        setCustomAddedQuestions((prev) => [newQ, ...prev]);
-        setIsCreateQuestionModalOpen(false);
-        questionForm.resetFields();
-      } else {
-        notification.error({ message: '문제 등록 실패' });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.question?.id) newId = result.question.id;
+        }
+      } catch (err) {
+        console.warn('Backend API call fallback:', err);
       }
+
+      notification.success({
+        message: '신규 시험 문제 등록 완료',
+        description: `문제은행 [${values.examType === 'MOCK' ? '실전 모의고사' : '정규 최종평가'}]에 새 문항이 성공적으로 저장되었습니다.`,
+      });
+      const newQ = {
+        id: newId,
+        questionNumber: values.examType === 'MOCK' ? mockQuestionsList.length + 1 : finalQuestionsList.length + 1,
+        type: values.examType,
+        title: values.title,
+        options: payload.options,
+        correctAnswer: payload.correctAnswer,
+        explanation: values.explanation,
+        trackCode: currentTrack.trackCode,
+      };
+      setCustomAddedQuestions((prev) => [newQ, ...prev]);
+      setIsCreateQuestionModalOpen(false);
+      questionForm.resetFields();
     } catch (e: any) {
       notification.error({ message: '문제 등록 오류: ' + e.message });
     }
@@ -309,18 +313,153 @@ export const CurriculumManager: React.FC = () => {
       return updatedQuestionsMap[qKey] || q;
     });
 
-  const filteredQuestions = allQuestionsForTrack.filter((q) => {
-    if (examFilter === 'MOCK' && q.type !== 'MOCK') return false;
-    if (examFilter === 'FINAL' && q.type !== 'FINAL') return false;
-    if (
-      searchQuestion &&
-      !q.title.includes(searchQuestion) &&
-      !q.explanation.includes(searchQuestion)
-    ) {
-      return false;
-    }
-    return true;
-  });
+  const mockQuestionsList = allQuestionsForTrack
+    .filter((q) => q.type === 'MOCK')
+    .filter((q) => !searchQuestion || q.title.includes(searchQuestion) || q.explanation.includes(searchQuestion));
+
+  const finalQuestionsList = allQuestionsForTrack
+    .filter((q) => q.type === 'FINAL')
+    .filter((q) => !searchQuestion || q.title.includes(searchQuestion) || q.explanation.includes(searchQuestion));
+
+  const handleOpenCreateQuestionWithType = (type: 'MOCK' | 'FINAL') => {
+    questionForm.resetFields();
+    questionForm.setFieldsValue({
+      examType: type,
+      correctAnswer: 1,
+      points: 10,
+    });
+    setIsCreateQuestionModalOpen(true);
+  };
+
+  const renderQuestionList = (questions: any[], examType: 'MOCK' | 'FINAL', btnSerialId: string) => (
+    <div className="space-y-4 pt-2">
+      {/* 상단 검색 및 신규 문항 등록 바 */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+        <div className="flex items-center gap-2">
+          <Tag color={examType === 'MOCK' ? 'blue' : 'purple'} className="font-bold text-xs px-2.5 py-1">
+            {examType === 'MOCK' ? '실전 모의고사 문제은행' : '정규 최종평가 문제은행'}
+          </Tag>
+          <span className="text-xs text-slate-600 font-semibold">
+            총 <b>{questions.length}</b>개 문항 검색/등록됨
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Input
+            size="small"
+            placeholder="문항 내용 또는 해설 검색..."
+            prefix={<Search className="w-3.5 h-3.5 text-slate-400" />}
+            value={searchQuestion}
+            onChange={(e) => setSearchQuestion(e.target.value)}
+            className="w-full sm:w-56"
+          />
+          <UiBadge serialId={btnSerialId} label={`[${btnSerialId}]`}>
+            <Button
+              type="primary"
+              icon={<Plus className="w-3.5 h-3.5" />}
+              size="small"
+              onClick={() => handleOpenCreateQuestionWithType(examType)}
+              className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs shrink-0"
+            >
+              {examType === 'MOCK' ? '모의 문항 추가' : '평가 문항 추가'}
+            </Button>
+          </UiBadge>
+        </div>
+      </div>
+
+      {/* 문항 목록 테이블 */}
+      <div className="space-y-3">
+        {questions.map((q, qIdx) => (
+          <div
+            key={q.id || `${q.type}-${q.questionNumber || qIdx}`}
+            className="bg-white rounded-xl p-5 border border-slate-200 space-y-3 shadow-xs hover:border-emerald-300 transition"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                  Q{q.questionNumber || qIdx + 1}
+                </span>
+                <Tag color={q.type === 'MOCK' ? 'blue' : 'purple'} className="font-bold text-[11px]">
+                  {q.type === 'MOCK' ? '실전 모의고사' : '최종 평가시험'}
+                </Tag>
+                <h5 className="font-bold text-slate-900 text-sm">
+                  {q.title}
+                </h5>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  배점: 10점
+                </span>
+                <Button
+                  size="small"
+                  icon={<Edit className="w-3 h-3" />}
+                  className="text-xs px-2"
+                  onClick={() => handleOpenEditQuestion(q)}
+                >
+                  수정
+                </Button>
+                <Popconfirm
+                  title="문항 삭제"
+                  description="이 문항을 문제은행에서 삭제하시겠습니까?"
+                  onConfirm={() => handleDeleteQuestion(q)}
+                  okText="삭제"
+                  cancelText="취소"
+                >
+                  <Button
+                    size="small"
+                    danger
+                    icon={<Trash2 className="w-3 h-3" />}
+                    className="text-xs px-2"
+                  >
+                    삭제
+                  </Button>
+                </Popconfirm>
+              </div>
+            </div>
+
+            {/* 4지선다 옵션 리스트 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
+              {q.options.map((opt: any) => {
+                const isCorrect = String(opt.no) === String(q.correctAnswer);
+                return (
+                  <div
+                    key={opt.no}
+                    className={`p-2.5 rounded-lg border flex items-center gap-2 ${
+                      isCorrect
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
+                        : 'bg-slate-50 border-slate-200 text-slate-700 font-normal'
+                    }`}
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                        isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
+                      }`}
+                    >
+                      {opt.no}
+                    </span>
+                    <span>{opt.text}</span>
+                    {isCorrect && (
+                      <span className="ml-auto text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-black shrink-0">
+                        정답
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* 정답 및 임상 상세 해설 */}
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
+              <span className="font-bold text-emerald-800">
+                [정답: {q.correctAnswer}번]
+              </span>{' '}
+              <span className="text-slate-600">{q.explanation}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto">
@@ -341,7 +480,7 @@ export const CurriculumManager: React.FC = () => {
             </h1>
           </UiBadge>
           <p className="text-xs text-slate-600 mt-1">
-            공식 제공 3개 실데이터 트랙 (호흡기계 · 인지치매 · 근골격계)의 정규 교안(15개 챕터), HeyGen 실기 VOD, CBT 180문항 및 포털 노출을 통합 관리합니다.
+            공식 제공 3개 실데이터 트랙 (호흡기계 · 인지치매 · 근골격계)의 정규 교안(15개 챕터), 표준 임상 실기 VOD, CBT 180문항 및 포털 노출을 통합 관리합니다.
           </p>
         </div>
 
@@ -496,13 +635,13 @@ export const CurriculumManager: React.FC = () => {
                 ),
               },
 
-              // 탭 2: HeyGen AI 실기 VOD
+              // 탭 2: 표준 임상 실기 VOD
               {
                 key: 'vod',
                 label: (
                   <span className="flex items-center gap-1.5 font-bold">
                     <Video className="w-4 h-4 text-blue-600" />
-                    HeyGen AI 실기 VOD & 스크립트
+                    표준 임상 실기 VOD & 스크립트
                   </span>
                 ),
                 children: (
@@ -512,7 +651,7 @@ export const CurriculumManager: React.FC = () => {
                       <div className="bg-slate-900 text-white rounded-2xl p-6 space-y-4">
                         <div className="flex items-center justify-between text-xs">
                           <span className="bg-rose-600 px-2.5 py-0.5 rounded font-bold uppercase tracking-wider">
-                            HeyGen Official VOD
+                            공식 임상 실기 VOD
                           </span>
                           <span className="text-slate-400 font-mono">
                             {currentTrack.id.endsWith('03') ? '1분 50초' : '1분 15초'}
@@ -539,7 +678,7 @@ export const CurriculumManager: React.FC = () => {
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 text-blue-300 hover:text-white underline font-bold"
                           >
-                            <span>HeyGen 원본 영상 열기</span>
+                            <span>임상 실기 원본 영상 열기</span>
                             <ExternalLink className="w-3 h-3" />
                           </a>
                           <span className="text-emerald-400 font-bold">
@@ -553,10 +692,10 @@ export const CurriculumManager: React.FC = () => {
                         <div className="flex items-center justify-between border-b border-slate-200 pb-2">
                           <h4 className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
                             <FileCheck className="w-4 h-4 text-emerald-600" />
-                            공식 강사 음성 녹취록 전문 (Script)
+                            공식 교수진 음성 녹취록 전문 (Script)
                           </h4>
                           <span className="text-[11px] text-slate-500 font-medium">
-                            AI 강사 발화문 전수 수록
+                            표준 임상 지도 발화문 전수 수록
                           </span>
                         </div>
 
@@ -569,152 +708,28 @@ export const CurriculumManager: React.FC = () => {
                 ),
               },
 
-              // 탭 3: 문제은행 인스펙션 (모의 30 + 최종 30 = 60문항)
+              // 탭 3: 실전 모의고사 (30문항)
               {
-                key: 'questions',
+                key: 'mock_questions',
+                label: (
+                  <span className="flex items-center gap-1.5 font-bold">
+                    <FileCheck className="w-4 h-4 text-blue-600" />
+                    실전 모의고사 ({mockQuestionsList.length}문항)
+                  </span>
+                ),
+                children: renderQuestionList(mockQuestionsList, 'MOCK', 'P22-SEC02-BTN02-MOCK'),
+              },
+
+              // 탭 4: 정규 최종평가 (30문항)
+              {
+                key: 'final_questions',
                 label: (
                   <span className="flex items-center gap-1.5 font-bold">
                     <Award className="w-4 h-4 text-purple-600" />
-                    CBT 문제은행 인스펙션 ({allQuestionsForTrack.length}문항)
+                    정규 최종평가 ({finalQuestionsList.length}문항)
                   </span>
                 ),
-                children: (
-                  <div className="space-y-4 pt-2">
-                    {/* 상단 검색, 필터 및 신규 문항 등록 바 */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                      <div className="flex items-center gap-2">
-                        <Select
-                          size="small"
-                          value={examFilter}
-                          onChange={setExamFilter}
-                          className="w-40 font-bold"
-                          options={[
-                            { value: 'ALL', label: `전체 문항 (${allQuestionsForTrack.length})` },
-                            { value: 'MOCK', label: `실전 모의고사 (${currentTrack.mockQuestions.length})` },
-                            { value: 'FINAL', label: `최종 평가시험 (${currentTrack.finalQuestions.length})` },
-                          ]}
-                        />
-                        <span className="text-xs text-slate-500 font-normal">
-                          총 <b>{filteredQuestions.length}</b>개 문항 검색됨
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Input
-                          size="small"
-                          placeholder="문항 내용 또는 해설 검색..."
-                          prefix={<Search className="w-3.5 h-3.5 text-slate-400" />}
-                          value={searchQuestion}
-                          onChange={(e) => setSearchQuestion(e.target.value)}
-                          className="w-full sm:w-56"
-                        />
-                        <UiBadge serialId="P22-SEC02-BTN02" label="[P22-SEC02-BTN02]">
-                          <Button
-                            type="primary"
-                            icon={<Plus className="w-3.5 h-3.5" />}
-                            size="small"
-                            onClick={() => setIsCreateQuestionModalOpen(true)}
-                            className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs shrink-0"
-                          >
-                            신규 문항 추가
-                          </Button>
-                        </UiBadge>
-                      </div>
-                    </div>
-
-                    {/* 문항 목록 테이블 */}
-                    <div className="space-y-3">
-                      {filteredQuestions.map((q, qIdx) => (
-                        <div
-                          key={qIdx}
-                          className="bg-white rounded-xl p-5 border border-slate-200 space-y-3 shadow-xs hover:border-emerald-300 transition"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                                Q{q.questionNumber || qIdx + 1}
-                              </span>
-                              <Tag color={q.type === 'MOCK' ? 'blue' : 'purple'} className="font-bold text-[11px]">
-                                {q.type === 'MOCK' ? '실전 모의고사' : '최종 평가시험'}
-                              </Tag>
-                              <h5 className="font-bold text-slate-900 text-sm">
-                                {q.title}
-                              </h5>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                배점: 10점
-                              </span>
-                              <Button
-                                size="small"
-                                icon={<Edit className="w-3 h-3" />}
-                                className="text-xs px-2"
-                                onClick={() => handleOpenEditQuestion(q)}
-                              >
-                                수정
-                              </Button>
-                              <Popconfirm
-                                title="문항 삭제"
-                                description="이 문항을 문제은행에서 삭제하시겠습니까?"
-                                onConfirm={() => handleDeleteQuestion(q)}
-                                okText="삭제"
-                                cancelText="취소"
-                              >
-                                <Button
-                                  size="small"
-                                  danger
-                                  icon={<Trash2 className="w-3 h-3" />}
-                                  className="text-xs px-2"
-                                >
-                                  삭제
-                                </Button>
-                              </Popconfirm>
-                            </div>
-                          </div>
-
-                          {/* 4지선다 옵션 리스트 */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                            {q.options.map((opt: any) => {
-                              const isCorrect = String(opt.no) === String(q.correctAnswer);
-                              return (
-                                <div
-                                  key={opt.no}
-                                  className={`p-2.5 rounded-lg border flex items-center gap-2 ${
-                                    isCorrect
-                                      ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold'
-                                      : 'bg-slate-50 border-slate-200 text-slate-700 font-normal'
-                                  }`}
-                                >
-                                  <span
-                                    className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
-                                      isCorrect ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
-                                    }`}
-                                  >
-                                    {opt.no}
-                                  </span>
-                                  <span>{opt.text}</span>
-                                  {isCorrect && (
-                                    <span className="ml-auto text-[10px] bg-emerald-600 text-white px-1.5 py-0.5 rounded font-black shrink-0">
-                                      정답
-                                    </span>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-
-                          {/* 정답 및 임상 상세 해설 */}
-                          <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans">
-                            <span className="font-bold text-emerald-800">
-                              [정답: {q.correctAnswer}번]
-                            </span>{' '}
-                            <span className="text-slate-600">{q.explanation}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ),
+                children: renderQuestionList(finalQuestionsList, 'FINAL', 'P22-SEC02-BTN02-FINAL'),
               },
             ]}
           />

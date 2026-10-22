@@ -157,7 +157,7 @@ export default function CurriculumPage() {
                     실기 시뮬레이션
                   </span>
                 </div>
-                <h3 className="font-extrabold text-base text-slate-900 mb-1">HeyGen VOD (4시간)</h3>
+                <h3 className="font-extrabold text-base text-slate-900 mb-1">임상 실기 VOD (4시간)</h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
                   • 전문강사 핵심 임상 실기 시연<br />
                   • 환자 안전 및 소통 기법<br />
@@ -225,7 +225,7 @@ export default function CurriculumPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-700">
               <div className="bg-white p-4 rounded-xl border border-slate-200">
                 <span className="font-extrabold text-emerald-700 block mb-1">요건 1: 총 8시간 교육 이수</span>
-                온라인 이론 4시간(정규 교안) + 실기 영상 4시간(HeyGen VOD) 진도율 100% 완료 필수
+                온라인 이론 4시간(정규 교안) + 실기 영상 4시간(임상 실습 VOD) 진도율 100% 완료 필수
               </div>
               <div className="bg-white p-4 rounded-xl border border-slate-200">
                 <span className="font-extrabold text-indigo-700 block mb-1">요건 2: 자격시험 60점 이상</span>
@@ -245,7 +245,7 @@ export default function CurriculumPage() {
                 <span className="text-xs font-bold text-emerald-600 tracking-wider uppercase">Official Tracks</span>
                 <h2 className="text-2xl font-black text-slate-900 mt-1">공식 제공 3대 전문 자격 트랙 (각 총 8시간)</h2>
                 <p className="text-xs sm:text-sm text-slate-600 mt-1">
-                  모든 트랙은 <b>정규 교안 5개 챕터 + HeyGen 4K VOD + 모의고사 30문항 + 자격시험 30문항</b>으로 구성됩니다.
+                  모든 트랙은 <b>정규 교안 5개 챕터 + 4K 실기 VOD + 모의고사 30문항 + 자격시험 30문항</b>으로 구성됩니다.
                 </p>
               </div>
               <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
