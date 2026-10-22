@@ -64,10 +64,11 @@ async function runCrudVerification() {
     adminToken = loginData.accessToken;
     console.log('   ✓ [AUTH] 관리자(admin) JWT 토큰 획득 완료');
 
-    // 브라우저 페이지 전체에 admin 토큰 자동 주입 (API 인증 헤더 연동)
-    await context.addInitScript((token) => {
+    // 브라우저 페이지 전체에 admin 토큰 및 세션 정보 자동 주입 (API 인증 헤더 연동)
+    await context.addInitScript(({ token, user }) => {
       localStorage.setItem('ecare24_admin_token', token);
-    }, adminToken);
+      localStorage.setItem('admin_user_info', JSON.stringify(user));
+    }, { token: adminToken, user: loginData.user });
   } catch (err) {
     console.error('   ✗ [AUTH] 관리자 로그인 실패:', err.message);
   }

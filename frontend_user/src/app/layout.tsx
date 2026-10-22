@@ -32,24 +32,39 @@ export default function RootLayout({
   const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
 
   useEffect(() => {
-    // 세션 로드 (없을 경우 기본 체험 계정 김영희)
-    const storedUser = localStorage.getItem('user_info');
-    if (storedUser) {
-      try {
-        setCurrentUser(JSON.parse(storedUser));
-      } catch (e) {
-        // ignore
+    // 세션 로드: access_token과 user_info가 모두 유효할 때만 로그인 유지
+    const syncUser = () => {
+      const token = localStorage.getItem('access_token');
+      const storedUser = localStorage.getItem('user_info');
+      if (token && storedUser) {
+        try {
+          setCurrentUser(JSON.parse(storedUser));
+        } catch (e) {
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
       }
-    } else {
-      // 기본 초기 데모 로그인 상태 제공
-      setCurrentUser({
-        id: 'user-std-01',
-        loginId: 'student01',
-        fullName: '김영희',
-        userType: 'STUDENT',
-      });
-    }
+    };
+
+    syncUser();
+    window.addEventListener('storage', syncUser);
+    window.addEventListener('auth_change', syncUser);
+    return () => {
+      window.removeEventListener('storage', syncUser);
+      window.removeEventListener('auth_change', syncUser);
+    };
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_info');
+    setCurrentUser(null);
+    window.dispatchEvent(new Event('auth_change'));
+    if (typeof window !== 'undefined' && window.location.pathname.includes('/mypage')) {
+      window.location.href = '/';
+    }
+  };
 
   useEffect(() => {
     const cleanup = initUiInspectorGlobalListener();
@@ -239,16 +254,18 @@ export default function RootLayout({
                 </a>
               </UiBadge>
 
-              {/* 5. 마이페이지 (신규) */}
-              <UiBadge serialId="P00-SEC01-LNK06" label="[P00-SEC01-LNK06]">
-                <a
-                  href="/mypage"
-                  className="flex items-center gap-1.5 hover:text-indigo-600 transition text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100"
-                >
-                  <User className="w-4 h-4 text-indigo-600" />
-                  <span>마이페이지</span>
-                </a>
-              </UiBadge>
+              {/* 5. 마이페이지 (로그인 회원 전용) */}
+              {currentUser && (
+                <UiBadge serialId="P00-SEC01-LNK06" label="[P00-SEC01-LNK06]">
+                  <a
+                    href="/mypage"
+                    className="flex items-center gap-1.5 hover:text-indigo-600 transition text-indigo-700 bg-indigo-50/80 px-2.5 py-1 rounded-lg border border-indigo-100"
+                  >
+                    <User className="w-4 h-4 text-indigo-600" />
+                    <span>마이페이지</span>
+                  </a>
+                </UiBadge>
+              )}
             </nav>
 
             {/* 수강생 프로필 / 빠른 액션 (로그인, 회원가입, 로그아웃) */}
@@ -261,16 +278,12 @@ export default function RootLayout({
                       className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 text-xs font-semibold transition"
                     >
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span>{currentUser.fullName || '김영희'} 돌봄교육생님 (MY)</span>
+                      <span>{currentUser.fullName || '교육생'} 돌봄교육생님 (MY)</span>
                     </a>
                   </UiBadge>
                   <UiBadge serialId="P00-SEC01-BTN-LOGOUT" label="[P00-SEC01-BTN-LOGOUT]">
                     <button
-                      onClick={() => {
-                        localStorage.removeItem('access_token');
-                        localStorage.removeItem('user_info');
-                        setCurrentUser(null);
-                      }}
+                      onClick={handleLogout}
                       className="text-xs text-slate-500 hover:text-rose-600 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-rose-200 transition font-bold"
                     >
                       로그아웃
@@ -317,6 +330,7 @@ export default function RootLayout({
           onClose={() => setIsAuthModalOpen(false)}
           onSuccess={(user) => {
             setCurrentUser(user);
+            window.dispatchEvent(new Event('auth_change'));
           }}
         />
 

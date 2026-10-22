@@ -38,12 +38,35 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isInspectorActive, setIsInspectorActive] = useState(false);
-  const [adminUser, setAdminUser] = useState<any>({
-    fullName: '시스템관리자',
-    loginId: 'admin',
-    userType: 'ADMIN',
-  });
+  const [adminUser, setAdminUser] = useState<any>(null);
   const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const syncAdminUser = () => {
+      const token = localStorage.getItem('ecare24_admin_token');
+      const stored = localStorage.getItem('admin_user_info');
+      if (token && stored) {
+        try {
+          setAdminUser(JSON.parse(stored));
+        } catch (e) {
+          setAdminUser(null);
+        }
+      } else {
+        setAdminUser(null);
+      }
+    };
+    syncAdminUser();
+    window.addEventListener('storage', syncAdminUser);
+    return () => window.removeEventListener('storage', syncAdminUser);
+  }, []);
+
+  const handleAdminLogout = () => {
+    localStorage.removeItem('ecare24_admin_token');
+    localStorage.removeItem('admin_user_info');
+    setAdminUser(null);
+    message.info('관리자 계정에서 로그아웃되었습니다.');
+    setIsAdminAuthModalOpen(true);
+  };
 
   // URL Hash (#tab=...) 동기화
   useEffect(() => {
@@ -145,43 +168,53 @@ export const App: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-slate-300">
-            <Avatar size="small" className="bg-indigo-600 font-bold">
-              {adminUser?.fullName?.[0] || '관'}
-            </Avatar>
-            <span className="font-semibold">
-              {adminUser?.fullName || '시스템관리자'}({adminUser?.loginId || 'admin'})
-            </span>
-            <Tag color="cyan" className="mr-0 text-[10px] font-mono">
-              25개 전권 보유
-            </Tag>
-          </div>
+          {adminUser ? (
+            <>
+              <div className="flex items-center gap-2 text-slate-300">
+                <Avatar size="small" className="bg-indigo-600 font-bold">
+                  {adminUser?.fullName?.[0] || '관'}
+                </Avatar>
+                <span className="font-semibold">
+                  {adminUser?.fullName || '관리자'}({adminUser?.loginId || 'admin'})
+                </span>
+                <Tag color="cyan" className="mr-0 text-[10px] font-mono">
+                  25개 전권 보유
+                </Tag>
+              </div>
 
-          <UiBadge serialId="P50-SEC01-BTN-LOGOUT" label="[P50-SEC01-BTN-LOGOUT]">
-            <Button
-              size="small"
-              danger
-              onClick={() => {
-                localStorage.removeItem('ecare24_admin_token');
-                localStorage.removeItem('admin_user_info');
-                message.info('관리자 계정에서 로그아웃되었습니다.');
-                setIsAdminAuthModalOpen(true);
-              }}
-              className="text-xs"
-            >
-              로그아웃
-            </Button>
-          </UiBadge>
+              <UiBadge serialId="P50-SEC01-BTN-LOGOUT" label="[P50-SEC01-BTN-LOGOUT]">
+                <Button
+                  size="small"
+                  danger
+                  onClick={handleAdminLogout}
+                  className="text-xs"
+                >
+                  로그아웃
+                </Button>
+              </UiBadge>
 
-          <UiBadge serialId="P50-SEC01-BTN-AUTH" label="[P50-SEC01-BTN-AUTH]">
-            <Button
-              size="small"
-              onClick={() => setIsAdminAuthModalOpen(true)}
-              className="text-xs border-indigo-700 text-indigo-300 hover:text-white hover:bg-indigo-900 bg-slate-900"
-            >
-              계정 변경 / 가입
-            </Button>
-          </UiBadge>
+              <UiBadge serialId="P50-SEC01-BTN-AUTH" label="[P50-SEC01-BTN-AUTH]">
+                <Button
+                  size="small"
+                  onClick={() => setIsAdminAuthModalOpen(true)}
+                  className="text-xs border-indigo-700 text-indigo-300 hover:text-white hover:bg-indigo-900 bg-slate-900"
+                >
+                  계정 변경 / 가입
+                </Button>
+              </UiBadge>
+            </>
+          ) : (
+            <UiBadge serialId="P50-SEC01-BTN-LOGIN" label="[P50-SEC01-BTN-LOGIN]">
+              <Button
+                type="primary"
+                size="small"
+                onClick={() => setIsAdminAuthModalOpen(true)}
+                className="text-xs bg-indigo-600 hover:bg-indigo-500 font-bold"
+              >
+                관리자 로그인
+              </Button>
+            </UiBadge>
+          )}
 
           <a
             href={ENV.USER_PORTAL_URL}
@@ -376,13 +409,41 @@ export const App: React.FC = () => {
           data-service-name="eCare24 관리자"
           data-page-name={`${pageInfo.name} (${pageInfo.code})`}
         >
-          {activeTab === 'DASHBOARD' && <DashboardScreen onNavigateTab={handleTabChange} />}
-          {activeTab === 'CALLCENTER' && <CallCenterScreen />}
-          {activeTab === 'CURRICULUM' && <CurriculumManager />}
-          {activeTab === 'CERT' && <CertRegistry />}
-          {activeTab === 'PAYMENTS' && <PaymentManager />}
-          {activeTab === 'POPUPS' && <PopupNoticeManager />}
-          {activeTab === 'PERMISSIONS' && <PermissionMatrix />}
+          {adminUser ? (
+            <>
+              {activeTab === 'DASHBOARD' && <DashboardScreen onNavigateTab={handleTabChange} />}
+              {activeTab === 'CALLCENTER' && <CallCenterScreen />}
+              {activeTab === 'CURRICULUM' && <CurriculumManager />}
+              {activeTab === 'CERT' && <CertRegistry />}
+              {activeTab === 'PAYMENTS' && <PaymentManager />}
+              {activeTab === 'POPUPS' && <PopupNoticeManager />}
+              {activeTab === 'PERMISSIONS' && <PermissionMatrix />}
+            </>
+          ) : (
+            <div className="h-full flex items-center justify-center p-8">
+              <div className="bg-white rounded-3xl border border-slate-300 p-10 max-w-md w-full text-center shadow-xl space-y-5">
+                <div className="w-16 h-16 rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
+                  <ShieldCheck className="w-8 h-8 text-rose-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">관리자 인증이 필요합니다</h2>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                    한국돌봄종사자양성교육원 학사/원무 시스템에 접근하려면 관리자 계정으로 로그인해 주십시오.
+                  </p>
+                </div>
+                <UiBadge serialId="P50-SEC00-BTN-LOGIN" label="[P50-SEC00-BTN-LOGIN]">
+                  <Button
+                    type="primary"
+                    size="large"
+                    onClick={() => setIsAdminAuthModalOpen(true)}
+                    className="w-full bg-indigo-600 hover:bg-indigo-500 font-extrabold rounded-xl py-5"
+                  >
+                    관리자 로그인 모달 열기
+                  </Button>
+                </UiBadge>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 

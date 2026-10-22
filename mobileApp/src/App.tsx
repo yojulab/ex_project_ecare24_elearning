@@ -28,7 +28,7 @@ export const App: React.FC = () => {
       const match = hash.match(/tab=([a-zA-Z0-9_-]+)/);
       if (match && match[1]) {
         const tab = match[1].toLowerCase() as TabType;
-        const validTabs: TabType[] = ['home', 'apply', 'course', 'guide', 'practice', 'exam', 'cert', 'wallet', 'tv24', 'about', 'curriculum'];
+        const validTabs: TabType[] = ['home', 'apply', 'course', 'guide', 'practice', 'exam', 'cert', 'wallet', 'tv24', 'about', 'curriculum', 'my'];
         if (validTabs.includes(tab)) {
           setCurrentTab(tab);
         }

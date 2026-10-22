@@ -20,6 +20,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'LOGIN' | 'SIGNUP'>(initialTab);
 
+  React.useEffect(() => {
+    setActiveTab(initialTab);
+    setErrorMessage('');
+    setSuccessMessage('');
+  }, [initialTab, isOpen]);
+
   // 로그인 폼
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');

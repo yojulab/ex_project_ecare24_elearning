@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard,
   BookOpen,
@@ -15,63 +15,120 @@ import {
   Sparkles,
   PhoneCall,
   Copy,
+  LogIn,
+  LogOut,
+  ShieldAlert,
 } from 'lucide-react';
 import UiBadge from '../../components/UiBadge';
+import { AuthModal } from '../../components/AuthModal';
 import { ENV } from '../../config/env';
 
 const API_BASE = ENV.API_BASE_URL;
 
 export default function MyPage() {
   const [activeTab, setActiveTab] = useState<'SUMMARY' | 'COURSES' | 'PAYMENTS' | 'CERTS' | 'INQUIRY' | 'PROFILE'>('SUMMARY');
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [summary, setSummary] = useState<any>(null);
   const [courses, setCourses] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [certs, setCerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'LOGIN' | 'SIGNUP'>('LOGIN');
+
+  const fetchUserData = useCallback(async (token: string) => {
+    setLoading(true);
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+
+      // 1. 프로필 최신화 (/auth/me)
+      try {
+        const meRes = await fetch(`${API_BASE}/auth/me`, { headers });
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData.user) {
+            setCurrentUser((prev: any) => ({
+              ...prev,
+              ...meData.user,
+              fullName: meData.user.fullName || prev?.fullName,
+            }));
+            const stored = JSON.parse(localStorage.getItem('user_info') || '{}');
+            localStorage.setItem('user_info', JSON.stringify({ ...stored, ...meData.user }));
+          }
+        } else if (meRes.status === 401) {
+          // 토큰 만료 시 세션 제거
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('user_info');
+          setCurrentUser(null);
+          return;
+        }
+      } catch (err) {
+        // network error
+      }
+
+      // 2. 요약
+      const sRes = await fetch(`${API_BASE}/me/summary`, { headers });
+      if (sRes.ok) setSummary(await sRes.json());
+
+      // 3. 수강 과정
+      const cRes = await fetch(`${API_BASE}/me/courses`, { headers });
+      if (cRes.ok) setCourses(await cRes.json());
+
+      // 4. 납부 내역
+      const pRes = await fetch(`${API_BASE}/me/payments`, { headers });
+      if (pRes.ok) setPayments(await pRes.json());
+
+      // 5. 자격증 내역
+      const certRes = await fetch(`${API_BASE}/me/certificates`, { headers });
+      if (certRes.ok) {
+        const certData = await certRes.json();
+        setCerts(certData.certificates || []);
+      }
+    } catch (e) {
+      console.warn('API 연동 대기:', e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const checkSession = useCallback(() => {
+    const token = localStorage.getItem('access_token');
+    const storedUser = localStorage.getItem('user_info');
+    if (token && storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        setCurrentUser(user);
+        fetchUserData(token);
+      } catch (e) {
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null);
+      setSummary(null);
+      setCourses([]);
+      setPayments([]);
+      setCerts([]);
+    }
+  }, [fetchUserData]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        // 데모 학생 계정 로그인 세션 획득
-        const loginRes = await fetch(`${API_BASE}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ loginId: 'student01', password: 'password123!' }),
-        });
-        if (loginRes.ok) {
-          const { accessToken } = await loginRes.json();
-          const headers = { Authorization: `Bearer ${accessToken}` };
-
-          // 1. 요약
-          const sRes = await fetch(`${API_BASE}/me/summary`, { headers });
-          if (sRes.ok) setSummary(await sRes.json());
-
-          // 2. 수강 과정
-          const cRes = await fetch(`${API_BASE}/me/courses`, { headers });
-          if (cRes.ok) setCourses(await cRes.json());
-
-          // 3. 납부 내역
-          const pRes = await fetch(`${API_BASE}/me/payments`, { headers });
-          if (pRes.ok) setPayments(await pRes.json());
-
-          // 4. 자격증 내역
-          const certRes = await fetch(`${API_BASE}/me/certificates`, { headers });
-          if (certRes.ok) {
-            const certData = await certRes.json();
-            setCerts(certData.certificates || []);
-          }
-        }
-      } catch (e) {
-        console.warn('API 연동 대기 (오프라인 모드):', e);
-      } finally {
-        setLoading(false);
-      }
+    checkSession();
+    window.addEventListener('storage', checkSession);
+    window.addEventListener('auth_change', checkSession);
+    return () => {
+      window.removeEventListener('storage', checkSession);
+      window.removeEventListener('auth_change', checkSession);
     };
+  }, [checkSession]);
 
-    fetchData();
-  }, []);
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user_info');
+    setCurrentUser(null);
+    window.dispatchEvent(new Event('auth_change'));
+    window.location.href = '/';
+  };
 
   const copyAccount = () => {
     navigator.clipboard.writeText('신한은행 110-542-889900 (예금주: 한국돌봄종사자양성교육원)');
@@ -92,6 +149,78 @@ export default function MyPage() {
 
   const pageInfo = getPageInfo();
 
+  // 비로그인 상태일 때의 보호 화면 (Route Guard)
+  if (!currentUser) {
+    return (
+      <div
+        className="max-w-4xl mx-auto px-4 py-16"
+        data-service-name="한국돌봄종사자양성교육원"
+        data-page-name="마이페이지 로그인 가드 (P10)"
+      >
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-xl text-center space-y-6">
+          <div className="w-20 h-20 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mx-auto text-indigo-600 shadow-inner">
+            <ShieldAlert className="w-10 h-10 text-indigo-600" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-xs font-bold inline-block">
+              로그인 필요 서비스
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+              로그인이 필요한 페이지입니다
+            </h1>
+            <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+              돌봄 수강생 마이페이지는 본인 인증 후 이용하실 수 있습니다.<br />
+              수강 과정 진도율, 납부 내역 및 공인 자격증 발급 현황을 확인하려면 로그인해 주세요.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <UiBadge serialId="P10-SEC00-BTN-LOGIN" label="[P10-SEC00-BTN-LOGIN]">
+              <button
+                onClick={() => {
+                  setAuthModalTab('LOGIN');
+                  setIsAuthModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-extrabold text-sm shadow-md transition flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>수강생 로그인하기</span>
+              </button>
+            </UiBadge>
+
+            <UiBadge serialId="P10-SEC00-BTN-SIGNUP" label="[P10-SEC00-BTN-SIGNUP]">
+              <button
+                onClick={() => {
+                  setAuthModalTab('SIGNUP');
+                  setIsAuthModalOpen(true);
+                }}
+                className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold text-sm shadow-md transition"
+              >
+                무료 회원가입
+              </button>
+            </UiBadge>
+          </div>
+
+          <div className="pt-6 border-t border-slate-100 text-xs text-slate-400">
+            문의사항: 한국돌봄종사자양성교육원 대표번호 <span className="font-bold text-slate-600">1588-2424</span>
+          </div>
+        </div>
+
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          initialTab={authModalTab}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={(user) => {
+            setCurrentUser(user);
+            setIsAuthModalOpen(false);
+            window.dispatchEvent(new Event('auth_change'));
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className="max-w-7xl mx-auto px-4 py-8"
@@ -105,27 +234,40 @@ export default function MyPage() {
             <span className="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full text-xs font-semibold">
               돌봄 수강생 전용 포털
             </span>
-            <span className="text-xs text-slate-400 font-mono">ID: student01</span>
+            <span className="text-xs text-slate-400 font-mono">
+              ID: {currentUser?.loginId || summary?.user?.loginId || 'student01'}
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            {summary?.user?.fullName || '김영희'} 돌봄교육생님의 마이페이지
+            {currentUser?.fullName || summary?.user?.fullName || '회원'} 돌봄교육생님의 마이페이지
           </h1>
           <p className="text-sm text-slate-300 mt-1">
             수강 진행률, 무통장 납부 상태, 현장 실습평가 및 공인 자격증 발급 현황을 한곳에서 관리합니다.
           </p>
         </div>
 
-        {summary?.recentEnrollment && (
-          <UiBadge serialId="P10-SEC01-BTN01" label="[P10-SEC01-BTN01]">
-            <a
-              href="/curriculum"
-              className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-3 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 transition"
+        <div className="flex items-center gap-2.5">
+          {summary?.recentEnrollment && (
+            <UiBadge serialId="P10-SEC01-BTN01" label="[P10-SEC01-BTN01]">
+              <a
+                href="/curriculum"
+                className="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-md flex items-center gap-2 transition"
+              >
+                <PlayCircle className="w-5 h-5" />
+                <span>최근 강의 1초 이어보기</span>
+              </a>
+            </UiBadge>
+          )}
+          <UiBadge serialId="P10-SEC01-BTN-LOGOUT" label="[P10-SEC01-BTN-LOGOUT]">
+            <button
+              onClick={handleLogout}
+              className="bg-slate-800/80 hover:bg-rose-900/60 hover:text-rose-200 text-slate-300 px-3.5 py-2.5 rounded-xl font-bold text-xs border border-slate-700/80 flex items-center gap-1.5 transition"
             >
-              <PlayCircle className="w-5 h-5" />
-              <span>최근 강의 1초 이어보기</span>
-            </a>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>로그아웃</span>
+            </button>
           </UiBadge>
-        )}
+        </div>
       </div>
 
       {/* 2. 메인 2열 레이아웃 (좌측 서브 메뉴 탭 + 우측 콘텐츠) */}
@@ -570,7 +712,7 @@ export default function MyPage() {
                   <input
                     type="text"
                     disabled
-                    value={summary?.user?.fullName || '김영희'}
+                    value={currentUser?.fullName || summary?.user?.fullName || '회원'}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-bold text-slate-800"
                   />
                 </div>
@@ -579,9 +721,45 @@ export default function MyPage() {
                   <input
                     type="text"
                     disabled
-                    value={summary?.user?.loginId || 'student01'}
+                    value={currentUser?.loginId || summary?.user?.loginId || 'student01'}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-800"
                   />
+                </div>
+                <div>
+                  <label className="text-slate-500 font-semibold block mb-1">연락처 (휴대폰)</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={currentUser?.phoneNumber || '010-5234-9871'}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 font-mono text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-500 font-semibold block mb-1">이메일 주소</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={currentUser?.email || '등록된 이메일 없음'}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-slate-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-500 font-semibold block mb-1">수강생 회원 구분</label>
+                  <div className="w-full bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5 font-bold text-emerald-800">
+                    {currentUser?.userType === 'ADMIN' ? '기관 관리자 / 임상교수진' : '공인 돌봄종사자 교육생 (정회원)'}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-slate-500 font-semibold block mb-1">세션 관리</label>
+                  <UiBadge serialId="P15-SEC01-BTN-LOGOUT" label="[P15-SEC01-BTN-LOGOUT]">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl px-4 py-2.5 font-bold transition flex items-center justify-center gap-1.5"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>현재 기기에서 안전하게 로그아웃</span>
+                    </button>
+                  </UiBadge>
                 </div>
               </div>
             </div>
