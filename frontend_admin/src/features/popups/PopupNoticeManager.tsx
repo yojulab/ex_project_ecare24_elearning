@@ -84,6 +84,105 @@ export const PopupNoticeManager: React.FC = () => {
     }
   };
 
+  const handleToggleActive = async (popupId: string) => {
+    try {
+      const loginRes = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId: 'admin', password: 'admin1234!' }),
+      });
+      const { accessToken } = await loginRes.json();
+
+      const res = await fetch(`${API_BASE}/admin/popups/${popupId}/toggle`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        message.success(data.message || '팝업 상태가 변경되었습니다.');
+        fetchPopups();
+      } else {
+        message.error('상태 변경 실패');
+      }
+    } catch (e: any) {
+      message.error('상태 변경 오류: ' + e.message);
+    }
+  };
+
+  const handleDelete = async (popupId: string) => {
+    if (!window.confirm('정말로 이 팝업 공지를 삭제하시겠습니까?')) return;
+    try {
+      const loginRes = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId: 'admin', password: 'admin1234!' }),
+      });
+      const { accessToken } = await loginRes.json();
+
+      const res = await fetch(`${API_BASE}/admin/popups/${popupId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (res.ok) {
+        message.success('팝업 공지가 삭제되었습니다.');
+        fetchPopups();
+      } else {
+        message.error('삭제 실패');
+      }
+    } catch (e: any) {
+      message.error('삭제 오류: ' + e.message);
+    }
+  };
+
+  const [editingPopup, setEditingPopup] = useState<any>(null);
+  const [editForm] = Form.useForm();
+
+  const openEditModal = (record: any) => {
+    setEditingPopup(record);
+    editForm.setFieldsValue({
+      title: record.title,
+      contentHtml: record.contentHtml,
+      linkUrl: record.linkUrl,
+      priority: record.priority,
+      showOnWeb: record.showOnWeb,
+      showOnMobile: record.showOnMobile,
+      isActive: record.isActive,
+    });
+  };
+
+  const handleUpdate = async (values: any) => {
+    if (!editingPopup) return;
+    try {
+      const loginRes = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId: 'admin', password: 'admin1234!' }),
+      });
+      const { accessToken } = await loginRes.json();
+
+      const res = await fetch(`${API_BASE}/admin/popups/${editingPopup.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (res.ok) {
+        message.success('팝업 공지가 수정되었습니다.');
+        setEditingPopup(null);
+        fetchPopups();
+      } else {
+        message.error('수정 실패');
+      }
+    } catch (e: any) {
+      message.error('수정 오류: ' + e.message);
+    }
+  };
+
   const columns = [
     {
       title: '제목',
@@ -117,11 +216,44 @@ export const PopupNoticeManager: React.FC = () => {
       render: (p: number) => <Tag color={p > 0 ? 'red' : 'default'}>{p}</Tag>,
     },
     {
-      title: '상태',
+      title: '상태 (토글)',
       dataIndex: 'isActive',
       key: 'isActive',
-      render: (active: boolean) =>
-        active ? <Tag color="emerald">진행중</Tag> : <Tag>중단</Tag>,
+      render: (active: boolean, r: any) => (
+        <div className="flex items-center gap-2">
+          <Switch
+            size="small"
+            checked={active}
+            onChange={() => handleToggleActive(r.id)}
+          />
+          <span className="text-xs font-bold text-slate-600">
+            {active ? '진행중' : '중단'}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: '관리',
+      key: 'actions',
+      render: (_: any, r: any) => (
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="small"
+            className="text-xs font-semibold px-2"
+            onClick={() => openEditModal(r)}
+          >
+            수정
+          </Button>
+          <Button
+            size="small"
+            danger
+            className="text-xs font-semibold px-2"
+            onClick={() => handleDelete(r.id)}
+          >
+            삭제
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -134,7 +266,7 @@ export const PopupNoticeManager: React.FC = () => {
             팝업 공지 관리
           </h2>
           <p className="text-xs text-slate-500 mt-1">
-            수강생 웹 및 모바일 앱 첫 진입 시 노출할 공지 팝업을 등록하고 기간과 타깃을 설정합니다.
+            수강생 웹 및 모바일 앱 첫 진입 시 노출할 공지 팝업을 등록, 수정, 상태 전환, 삭제할 수 있습니다.
           </p>
         </div>
         <div className="flex gap-2">
@@ -181,7 +313,7 @@ export const PopupNoticeManager: React.FC = () => {
             <Input placeholder="예: /curriculum 또는 https://..." />
           </Form.Item>
 
-          <Form.Item name="dateRange" label="노출 기간" rules={[{ required: true, message: '기간을 선택하세요' }]}>
+          <Form.Item name="dateRange" label="노출 기간">
             <DatePicker.RangePicker className="w-full" />
           </Form.Item>
 
@@ -198,6 +330,52 @@ export const PopupNoticeManager: React.FC = () => {
             <Button onClick={() => setIsModalOpen(false)}>취소</Button>
             <Button type="primary" htmlType="submit" className="bg-indigo-600">
               팝업 게시하기
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* 팝업 공지 수정 모달 */}
+      <Modal
+        title="팝업 공지 수정"
+        open={!!editingPopup}
+        onCancel={() => setEditingPopup(null)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form form={editForm} layout="vertical" onFinish={handleUpdate} className="mt-4">
+          <Form.Item name="title" label="팝업 제목" rules={[{ required: true, message: '제목을 입력하세요' }]}>
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="contentHtml" label="팝업 본문 (텍스트 또는 HTML)">
+            <Input.TextArea rows={4} />
+          </Form.Item>
+
+          <Form.Item name="linkUrl" label="클릭 시 이동할 링크 URL">
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="priority" label="우선순위 (높을수록 상단)">
+            <Input type="number" />
+          </Form.Item>
+
+          <div className="flex gap-6 mb-4">
+            <Form.Item name="showOnWeb" label="웹 노출" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item name="showOnMobile" label="모바일 노출" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+            <Form.Item name="isActive" label="활성화" valuePropName="checked">
+              <Switch />
+            </Form.Item>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button onClick={() => setEditingPopup(null)}>취소</Button>
+            <Button type="primary" htmlType="submit" className="bg-indigo-600">
+              수정사항 저장
             </Button>
           </div>
         </Form>

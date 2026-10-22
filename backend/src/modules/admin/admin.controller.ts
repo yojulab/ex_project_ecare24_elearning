@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Delete,
   Param,
   Body,
   Query,
@@ -225,6 +226,75 @@ export class AdminController {
     });
   }
 
+  // 9-1. 팝업 공지 수정
+  @Put('popups/:id')
+  @RequirePermissions('POPUP_MANAGE')
+  async updatePopup(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+      contentHtml?: string;
+      imageUrl?: string;
+      linkUrl?: string;
+      startsAt?: string;
+      endsAt?: string;
+      showOnWeb?: boolean;
+      showOnMobile?: boolean;
+      priority?: number;
+      isActive?: boolean;
+    },
+  ) {
+    const popup = await this.popupRepo.findOne({ where: { id } });
+    if (!popup) {
+      throw new NotFoundException('해당 팝업을 찾을 수 없습니다.');
+    }
+
+    if (body.title !== undefined) popup.title = body.title;
+    if (body.contentHtml !== undefined) popup.contentHtml = body.contentHtml;
+    if (body.imageUrl !== undefined) popup.imageUrl = body.imageUrl;
+    if (body.linkUrl !== undefined) popup.linkUrl = body.linkUrl;
+    if (body.startsAt) popup.startsAt = new Date(body.startsAt);
+    if (body.endsAt) popup.endsAt = new Date(body.endsAt);
+    if (body.showOnWeb !== undefined) popup.showOnWeb = body.showOnWeb;
+    if (body.showOnMobile !== undefined) popup.showOnMobile = body.showOnMobile;
+    if (body.priority !== undefined) popup.priority = body.priority;
+    if (body.isActive !== undefined) popup.isActive = body.isActive;
+
+    const saved = await this.popupRepo.save(popup);
+    return { success: true, message: '팝업 공지가 수정되었습니다.', popup: saved };
+  }
+
+  // 9-2. 팝업 활성/비활성 토글
+  @Put('popups/:id/toggle')
+  @RequirePermissions('POPUP_MANAGE')
+  async togglePopupActive(@Param('id') id: string) {
+    const popup = await this.popupRepo.findOne({ where: { id } });
+    if (!popup) {
+      throw new NotFoundException('해당 팝업을 찾을 수 없습니다.');
+    }
+    popup.isActive = !popup.isActive;
+    await this.popupRepo.save(popup);
+    return {
+      success: true,
+      id: popup.id,
+      isActive: popup.isActive,
+      message: `팝업이 [${popup.isActive ? '활성화(노출)' : '비활성화(미노출)'}]되었습니다.`,
+    };
+  }
+
+  // 9-3. 팝업 공지 삭제
+  @Delete('popups/:id')
+  @RequirePermissions('POPUP_MANAGE')
+  async deletePopup(@Param('id') id: string) {
+    const popup = await this.popupRepo.findOne({ where: { id } });
+    if (!popup) {
+      throw new NotFoundException('해당 팝업을 찾을 수 없습니다.');
+    }
+    await this.popupRepo.delete(id);
+    return { success: true, id, message: '팝업 공지가 성공적으로 삭제되었습니다.' };
+  }
+
   // 10. 직능원(pqi.or.kr) 자격증 발급 대장 조회
   @Get('certificates')
   @RequirePermissions('CERT_REVIEW')
@@ -380,5 +450,151 @@ export class AdminController {
       qb.where('q.subjectCode LIKE :pattern', { pattern: `${trackCode}%` });
     }
     return qb.orderBy('q.subjectCode', 'ASC').addOrderBy('q.id', 'ASC').getMany();
+  }
+
+  // 19. 교육과정 정보 수정 (수강료, 시간, 질환명, 요약 등)
+  @Put('courses/:id')
+  @RequirePermissions('COURSE_WRITE')
+  async updateCourse(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+      summary?: string;
+      price?: number;
+      theoryHours?: number;
+      practicalHours?: number;
+      targetDisease?: string;
+      qualificationName?: string;
+    },
+  ) {
+    const course = await this.courseRepo.findOne({ where: { id } });
+    if (!course) {
+      throw new NotFoundException('교육과정을 찾을 수 없습니다.');
+    }
+
+    if (body.title !== undefined) course.title = body.title;
+    if (body.summary !== undefined) course.summary = body.summary;
+    if (body.price !== undefined) course.price = body.price;
+    if (body.theoryHours !== undefined) course.theoryHours = body.theoryHours;
+    if (body.practicalHours !== undefined) course.practicalHours = body.practicalHours;
+    if (body.targetDisease !== undefined) course.targetDisease = body.targetDisease;
+    if (body.qualificationName !== undefined) course.qualificationName = body.qualificationName;
+
+    const saved = await this.courseRepo.save(course);
+    return { success: true, message: '교육과정 정보가 수정되었습니다.', course: saved };
+  }
+
+  // 20. 신규 시험 문제 등록
+  @Post('exam-questions')
+  @RequirePermissions('COURSE_WRITE')
+  async createExamQuestion(
+    @Body()
+    body: {
+      subjectCode: string;
+      title: string;
+      scenario?: string;
+      points?: number;
+      options: { no: number; text: string }[];
+      correctAnswer: string;
+      explanation: string;
+      terminologyTags?: string[];
+      categoryId?: number;
+    },
+  ) {
+    const question = this.examQuestionRepo.create({
+      ...body,
+      points: body.points || 10,
+      terminologyTags: body.terminologyTags || [],
+      isReviewedByClinician: true,
+    });
+    const saved = await this.examQuestionRepo.save(question);
+    return { success: true, message: '신규 문제가 문제은행에 등록되었습니다.', question: saved };
+  }
+
+  // 21. 시험 문제 수정
+  @Put('exam-questions/:id')
+  @RequirePermissions('COURSE_WRITE')
+  async updateExamQuestion(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      title?: string;
+      scenario?: string;
+      points?: number;
+      options?: { no: number; text: string }[];
+      correctAnswer?: string;
+      explanation?: string;
+      terminologyTags?: string[];
+    },
+  ) {
+    const question = await this.examQuestionRepo.findOne({ where: { id } });
+    if (!question) {
+      throw new NotFoundException('문제를 찾을 수 없습니다.');
+    }
+
+    if (body.title !== undefined) question.title = body.title;
+    if (body.scenario !== undefined) question.scenario = body.scenario;
+    if (body.points !== undefined) question.points = body.points;
+    if (body.options !== undefined) question.options = body.options;
+    if (body.correctAnswer !== undefined) question.correctAnswer = body.correctAnswer;
+    if (body.explanation !== undefined) question.explanation = body.explanation;
+    if (body.terminologyTags !== undefined) question.terminologyTags = body.terminologyTags;
+
+    const saved = await this.examQuestionRepo.save(question);
+    return { success: true, message: '문제 정보가 수정되었습니다.', question: saved };
+  }
+
+  // 22. 시험 문제 삭제
+  @Delete('exam-questions/:id')
+  @RequirePermissions('COURSE_WRITE')
+  async deleteExamQuestion(@Param('id') id: string) {
+    const question = await this.examQuestionRepo.findOne({ where: { id } });
+    if (!question) {
+      throw new NotFoundException('문제를 찾을 수 없습니다.');
+    }
+    await this.examQuestionRepo.delete(id);
+    return { success: true, id, message: '문제가 문제은행에서 성공적으로 삭제되었습니다.' };
+  }
+
+  // 23. 상담 문의 삭제
+  @Delete('inquiries/:id')
+  @RequirePermissions('COUNSEL_HANDLE')
+  async deleteInquiry(@Param('id') id: string) {
+    const inq = await this.inquiryRepo.findOne({ where: { id } });
+    if (!inq) {
+      throw new NotFoundException('문의를 찾을 수 없습니다.');
+    }
+    await this.inquiryRepo.delete(id);
+    return { success: true, id, message: '문의 내역이 삭제되었습니다.' };
+  }
+
+  // 24. 결제 취소 및 수강 취소 처리
+  @Post('payments/:id/cancel')
+  @RequirePermissions('PAYMENT_CONFIRM')
+  async cancelPayment(@Param('id') paymentId: string) {
+    const payment = await this.paymentRepo.findOne({
+      where: { id: paymentId },
+      relations: ['enrollment'],
+    });
+
+    if (!payment) {
+      throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
+    }
+
+    payment.status = 'CANCELED';
+    await this.paymentRepo.save(payment);
+
+    if (payment.enrollment) {
+      await this.enrollmentRepo.update(payment.enrollment.id, {
+        status: 'CANCELED',
+      });
+    }
+
+    return {
+      success: true,
+      message: '결제 및 수강 신청이 취소 처리되었습니다.',
+      payment,
+    };
   }
 }

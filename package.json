@@ -41,7 +41,8 @@
     "port": "bash run_port.sh",
     "tunnel:share": "bash scripts/start_tunnels.sh",
     "tunnel:status": "bash scripts/status_tunnels.sh",
-    "test:capture": "node tests/capture_screens.js"
+    "test:capture": "node tests/capture_screens.js",
+    "test:crud": "node tests/test_crud_scenarios.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

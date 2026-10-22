@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Tag, Button, Input, Select, Switch, notification, Tabs, Badge } from 'antd';
+import { Card, Tag, Button, Input, Select, Switch, notification, Tabs, Badge, Modal, Form, message, Popconfirm } from 'antd';
 import {
   Video,
   BookOpen,
@@ -16,6 +16,9 @@ import {
   FileCheck,
   ChevronRight,
   ShieldCheck,
+  Plus,
+  Trash2,
+  Edit,
 } from 'lucide-react';
 import { REAL_TRACKS, TrackData } from '@ecare24/utils';
 import UiBadge from '../../components/UiBadge';
@@ -91,11 +94,220 @@ export const CurriculumManager: React.FC = () => {
     }
   };
 
-  // 문제은행 필터링
-  const allQuestionsForTrack = [
+  // 트랙 정보 수정 모달 상태
+  const [isEditCourseModalOpen, setIsEditCourseModalOpen] = useState(false);
+  const [courseForm] = Form.useForm();
+
+  // 신규 문제 등록 / 수정 모달 상태
+  const [isCreateQuestionModalOpen, setIsCreateQuestionModalOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [questionForm] = Form.useForm();
+  const [editQuestionForm] = Form.useForm();
+
+  // 문항 추가/수정/삭제 동적 상태
+  const [customAddedQuestions, setCustomAddedQuestions] = useState<any[]>([]);
+  const [updatedQuestionsMap, setUpdatedQuestionsMap] = useState<Record<string, any>>({});
+  const [deletedQuestionKeys, setDeletedQuestionKeys] = useState<string[]>([]);
+
+  // 1. 과정 정보 수정
+  const handleOpenEditCourse = () => {
+    const dbCourse = dbCourses.find((c) => c.id === currentTrack.id);
+    courseForm.setFieldsValue({
+      title: dbCourse ? dbCourse.title : currentTrack.title,
+      targetDisease: dbCourse ? dbCourse.targetDisease : currentTrack.targetDisease,
+      price: dbCourse ? dbCourse.price : 120000,
+      summary: dbCourse ? dbCourse.summary : currentTrack.targetDisease,
+      theoryHours: dbCourse ? dbCourse.theoryHours : 4,
+      practicalHours: dbCourse ? dbCourse.practicalHours : 4,
+    });
+    setIsEditCourseModalOpen(true);
+  };
+
+  const handleUpdateCourse = async (values: any) => {
+    try {
+      const token = localStorage.getItem('ecare24_admin_token');
+      const res = await fetch(`${ENV.API_BASE_URL}/admin/courses/${currentTrack.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (res.ok) {
+        notification.success({
+          message: '교육과정 정보 수정 완료',
+          description: `[${values.title}] 과정의 정보가 성공적으로 갱신되었습니다.`,
+        });
+        setIsEditCourseModalOpen(false);
+        fetchCourses();
+      } else {
+        notification.error({ message: '과정 정보 수정 실패' });
+      }
+    } catch (e: any) {
+      notification.error({ message: '서버 통신 오류: ' + e.message });
+    }
+  };
+
+  // 2. 신규 문제 등록
+  const handleCreateQuestion = async (values: any) => {
+    try {
+      const token = localStorage.getItem('ecare24_admin_token');
+      const payload = {
+        subjectCode: `${currentTrack.trackCode}-${values.examType}`,
+        title: values.title,
+        points: values.points || 10,
+        options: [
+          { no: 1, text: values.opt1 },
+          { no: 2, text: values.opt2 },
+          { no: 3, text: values.opt3 },
+          { no: 4, text: values.opt4 },
+        ],
+        correctAnswer: String(values.correctAnswer),
+        explanation: values.explanation,
+      };
+
+      const res = await fetch(`${ENV.API_BASE_URL}/admin/exam-questions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const result = await res.json();
+        notification.success({
+          message: '신규 시험 문제 등록 완료',
+          description: '문제은행에 새 문항이 성공적으로 저장되었습니다.',
+        });
+        const newQ = {
+          id: result.question?.id || `CUSTOM-${Date.now()}`,
+          questionNumber: 99,
+          type: values.examType,
+          title: values.title,
+          options: payload.options,
+          correctAnswer: payload.correctAnswer,
+          explanation: values.explanation,
+          trackCode: currentTrack.trackCode,
+        };
+        setCustomAddedQuestions((prev) => [newQ, ...prev]);
+        setIsCreateQuestionModalOpen(false);
+        questionForm.resetFields();
+      } else {
+        notification.error({ message: '문제 등록 실패' });
+      }
+    } catch (e: any) {
+      notification.error({ message: '문제 등록 오류: ' + e.message });
+    }
+  };
+
+  // 3. 문제 수정
+  const handleOpenEditQuestion = (q: any) => {
+    setEditingQuestion(q);
+    editQuestionForm.setFieldsValue({
+      title: q.title,
+      points: 10,
+      opt1: q.options[0]?.text || '',
+      opt2: q.options[1]?.text || '',
+      opt3: q.options[2]?.text || '',
+      opt4: q.options[3]?.text || '',
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation,
+    });
+  };
+
+  const handleUpdateQuestion = async (values: any) => {
+    if (!editingQuestion) return;
+    try {
+      const token = localStorage.getItem('ecare24_admin_token');
+      const payload = {
+        title: values.title,
+        points: values.points || 10,
+        options: [
+          { no: 1, text: values.opt1 },
+          { no: 2, text: values.opt2 },
+          { no: 3, text: values.opt3 },
+          { no: 4, text: values.opt4 },
+        ],
+        correctAnswer: String(values.correctAnswer),
+        explanation: values.explanation,
+      };
+
+      if (editingQuestion.id && !editingQuestion.id.startsWith('CUSTOM')) {
+        await fetch(`${ENV.API_BASE_URL}/admin/exam-questions/${editingQuestion.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+      }
+
+      notification.success({
+        message: '문제 수정 완료',
+        description: '문항 정보가 성공적으로 수정되었습니다.',
+      });
+
+      const qKey = editingQuestion.id || `${editingQuestion.type}-${editingQuestion.questionNumber}`;
+      setUpdatedQuestionsMap((prev) => ({
+        ...prev,
+        [qKey]: {
+          ...editingQuestion,
+          title: values.title,
+          options: payload.options,
+          correctAnswer: payload.correctAnswer,
+          explanation: values.explanation,
+        },
+      }));
+      setEditingQuestion(null);
+    } catch (e: any) {
+      notification.error({ message: '문제 수정 오류: ' + e.message });
+    }
+  };
+
+  // 4. 문제 삭제
+  const handleDeleteQuestion = async (q: any) => {
+    const qKey = q.id || `${q.type}-${q.questionNumber}`;
+    try {
+      const token = localStorage.getItem('ecare24_admin_token');
+      if (q.id && !q.id.startsWith('CUSTOM')) {
+        await fetch(`${ENV.API_BASE_URL}/admin/exam-questions/${q.id}`, {
+          method: 'DELETE',
+          headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        });
+      }
+
+      notification.success({
+        message: '문제 삭제 완료',
+        description: '문제은행에서 문항이 성공적으로 삭제되었습니다.',
+      });
+
+      setDeletedQuestionKeys((prev) => [...prev, qKey]);
+    } catch (e: any) {
+      notification.error({ message: '문제 삭제 오류: ' + e.message });
+    }
+  };
+
+  // 문제은행 전체 목록 조합 (기본 실데이터 + 커스텀 추가 - 삭제 + 수정)
+  const baseQuestions = [
+    ...customAddedQuestions.filter((q) => q.trackCode === currentTrack.trackCode),
     ...currentTrack.mockQuestions.map((q) => ({ ...q, type: 'MOCK' as const })),
     ...currentTrack.finalQuestions.map((q) => ({ ...q, type: 'FINAL' as const })),
   ];
+
+  const allQuestionsForTrack = baseQuestions
+    .filter((q) => {
+      const qKey = q.id || `${q.type}-${q.questionNumber}`;
+      return !deletedQuestionKeys.includes(qKey);
+    })
+    .map((q) => {
+      const qKey = q.id || `${q.type}-${q.questionNumber}`;
+      return updatedQuestionsMap[qKey] || q;
+    });
 
   const filteredQuestions = allQuestionsForTrack.filter((q) => {
     if (examFilter === 'MOCK' && q.type !== 'MOCK') return false;
@@ -133,16 +345,27 @@ export const CurriculumManager: React.FC = () => {
           </p>
         </div>
 
-        <UiBadge serialId="P22-SEC01-BTN01" label="[P22-SEC01-BTN01]">
-          <Button
-            type="primary"
-            icon={<RefreshCw className={`w-3.5 h-3.5 ${isLoadingCourses ? 'animate-spin' : ''}`} />}
-            onClick={fetchCourses}
-            className="bg-emerald-600 hover:bg-emerald-700"
-          >
-            DB 실시간 동기화
-          </Button>
-        </UiBadge>
+        <div className="flex items-center gap-2">
+          <UiBadge serialId="P22-SEC01-BTN02" label="[P22-SEC01-BTN02]">
+            <Button
+              icon={<Edit className="w-3.5 h-3.5" />}
+              onClick={handleOpenEditCourse}
+              className="font-bold text-xs border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            >
+              선택 트랙 정보 수정
+            </Button>
+          </UiBadge>
+          <UiBadge serialId="P22-SEC01-BTN01" label="[P22-SEC01-BTN01]">
+            <Button
+              type="primary"
+              icon={<RefreshCw className={`w-3.5 h-3.5 ${isLoadingCourses ? 'animate-spin' : ''}`} />}
+              onClick={fetchCourses}
+              className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs"
+            >
+              DB 실시간 동기화
+            </Button>
+          </UiBadge>
+        </div>
       </div>
 
       {/* 2. 3개 실데이터 트랙 선택 카드 그리드 */}
@@ -357,7 +580,7 @@ export const CurriculumManager: React.FC = () => {
                 ),
                 children: (
                   <div className="space-y-4 pt-2">
-                    {/* 상단 검색 및 필터 바 */}
+                    {/* 상단 검색, 필터 및 신규 문항 등록 바 */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
                       <div className="flex items-center gap-2">
                         <Select
@@ -376,14 +599,27 @@ export const CurriculumManager: React.FC = () => {
                         </span>
                       </div>
 
-                      <Input
-                        size="small"
-                        placeholder="문항 내용 또는 해설 검색..."
-                        prefix={<Search className="w-3.5 h-3.5 text-slate-400" />}
-                        value={searchQuestion}
-                        onChange={(e) => setSearchQuestion(e.target.value)}
-                        className="w-full sm:w-64"
-                      />
+                      <div className="flex items-center gap-2">
+                        <Input
+                          size="small"
+                          placeholder="문항 내용 또는 해설 검색..."
+                          prefix={<Search className="w-3.5 h-3.5 text-slate-400" />}
+                          value={searchQuestion}
+                          onChange={(e) => setSearchQuestion(e.target.value)}
+                          className="w-full sm:w-56"
+                        />
+                        <UiBadge serialId="P22-SEC02-BTN02" label="[P22-SEC02-BTN02]">
+                          <Button
+                            type="primary"
+                            icon={<Plus className="w-3.5 h-3.5" />}
+                            size="small"
+                            onClick={() => setIsCreateQuestionModalOpen(true)}
+                            className="bg-emerald-600 hover:bg-emerald-700 font-bold text-xs shrink-0"
+                          >
+                            신규 문항 추가
+                          </Button>
+                        </UiBadge>
+                      </div>
                     </div>
 
                     {/* 문항 목록 테이블 */}
@@ -396,7 +632,7 @@ export const CurriculumManager: React.FC = () => {
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-center gap-2">
                               <span className="font-mono text-xs font-black px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                                Q{q.questionNumber}
+                                Q{q.questionNumber || qIdx + 1}
                               </span>
                               <Tag color={q.type === 'MOCK' ? 'blue' : 'purple'} className="font-bold text-[11px]">
                                 {q.type === 'MOCK' ? '실전 모의고사' : '최종 평가시험'}
@@ -405,14 +641,40 @@ export const CurriculumManager: React.FC = () => {
                                 {q.title}
                               </h5>
                             </div>
-                            <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
-                              배점: 20점
-                            </span>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-[11px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                배점: 10점
+                              </span>
+                              <Button
+                                size="small"
+                                icon={<Edit className="w-3 h-3" />}
+                                className="text-xs px-2"
+                                onClick={() => handleOpenEditQuestion(q)}
+                              >
+                                수정
+                              </Button>
+                              <Popconfirm
+                                title="문항 삭제"
+                                description="이 문항을 문제은행에서 삭제하시겠습니까?"
+                                onConfirm={() => handleDeleteQuestion(q)}
+                                okText="삭제"
+                                cancelText="취소"
+                              >
+                                <Button
+                                  size="small"
+                                  danger
+                                  icon={<Trash2 className="w-3 h-3" />}
+                                  className="text-xs px-2"
+                                >
+                                  삭제
+                                </Button>
+                              </Popconfirm>
+                            </div>
                           </div>
 
                           {/* 4지선다 옵션 리스트 */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
-                            {q.options.map((opt) => {
+                            {q.options.map((opt: any) => {
                               const isCorrect = String(opt.no) === String(q.correctAnswer);
                               return (
                                 <div
@@ -458,6 +720,160 @@ export const CurriculumManager: React.FC = () => {
           />
         </Card>
       </UiBadge>
+
+      {/* 1. 과정 정보 수정 모달 */}
+      <Modal
+        title={`[${currentTrack.trackCode}] 과정 기본 정보 수정`}
+        open={isEditCourseModalOpen}
+        onCancel={() => setIsEditCourseModalOpen(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form form={courseForm} layout="vertical" onFinish={handleUpdateCourse} className="mt-4">
+          <Form.Item name="title" label="과정명" rules={[{ required: true, message: '과정명을 입력하세요' }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="targetDisease" label="대상 질환 및 수술명" rules={[{ required: true, message: '대상 질환을 입력하세요' }]}>
+            <Input />
+          </Form.Item>
+          <div className="grid grid-cols-3 gap-3">
+            <Form.Item name="price" label="수강료 (원)" rules={[{ required: true, message: '수강료' }]}>
+              <Input type="number" />
+            </Form.Item>
+            <Form.Item name="theoryHours" label="이론 (시간)">
+              <Input type="number" />
+            </Form.Item>
+            <Form.Item name="practicalHours" label="실습 (시간)">
+              <Input type="number" />
+            </Form.Item>
+          </div>
+          <Form.Item name="summary" label="교육 요약">
+            <Input.TextArea rows={3} />
+          </Form.Item>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button onClick={() => setIsEditCourseModalOpen(false)}>취소</Button>
+            <Button type="primary" htmlType="submit" className="bg-emerald-600">
+              수정사항 저장
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* 2. 신규 문제 등록 모달 */}
+      <Modal
+        title={`[${currentTrack.trackCode}] 신규 CBT 시험 문항 등록`}
+        open={isCreateQuestionModalOpen}
+        onCancel={() => setIsCreateQuestionModalOpen(false)}
+        footer={null}
+        destroyOnClose
+        width={680}
+      >
+        <Form form={questionForm} layout="vertical" onFinish={handleCreateQuestion} className="mt-4" initialValues={{ examType: 'MOCK', correctAnswer: 1, points: 10 }}>
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item name="examType" label="시험 유형" rules={[{ required: true }]}>
+              <Select
+                options={[
+                  { value: 'MOCK', label: '실전 모의고사 (MOCK)' },
+                  { value: 'FINAL', label: '최종 평가시험 (FINAL)' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item name="correctAnswer" label="정답 번호" rules={[{ required: true }]}>
+              <Select
+                options={[
+                  { value: 1, label: '1번' },
+                  { value: 2, label: '2번' },
+                  { value: 3, label: '3번' },
+                  { value: 4, label: '4번' },
+                ]}
+              />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="title" label="문제 지문" rules={[{ required: true, message: '문제 지문을 입력하세요' }]}>
+            <Input.TextArea rows={2} placeholder="예: 만성 폐쇄성 폐질환 대상자에게 산소 투여 시 올바른 유량은?" />
+          </Form.Item>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item name="opt1" label="보기 1" rules={[{ required: true }]}>
+              <Input placeholder="1번 보기 내용" />
+            </Form.Item>
+            <Form.Item name="opt2" label="보기 2" rules={[{ required: true }]}>
+              <Input placeholder="2번 보기 내용" />
+            </Form.Item>
+            <Form.Item name="opt3" label="보기 3" rules={[{ required: true }]}>
+              <Input placeholder="3번 보기 내용" />
+            </Form.Item>
+            <Form.Item name="opt4" label="보기 4" rules={[{ required: true }]}>
+              <Input placeholder="4번 보기 내용" />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="explanation" label="임상 근거 및 정답 해설" rules={[{ required: true, message: '해설을 입력하세요' }]}>
+            <Input.TextArea rows={3} placeholder="골든 룰 및 표준 지침에 기반한 해설 작성" />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button onClick={() => setIsCreateQuestionModalOpen(false)}>취소</Button>
+            <Button type="primary" htmlType="submit" className="bg-emerald-600">
+              문제은행에 등록하기
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* 3. 문항 수정 모달 */}
+      <Modal
+        title="CBT 시험 문항 수정"
+        open={!!editingQuestion}
+        onCancel={() => setEditingQuestion(null)}
+        footer={null}
+        destroyOnClose
+        width={680}
+      >
+        <Form form={editQuestionForm} layout="vertical" onFinish={handleUpdateQuestion} className="mt-4">
+          <Form.Item name="correctAnswer" label="정답 번호" rules={[{ required: true }]}>
+            <Select
+              options={[
+                { value: '1', label: '1번' },
+                { value: '2', label: '2번' },
+                { value: '3', label: '3번' },
+                { value: '4', label: '4번' },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item name="title" label="문제 지문" rules={[{ required: true, message: '문제 지문을 입력하세요' }]}>
+            <Input.TextArea rows={2} />
+          </Form.Item>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Form.Item name="opt1" label="보기 1" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="opt2" label="보기 2" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="opt3" label="보기 3" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item name="opt4" label="보기 4" rules={[{ required: true }]}>
+              <Input />
+            </Form.Item>
+          </div>
+
+          <Form.Item name="explanation" label="임상 근거 및 정답 해설" rules={[{ required: true }]}>
+            <Input.TextArea rows={3} />
+          </Form.Item>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button onClick={() => setEditingQuestion(null)}>취소</Button>
+            <Button type="primary" htmlType="submit" className="bg-emerald-600">
+              수정사항 저장
+            </Button>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 };

@@ -1,6 +1,7 @@
 const { Client } = require('pg');
 const path = require('path');
 const dotenv = require('dotenv');
+const bcrypt = require('bcrypt');
 
 dotenv.config({ path: path.join(__dirname, '../backend/.env') });
 
@@ -195,8 +196,53 @@ async function seedThreeTracks() {
     }
     console.log(`✅ 총 ${qCount}개 문항 (트랙당 모의고사 30 + 최종평가 30) 주입 완료.`);
 
+    // 4-1. 권한 마스터 시드 (25개)
+    console.log('🔐 [4/5] 권한 마스터 시드 보장 중...');
+    const permissionsData = require('../backend/dist/database/seeds/data/permissions.data').SEED_PERMISSIONS;
+    for (const p of permissionsData) {
+      await client.query(
+        `INSERT INTO permissions (code, group_name, name_ko, description, display_order, is_active)
+         VALUES ($1, $2, $3, $4, $5, TRUE)
+         ON CONFLICT (code) DO NOTHING;`,
+        [p.code, p.groupName, p.nameKo, p.description, p.displayOrder]
+      );
+    }
+
+    // 4-2. 사용자 계정 생성 (최고관리자 admin, 학생 student01, student02)
+    console.log('👥 [4/5] 최고관리자(admin) 및 학생(student01, student02) 계정 생성 중...');
+    const adminHash = await bcrypt.hash('admin1234!', 10);
+    const studentHash = await bcrypt.hash('password123!', 10);
+
+    const adminRes = await client.query(
+      `INSERT INTO users (login_id, full_name, phone_number, password_hash, user_type, status, email)
+       VALUES ('admin', '시스템관리자', '010-0000-0000', $1, 'STAFF', 'ACTIVE', 'admin@ecare24.kr')
+       ON CONFLICT (login_id) DO UPDATE SET password_hash = EXCLUDED.password_hash
+       RETURNING id;`,
+      [adminHash]
+    );
+    const adminId = adminRes.rows[0].id;
+
+    for (const p of permissionsData) {
+      await client.query(
+        `INSERT INTO user_permissions (user_id, permission_code, granted_by, granted_at)
+         VALUES ($1, $2, $1, NOW())
+         ON CONFLICT (user_id, permission_code) DO NOTHING;`,
+        [adminId, p.code]
+      );
+    }
+
+    await client.query(
+      `INSERT INTO users (login_id, full_name, phone_number, password_hash, user_type, status, email)
+       VALUES 
+         ('student01', '김영희', '010-9876-5432', $1, 'STUDENT', 'ACTIVE', 'younghee.kim@caregiver24.kr'),
+         ('student02', '박철수', '010-1234-5678', $1, 'STUDENT', 'ACTIVE', 'chulsoo.park@caregiver24.kr')
+       ON CONFLICT (login_id) DO UPDATE SET password_hash = EXCLUDED.password_hash;`,
+      [studentHash]
+    );
+    console.log('✅ 최고관리자 및 학생 계정 준비 완료.');
+
     // 5. 기본 학생 계정(student01, student02) 수강 등록 및 자격증 데이터 보강
-    console.log('📜 [4/4] 수강생 등록 및 자격증 데이터 3개 트랙 연동...');
+    console.log('📜 [5/5] 수강생 등록 및 자격증 데이터 3개 트랙 연동...');
     const userRes = await client.query(`SELECT id, login_id FROM users WHERE login_id IN ('student01', 'student02');`);
     const studentUser = userRes.rows.find(u => u.login_id === 'student01');
 
@@ -209,8 +255,8 @@ async function seedThreeTracks() {
         [studentUser.id]
       );
       await client.query(
-        `INSERT INTO payments (enrollment_id, user_id, amount, method, status, depositor_name, paid_at)
-         VALUES ($1, $2, 120000, 'BANK_TRANSFER', 'PAID', '김영희', NOW());`,
+        `INSERT INTO payments (order_no, enrollment_id, user_id, amount, method, status, depositor_name, paid_at)
+         VALUES ('EC24-ORD-2026-0001', $1, $2, 120000, 'BANK_TRANSFER', 'PAID', '김영희', NOW());`,
         [enrollRes1.rows[0].id, studentUser.id]
       );
 
@@ -222,8 +268,8 @@ async function seedThreeTracks() {
         [studentUser.id]
       );
       await client.query(
-        `INSERT INTO payments (enrollment_id, user_id, amount, method, status, depositor_name, paid_at)
-         VALUES ($1, $2, 120000, 'BANK_TRANSFER', 'PAID', '김영희', NOW());`,
+        `INSERT INTO payments (order_no, enrollment_id, user_id, amount, method, status, depositor_name, paid_at)
+         VALUES ('EC24-ORD-2026-0002', $1, $2, 120000, 'BANK_TRANSFER', 'PAID', '김영희', NOW());`,
         [enrollRes2.rows[0].id, studentUser.id]
       );
 
