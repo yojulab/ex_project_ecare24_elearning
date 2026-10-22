@@ -54,12 +54,12 @@ export const SEED_CERTIFICATES: SeedCertificateItem[] = [
     certificateNo: 'EC24-CERT-2026-00892',
     registryNo: 'PQI-2026-0892',
     studentLoginId: 'student01',
-    courseId: 'a0000000-0000-0000-0000-000000000002', // 신경계
+    courseId: 'a0000000-0000-0000-0000-000000000001', // 트랙 1: 호흡기계
     categoryId: 1,
-    qualificationName: '환자질환별전문간병사 (신경계)',
+    qualificationName: '환자 질환별 전문간병사 (호흡기계·폐질환자)',
     grade: '전문간병사 1급',
     score: 92,
-    qrVerifyToken: 'QR-TOKEN-EC24-2026-NEURO-892',
+    qrVerifyToken: 'QR-TOKEN-EC24-2026-PULMONARY-892',
     status: 'VALID',
   },
   {
@@ -67,11 +67,12 @@ export const SEED_CERTIFICATES: SeedCertificateItem[] = [
     certificateNo: 'EC24-CERT-2026-00104',
     registryNo: 'PQI-2026-0104',
     studentLoginId: 'student01',
-    courseId: 'a0000000-0000-0000-0000-000000000001', // 정규통합
-    qualificationName: '공인 돌봄종사자 (한국돌봄종사자양성교육원 수료)',
-    grade: '정규 240시간 수료',
+    courseId: 'a0000000-0000-0000-0000-000000000002', // 트랙 2: 치매
+    categoryId: 2,
+    qualificationName: '환자 질환별 전문간병사 (인지·정신·치매)',
+    grade: '전문간병사 1급',
     score: 95,
-    qrVerifyToken: 'QR-TOKEN-EC24-2026-MAIN-104',
+    qrVerifyToken: 'QR-TOKEN-EC24-2026-DEMENTIA-104',
     status: 'VALID',
   },
 ];
@@ -88,7 +89,7 @@ export const SEED_CERT_APPLICATIONS: SeedCertApplicationItem[] = [
   {
     id: 'e0000000-0000-0000-0000-000000000001',
     studentLoginId: 'student01',
-    courseId: 'a0000000-0000-0000-0000-000000000003', // 소화기계
+    courseId: 'a0000000-0000-0000-0000-000000000003', // 트랙 3: 근골격계
     eligibilityBasis: '요양보호사 1급 소지자 및 8h 이수',
     status: 'DOC_CHECK',
   },

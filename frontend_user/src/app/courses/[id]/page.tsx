@@ -22,140 +22,32 @@ import {
   Check,
   RefreshCw,
 } from 'lucide-react';
-import {
-  MOCK_MVP_COURSES,
-  MOCK_EXAM_QUESTIONS,
-} from '@ecare24/utils';
+import { REAL_TRACKS, TrackData, TrackQuestion } from '@ecare24/utils';
 import UiBadge from '../../../components/UiBadge';
 import { ENV } from '@/config/env';
 
-// HeyGen 사용자 제공 실비디오 목록 (2개 영상)
-const HEYGEN_VIDEOS = [
-  {
-    id: '1-15-ff12fa129347edd33a1cd0325cc13ac7',
-    title: '환자 안전을 지키는 간병 10대 골든 룰 실기 개요 (HeyGen AI 전문강사)',
-    duration: '3분 30초',
-    videoUrl: 'https://app.heygen.com/videos/1-15-ff12fa129347edd33a1cd0325cc13ac7',
-    embedUrl: 'https://app.heygen.com/embeds/1-15-ff12fa129347edd33a1cd0325cc13ac7',
-    desc: '탈건착환, q2hr 체위변경, 유린백 방광하단 거치, 석션 15초 제한 등 임상 10대 수칙 실기 시연',
-  },
-  {
-    id: '1-15-1ea6d589354cb4aadd79a0ce6c9887a9',
-    title: '돌봄종사자 양성과정 오리엔테이션 및 임상 첫걸음 (HeyGen AI 전문강사)',
-    duration: '3분 05초',
-    videoUrl: 'https://app.heygen.com/videos/1-15-1ea6d589354cb4aadd79a0ce6c9887a9',
-    embedUrl: 'https://app.heygen.com/embeds/1-15-1ea6d589354cb4aadd79a0ce6c9887a9',
-    desc: '대학병원 표준 임상 술기 가이드라인 및 환자 권리 보호 교육원 수료 오리엔테이션',
-  },
-];
-
-// 실제 시험 문항 (DB exam_questions 연동 및 기본 실제 임상 5문항)
-const REAL_EXAM_QUESTIONS = [
-  {
-    id: 'exam-q1',
-    questionNumber: 1,
-    title: '우측 편마비 환자의 단추 달린 상의를 갈아입힐 때 올바른 순서는?',
-    scenario: '뇌경색으로 인해 우측 상하지 마비가 있는 72세 박○○ 환자가 땀으로 젖은 옷을 갈아입으려 한다.',
-    points: 20,
-    options: [
-      { no: 1, text: '벗길 때 우측(환측) 먼저, 입힐 때 좌측(건측) 먼저' },
-      { no: 2, text: '벗길 때 좌측(건측) 먼저, 입힐 때 우측(환측) 먼저 (탈건착환 공식)' },
-      { no: 3, text: '상의 단추를 모두 잠근 채 머리부터 강제로 벗긴다' },
-      { no: 4, text: '좌측과 우측 구분 없이 손에 잡히는 쪽부터 무작위로 당긴다' },
-    ],
-    correctAnswer: 2,
-    explanation: '편마비 환자의 의복 교체 골든 룰은 [탈건착환]입니다. 벗길 때는 자유로운 건강한 쪽(좌측)을 먼저 벗겨 공간을 확보하고, 입힐 때는 움직임이 불편한 마비된 쪽(우측)을 먼저 끼워 넣어야 어깨 탈구와 통증을 예방할 수 있습니다.',
-    carePointTag: '탈건착환 공식 (골든룰 1)',
-  },
-  {
-    id: 'exam-q2',
-    questionNumber: 2,
-    title: '경관유동식(L-tube 피딩) 주입 시 흡인성 폐렴을 예방하기 위한 올바른 환자 자세는?',
-    scenario: '연하곤란으로 비위관을 삽입 중인 80세 이○○ 환자에게 점심 유동식 300ml를 주입하려 한다.',
-    points: 20,
-    options: [
-      { no: 1, text: '편안하게 천장을 보고 똑바로 누운 앙와위 자세' },
-      { no: 2, text: '상체를 30~45도 올린 반좌위(Fowler) 자세' },
-      { no: 3, text: '베개를 빼고 머리를 침대 밑으로 낮춘 트렌델렌버그 자세' },
-      { no: 4, text: '엎드려서 턱을 바닥에 괸 복위 자세' },
-    ],
-    correctAnswer: 2,
-    explanation: '경관영양 주입 시 중력에 의해 음식물이 역류하여 기도로 흡인(Aspiration)되는 것을 방지하기 위해 반드시 상체를 30~45도 거상한 반좌위를 취해야 하며, 주입 후에도 30분 이상 이 자세를 유지해야 합니다.',
-    carePointTag: '상체 30도 반좌위 (골든룰 2)',
-  },
-  {
-    id: 'exam-q3',
-    questionNumber: 3,
-    title: '유치도뇨관(Foley)을 삽입 중인 환자의 유린백(소변백) 관리로 가장 적절한 것은?',
-    scenario: '요폐로 유치도뇨관을 유지 중인 68세 환자가 침상에서 휠체어로 이동하려 한다.',
-    points: 20,
-    options: [
-      { no: 1, text: '이동이 편하도록 유린백을 환자 무릎 위나 가슴 위에 올려놓는다' },
-      { no: 2, text: '유린백을 침대 난간 가장 높은 곳에 걸어 소변 배출을 확인한다' },
-      { no: 3, text: '유린백을 항상 환자의 방광보다 낮은 위치에 유지하며 바닥에 닿지 않게 한다' },
-      { no: 4, text: '소변백 관이 꼬이더라도 배출구만 잠그면 상관없다' },
-    ],
-    correctAnswer: 3,
-    explanation: '소변백이 방광보다 높게 위치하면 역류로 인해 요로감염(CAUTI) 및 패혈증이 발생하므로, 유린백은 항상 방광보다 아래에 거치해야 합니다.',
-    carePointTag: '방광 하단 거치 (골든룰 3)',
-  },
-  {
-    id: 'exam-q4',
-    questionNumber: 4,
-    title: '기도 내 분비물 흡인(석션) 시 1회 흡인 시간의 안전 기준은?',
-    scenario: '기관절개관을 통해 가래 끓는 소리가 심하여 석션을 시행하고자 한다.',
-    points: 20,
-    options: [
-      { no: 1, text: '가래가 완전히 다 나올 때까지 1분 이상 지속한다' },
-      { no: 2, text: '환자가 숨을 참을 수 있을 때까지 30~40초간 시행한다' },
-      { no: 3, text: '1회 흡인은 반드시 15초 이내로 제한하고 충분한 산소를 공급한다' },
-      { no: 4, text: '카테터를 강하게 회전시키며 5초 미만으로 끝낸다' },
-    ],
-    correctAnswer: 3,
-    explanation: '석션 시 폐 내부의 산소도 함께 흡인되므로 1회 흡인 시간은 반드시 15초 이내로 제한해야 합니다. 이를 초과하면 심각한 저산소증과 심장 부정맥이 발생할 수 있습니다.',
-    carePointTag: '15초 이내 흡인 (골든룰 4)',
-  },
-  {
-    id: 'exam-q5',
-    questionNumber: 5,
-    title: '와상 상태의 노인 환자에게 욕창을 예방하기 위한 체위변경 주기 원칙은?',
-    scenario: '뇌출혈 후유증으로 스스로 체위를 변경하지 못하는 85세 와상 환자를 간병하고 있다.',
-    points: 20,
-    options: [
-      { no: 1, text: '하루 3번 식사 시간에만 맞추어 변경한다' },
-      { no: 2, text: '밤에는 수면을 방해하지 않도록 아침까지 그대로 둔다' },
-      { no: 3, text: '낮과 밤을 불문하고 최소 2시간(q2hr) 간격으로 규칙적으로 변경한다' },
-      { no: 4, text: '환자가 아프다고 통증을 호소할 때만 변경한다' },
-    ],
-    correctAnswer: 3,
-    explanation: '지속적인 압박으로 인한 피부 괴사를 막기 위해 와상 환자의 체위변경은 2시간마다(q2hr) 앙와위-측위 순으로 규칙적으로 시행해야 합니다.',
-    carePointTag: 'q2hr 체변 (골든룰 5)',
-  },
-];
-
 export default function CourseDetailPage({ params }: { params: { id: string } }) {
-  const course =
-    MOCK_MVP_COURSES.find((c) => c.id === params.id) || MOCK_MVP_COURSES[0];
+  // params.id에 해당하는 트랙 찾기 (기본값: 트랙 1)
+  const track: TrackData =
+    REAL_TRACKS.find((t) => t.id === params.id) || REAL_TRACKS[0];
 
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   // Step 1: 문구형 교안 상태
+  const [selectedChapterIndex, setSelectedChapterIndex] = useState<number>(0);
   const [isTheoryReadComplete, setIsTheoryReadComplete] = useState<boolean>(true);
 
   // Step 2: HeyGen 비디오 플레이어 상태
-  const [activeVideoIndex, setActiveVideoIndex] = useState<number>(0);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
-  const [videoProgress, setVideoProgress] = useState<number>(100);
   const [speedWarning, setSpeedWarning] = useState<string | null>(null);
 
-  // Step 3: OMR 모의고사 상태
-  const [mockAnswers, setMockAnswers] = useState<Record<string, number>>({});
+  // Step 3: OMR 실전 모의고사 상태 (30문항)
+  const [mockAnswers, setMockAnswers] = useState<Record<number, number>>({});
   const [mockSubmitted, setMockSubmitted] = useState<boolean>(false);
   const [mockScore, setMockScore] = useState<number>(0);
 
-  // Step 4: 실제 시험 항목 및 실시간 통과 상태
-  const [realQuestions, setRealQuestions] = useState<any[]>(REAL_EXAM_QUESTIONS);
-  const [realExamAnswers, setRealExamAnswers] = useState<Record<string, number>>({});
+  // Step 4: 정규 자격검정 시험 상태 (30문항)
+  const [realExamAnswers, setRealExamAnswers] = useState<Record<number, number>>({});
   const [isExamSubmitting, setIsExamSubmitting] = useState<boolean>(false);
   const [realExamSubmitted, setRealExamSubmitted] = useState<boolean>(false);
   const [realExamScore, setRealExamScore] = useState<number>(0);
@@ -164,34 +56,6 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   const [applicantName, setApplicantName] = useState<string>('박순자');
   const [examAutoSavedTime, setExamAutoSavedTime] = useState<string>('방금 실시간 동기화 완료');
   const [examRemainingSeconds, setExamRemainingSeconds] = useState<number>(1800); // 30분 시험
-
-  // 백엔드 실제 시험 문항 로드
-  useEffect(() => {
-    fetch(`${ENV.API_BASE_URL}/exam-questions`)
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error('Exam API offline');
-      })
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const formatted = data.map((q: any, idx: number) => ({
-            id: q.id,
-            questionNumber: idx + 1,
-            title: q.title,
-            scenario: q.scenario,
-            points: q.points || 20,
-            options: q.options || [],
-            correctAnswer: Number(q.correctAnswer) || 2,
-            explanation: q.explanation,
-            carePointTag: q.terminologyTags?.join(', ') || '임상 핵심',
-          }));
-          setRealQuestions(formatted);
-        }
-      })
-      .catch(() => {
-        // Fallback REAL_EXAM_QUESTIONS 유지
-      });
-  }, []);
 
   // 실시간 타이머
   useEffect(() => {
@@ -215,93 +79,80 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   };
 
   // Step 3 모의고사 핸들러
-  const handleSelectMockOption = (qId: string, optNo: number) => {
-    setMockAnswers((prev) => ({ ...prev, [qId]: optNo }));
+  const handleSelectMockOption = (qNum: number, optNo: number) => {
+    setMockAnswers((prev) => ({ ...prev, [qNum]: optNo }));
   };
+
   const handleSubmitMock = () => {
     let correct = 0;
-    MOCK_EXAM_QUESTIONS.forEach((q) => {
-      if (mockAnswers[q.id] === q.correctAnswer) correct++;
+    track.mockQuestions.forEach((q) => {
+      if (String(mockAnswers[q.questionNumber]) === String(q.correctAnswer)) {
+        correct++;
+      }
     });
-    setMockScore(Math.round((correct / MOCK_EXAM_QUESTIONS.length) * 100));
+    const calculatedScore = Math.round((correct / track.mockQuestions.length) * 100);
+    setMockScore(calculatedScore);
     setMockSubmitted(true);
   };
 
-  // Step 4 실제 시험 OMR 답안 선택
-  const handleSelectRealOption = (qId: string, optNo: number) => {
-    setRealExamAnswers((prev) => ({ ...prev, [qId]: optNo }));
+  const handleResetMock = () => {
+    setMockAnswers({});
+    setMockSubmitted(false);
+    setMockScore(0);
+  };
+
+  // Step 4 실제 자격시험 OMR 답안 선택
+  const handleSelectRealOption = (qNum: number, optNo: number) => {
+    setRealExamAnswers((prev) => ({ ...prev, [qNum]: optNo }));
     setExamAutoSavedTime('방금 OMR 마킹 실시간 자동저장');
   };
 
-  // Step 4 실제 시험 제출 및 실시간 통과 처리
+  // Step 4 실제 자격시험 제출 및 실시간 통과 처리
   const handleSubmitRealExam = async () => {
     setIsExamSubmitting(true);
-    try {
-      const res = await fetch(`${ENV.API_BASE_URL}/exams/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          answers: realExamAnswers,
-          applicantName,
-          courseId: course.id,
-          courseTitle: `${course.qualificationName} 1급`,
-        }),
-      });
-
-      if (res.ok) {
-        const result = await res.json();
-        setRealExamScore(result.score);
-        setRealExamPassed(result.isPassed);
-        setRealExamResultData(result);
-        setRealExamSubmitted(true);
-      } else {
-        throw new Error('API 응답 에러');
+    let correctCount = 0;
+    track.finalQuestions.forEach((q) => {
+      if (String(realExamAnswers[q.questionNumber]) === String(q.correctAnswer)) {
+        correctCount++;
       }
-    } catch {
-      // 오프라인 fallback 실시간 채점 엔진 가동
-      let correctCount = 0;
-      realQuestions.forEach((q) => {
-        if (realExamAnswers[q.id] === q.correctAnswer) {
-          correctCount++;
-        }
-      });
-      const calculatedScore = Math.round((correctCount / realQuestions.length) * 100);
-      const isPassed = calculatedScore >= 60;
-      const now = new Date();
-      const issueDateStr = now.toISOString().split('T')[0];
-      const expiryDate = new Date(now);
-      expiryDate.setFullYear(expiryDate.getFullYear() + 2);
-      const expiryDateStr = expiryDate.toISOString().split('T')[0];
-      const certNo = `EC24-${now.getFullYear()}-NEURO-${Math.floor(Math.random() * 90000 + 10000)}`;
+    });
 
-      setRealExamScore(calculatedScore);
-      setRealExamPassed(isPassed);
-      setRealExamResultData({
-        success: true,
-        score: calculatedScore,
-        isPassed,
-        correctCount,
-        totalQuestions: realQuestions.length,
-        grade: calculatedScore >= 90 ? '최우수 (특급)' : calculatedScore >= 80 ? '우수 (1급)' : '합격',
-        certificate: isPassed
-          ? {
-              registryNo: certNo,
-              qualificationName: `${course.qualificationName} 1급`,
-              applicantName,
-              birthDate: '1965.04.12',
-              score: calculatedScore,
-              issuedAt: issueDateStr,
-              expiresAt: expiryDateStr,
-              agency: '한국돌봄종사자양성교육원',
-              pqiRegNo: '한국직업능력연구원(pqi.or.kr) 제2026-0814호',
-              qrVerifyToken: `VERIFY-${certNo}`,
-            }
-          : null,
-      });
-      setRealExamSubmitted(true);
-    } finally {
-      setIsExamSubmitting(false);
-    }
+    const calculatedScore = Math.round((correctCount / track.finalQuestions.length) * 100);
+    const isPassed = calculatedScore >= 60;
+
+    const now = new Date();
+    const issueDateStr = now.toISOString().split('T')[0];
+    const expiryDate = new Date(now);
+    expiryDate.setFullYear(expiryDate.getFullYear() + 2);
+    const expiryDateStr = expiryDate.toISOString().split('T')[0];
+    const certNo = `EC24-${now.getFullYear()}-${track.trackCode}-${Math.floor(Math.random() * 90000 + 10000)}`;
+
+    setRealExamScore(calculatedScore);
+    setRealExamPassed(isPassed);
+    setRealExamResultData({
+      success: true,
+      score: calculatedScore,
+      isPassed,
+      correctCount,
+      totalQuestions: track.finalQuestions.length,
+      grade: calculatedScore >= 90 ? '최우수 (특급)' : calculatedScore >= 80 ? '우수 (1급)' : '합격',
+      certificate: isPassed
+        ? {
+            registryNo: certNo,
+            qualificationName: `${track.qualificationName} 1급`,
+            applicantName,
+            birthDate: '1965.04.12',
+            score: calculatedScore,
+            issuedAt: issueDateStr,
+            expiresAt: expiryDateStr,
+            agency: '한국돌봄종사자양성교육원',
+            pqiRegNo: '한국직업능력연구원(pqi.or.kr) 제2026-0814호',
+            qrVerifyToken: `VERIFY-${certNo}`,
+          }
+        : null,
+    });
+    setRealExamSubmitted(true);
+    setIsExamSubmitting(false);
   };
 
   // 실시간 재시험 응시 리셋
@@ -314,8 +165,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
     setExamRemainingSeconds(1800);
   };
 
-  const currentHeygen = HEYGEN_VIDEOS[activeVideoIndex];
-  const realExamUnansweredCount = realQuestions.length - Object.keys(realExamAnswers).length;
+  const realExamUnansweredCount = track.finalQuestions.length - Object.keys(realExamAnswers).length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8 space-y-8">
@@ -326,10 +176,10 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-emerald-700 transition"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span>전체 16대 질환군 전문 커리큘럼으로 돌아가기</span>
+          <span>전체 3대 전문 커리큘럼으로 돌아가기</span>
         </a>
         <span className="text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-          {course.categoryCode || 'TRK-02'}
+          {track.trackCode}
         </span>
       </div>
 
@@ -341,15 +191,15 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-2">
             <span className="bg-emerald-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">
-              {course.qualificationName}
+              {track.qualificationName}
             </span>
             <UiBadge serialId="P02-SEC01-TIT01" label="[P02-SEC01-TIT01]">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {course.title}
+                {track.title}
               </h1>
             </UiBadge>
             <p className="text-sm text-slate-600 max-w-3xl leading-relaxed">
-              {course.summary}
+              대상 질환: {track.targetDisease}
             </p>
           </div>
 
@@ -357,14 +207,12 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">필수 이수:</span>
               <span className="font-extrabold text-emerald-800">
-                총 {course.totalHours}시간 (이론 {course.theoryHours}h / 실기 {course.practicalHours}h)
+                총 8시간 (이론 4h + 실기 4h)
               </span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-slate-500">임상 기준:</span>
-              <span className="font-bold text-slate-800">
-                대학병원 표준 임상 실기 10대 골든 룰
-              </span>
+              <span className="text-slate-500">수강료:</span>
+              <span className="font-bold text-slate-800">120,000원</span>
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-slate-500">합격 기준:</span>
@@ -385,10 +233,10 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { step: 1, name: '1. 이론 심화교안 (문구형)', icon: <BookOpen className="w-4 h-4" /> },
-              { step: 2, name: '2. 4K 실기 & 실습 (HeyGen)', icon: <Video className="w-4 h-4" /> },
-              { step: 3, name: '3. OMR 모의고사', icon: <FileCheck className="w-4 h-4" /> },
-              { step: 4, name: '4. 정규 자격검정 (실시간 시험)', icon: <Award className="w-4 h-4" /> },
+              { step: 1, name: '1. 정규 심화교안 (문구형)', icon: <BookOpen className="w-4 h-4" /> },
+              { step: 2, name: '2. 4K 실기 VOD (HeyGen)', icon: <Video className="w-4 h-4" /> },
+              { step: 3, name: '3. 실전 모의고사 (30문항)', icon: <FileCheck className="w-4 h-4" /> },
+              { step: 4, name: '4. 정규 자격검정 (30문항)', icon: <Award className="w-4 h-4" /> },
             ].map((s) => (
               <UiBadge
                 key={s.step}
@@ -414,693 +262,572 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       </div>
 
       {/* ====================================================================
-          Step 1: TTS 아닌 문구형 교안 (P03-SEC01-TIT01)
+          Step 1: 정규 교안 5개 챕터 (문구형 정규 교안)
           ==================================================================== */}
       {currentStep === 1 && (
         <div data-serial-id="P03-SEC01-THEORY" className="space-y-6">
-          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-8">
-            {/* 상단 문구형 교안 헤더 */}
-            <div className="border-b border-slate-200 pb-5">
-              <UiBadge serialId="P03-SEC01-TIT01" label="[P03-SEC01-TIT01]">
-                <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                  <span className="w-9 h-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-sm font-black">
-                    文
-                  </span>
-                  Step 1. 뇌졸중 병태생리 및 임상 케어 이론 교안 (문구형 정규 교안)
-                </h2>
-              </UiBadge>
-              <p className="text-xs text-slate-500 mt-2">
-                ※ 본 교안은 TTS 오디오가 아닌, 대학병원 표준 임상 술기 가이드라인과 10대 골든 룰에 기반한 텍스트 전문 문구형 교안입니다.
-              </p>
-            </div>
-
-            {/* 문구형 정규 교안 5대 챕터 본문 */}
-            <div className="space-y-8 text-slate-800 leading-relaxed font-sans">
-              {/* 제1장 */}
-              <section className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
-                <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded">
-                  제1장
-                </span>
-                <h3 className="text-lg font-black text-slate-900">
-                  뇌졸중(뇌경색·뇌출혈) 편마비 환자의 신체 역학 및 견관절 보호 원칙
-                </h3>
-                <p className="text-sm text-slate-700">
-                  뇌졸중으로 인한 편마비(Hemiplegia) 환자는 마비측의 관절을 지지하는 회전근개와 관절낭의 긴장도가 현저히 저하되어 있습니다. 특히 <b>견관절(어깨 관절)</b>은 중력과 외력에 매우 취약하므로, 간병인이 침상 이동이나 체위변경 시 환자의 마비된 팔을 잡아당기면 즉각적인 <b>아탈구(Subluxation)</b>와 비가역적 통증 증후군을 유발합니다.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200">
-                    <b className="text-indigo-900 block mb-1">허혈성 뇌졸중 (뇌경색)</b>
-                    뇌혈관 폐색으로 인한 뇌조직 괴사. 급성기 4.5시간 이내 tPA 혈전용해제 투약 여부 및 출혈성 전환 징후 관찰 필수.
-                  </div>
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200">
-                    <b className="text-rose-900 block mb-1">출혈성 뇌졸중 (뇌출혈)</b>
-                    뇌혈관 파열로 인한 두개내압(ICP) 상승. 혈압의 급격한 변동 방지 및 배변 시 과도한 복압 상승 억제 케어.
-                  </div>
-                </div>
-              </section>
-
-              {/* 제2장: 핵심 골든룰 탈건착환 */}
-              <section className="bg-emerald-50/80 p-6 rounded-2xl border-2 border-emerald-500 space-y-3">
-                <span className="text-xs font-black text-emerald-900 bg-emerald-200 px-2.5 py-1 rounded">
-                  제2장. 핵심 골든 룰 1
-                </span>
-                <h3 className="text-lg font-black text-emerald-950">
-                  골든 룰 체크: 탈건착환 (脫健着患) 정밀 프로토콜
-                </h3>
-                <p className="text-sm text-emerald-900">
-                  <b>"벗길 때는 건강한 쪽(건측)부터, 입힐 때는 마비된 쪽(환측)부터!"</b>
-                </p>
-                <div className="bg-white p-4 rounded-xl border border-emerald-300 text-xs text-slate-800 space-y-2">
-                  <div className="font-extrabold text-emerald-800">
-                    ■ 단추 달린 상의 의복 교체 4단계 순서:
-                  </div>
-                  <ol className="list-decimal list-inside space-y-1.5 text-slate-700">
-                    <li>환자의 단추를 위에서부터 아래로 풀고, 옷깃을 정돈합니다.</li>
-                    <li>자유롭게 움직일 수 있는 <b>건강한 팔(건측)</b>을 먼저 부드럽게 벗겨내어 옷의 품을 최대한 넓힙니다.</li>
-                    <li>상의를 환자의 등 뒤를 거쳐 마비된 어깨 쪽으로 조심스럽게 모아 이동시킵니다.</li>
-                    <li>마지막으로 <b>마비된 팔(환측)</b>의 손목과 팔꿈치를 아래에서 받쳐 지지하면서 옷소매를 부드럽게 빼냅니다. (입힐 때는 이의 역순으로 환측 소매 먼저 착용)</li>
-                  </ol>
-                </div>
-              </section>
-
-              {/* 제3장: q2hr 체위변경 */}
-              <section className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
-                <span className="text-xs font-black text-teal-800 bg-teal-100 px-2.5 py-1 rounded">
-                  제3장. 핵심 골든 룰 2
-                </span>
-                <h3 className="text-lg font-black text-slate-900">
-                  2시간 주기 체위변경(q2hr) 및 앙와위·측위 관절 정렬
-                </h3>
-                <p className="text-sm text-slate-700">
-                  와상 및 반와상 환자는 동일 자세로 2시간 이상 지속될 경우 천골부와 대전자 부위 모세혈관 폐색으로 욕창(Pressure Ulcer)이 급속히 발생합니다.
-                  따라서 <b>낮과 밤을 불문하고 2시간 간격(q2hr)</b>으로 앙와위(똑바로 누운 자세)와 좌·우 측위(옆으로 누운 자세)를 번갈아 변경해야 합니다.
-                </p>
-                <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-medium">
-                  💡 <b>주의</b>: 측위 시 양 무릎 사이에 베개를 끼워 골반 비틀림과 무릎 안쪽 뼈 마찰을 방지하며, 마비된 팔 아래에 지지 베개를 바쳐 어깨 관절 아탈구를 예방합니다.
-                </div>
-              </section>
-
-              {/* 제4장: 연하곤란 & 아스피레이션 */}
-              <section className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-3">
-                <span className="text-xs font-black text-indigo-800 bg-indigo-100 px-2.5 py-1 rounded">
-                  제4장. 핵심 골든 룰 3
-                </span>
-                <h3 className="text-lg font-black text-slate-900">
-                  연하곤란(Dysphagia) 환자의 아스피레이션(흡인성 폐렴) 예방 수칙
-                </h3>
-                <p className="text-sm text-slate-700">
-                  뇌졸중 후유증 환자의 다수는 연하반사 저하로 음식물이나 침이 기도로 넘어가는 흡인 위험이 매우 높습니다.
-                  경관영양(L-tube 피딩) 또는 경구 식사 시 <b>상체를 30~45도 거상한 반좌위(Fowler)</b>를 취하고, 턱을 가슴 쪽으로 당긴(Chin-tuck) 자세에서 천천히 진행합니다. 주입 완료 후에도 최소 30분간 좌위를 유지합니다.
-                </p>
-              </section>
-
-              {/* 제5장: FAST 법칙 */}
-              <section className="bg-rose-50/60 p-6 rounded-2xl border border-rose-200 space-y-3">
-                <span className="text-xs font-black text-rose-800 bg-rose-100 px-2.5 py-1 rounded">
-                  제5장. 응급 이상징후 감별
-                </span>
-                <h3 className="text-lg font-black text-rose-950">
-                  급성기 재발 위험 징후: FAST 법칙 및 즉각 구두 노티(Notification)
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-center">
-                    <div className="font-black text-rose-700 text-sm">F</div>
-                    <div className="font-bold text-slate-800 mt-1">Facial Droop</div>
-                    <div className="text-[11px] text-slate-500">한쪽 입꼬리 처짐</div>
-                  </div>
-                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-center">
-                    <div className="font-black text-rose-700 text-sm">A</div>
-                    <div className="font-bold text-slate-800 mt-1">Arm Weakness</div>
-                    <div className="text-[11px] text-slate-500">한쪽 팔 힘빠짐/저림</div>
-                  </div>
-                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-center">
-                    <div className="font-black text-rose-700 text-sm">S</div>
-                    <div className="font-bold text-slate-800 mt-1">Slurred Speech</div>
-                    <div className="text-[11px] text-slate-500">발음 이상/언어장애</div>
-                  </div>
-                  <div className="bg-white p-3 rounded-xl border border-rose-200 text-center">
-                    <div className="font-black text-rose-700 text-sm">T</div>
-                    <div className="font-bold text-slate-800 mt-1">Time to Notify</div>
-                    <div className="text-[11px] text-slate-500">1초도 지체없이 보고</div>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            {/* Step 1 완료 액션 바 */}
-            <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-emerald-800 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
-                <input
-                  type="checkbox"
-                  checked={isTheoryReadComplete}
-                  onChange={(e) => setIsTheoryReadComplete(e.target.checked)}
-                  className="w-4 h-4 text-emerald-600 rounded"
-                />
-                <span>이론 문구형 교안 전 단원을 정독하였음을 확인합니다. (이론 4시간 인정)</span>
-              </label>
-
-              <UiBadge serialId="P03-SEC01-BTN02" label="[P03-SEC01-BTN02]">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-6 py-3 rounded-xl text-xs sm:text-sm transition shadow"
-                >
-                  Step 2. 4K 실기 영상 학습으로 이동 ▷
-                </button>
-              </UiBadge>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          Step 2: 제공 링크로 등록된 실기 영상 재생 (P02-SEC02-STP02)
-          ==================================================================== */}
-      {currentStep === 2 && (
-        <div data-serial-id="P04-SEC01-VOD" className="space-y-6">
-          <div className="bg-slate-950 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xl space-y-6">
-            {/* 상단 비디오 헤더 */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <UiBadge serialId="P04-SEC01-TIT01" label="[P04-SEC01-TIT01]">
-                  <h2 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-black">
-                      4K
+                <UiBadge serialId="P03-SEC01-TIT01" label="[P03-SEC01-TIT01]">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-sm font-black">
+                      文
                     </span>
-                    Step 2. 4K 실기 & 실습 (HeyGen 공인 영상 연동)
+                    Step 1. {track.title} 정규 교안
                   </h2>
                 </UiBadge>
-                <p className="text-xs text-slate-400 mt-1">
-                  제공된 HeyGen 비디오 링크로 등록된 실제 임상 강좌가 재생됩니다.
+                <p className="text-xs text-slate-500 mt-1">
+                  ※ 본 교안은 TTS 오디오가 아닌, 대학병원 임상 실기 가이드라인과 10대 골든 룰에 기반한 정규 텍스트 전문 교안입니다.
                 </p>
               </div>
-
-              {/* 배속 조절기 */}
-              <div className="flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800 text-xs">
-                <span className="text-slate-400">재생 속도:</span>
-                {[1.0, 1.25, 1.5, 2.0].map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => handleSetSpeed(s)}
-                    className={`px-2 py-0.5 rounded font-bold font-mono transition ${
-                      playbackSpeed === s
-                        ? 'bg-emerald-600 text-white'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {s}x
-                  </button>
-                ))}
-              </div>
+              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shrink-0">
+                5개 챕터 완비 (이수시간 4h 인정)
+              </span>
             </div>
 
-            {speedWarning && (
-              <div className="bg-amber-950/80 border border-amber-600 text-amber-200 p-3 rounded-xl text-xs flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>{speedWarning}</span>
-              </div>
-            )}
-
-            {/* 차시 선택 탭 버튼 (HeyGen 제공 2개 영상) */}
-            <div className="flex flex-wrap gap-2">
-              {HEYGEN_VIDEOS.map((v, idx) => (
+            {/* 챕터 선택 탭 */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {track.chapters.map((ch, idx) => (
                 <button
-                  key={v.id}
-                  onClick={() => setActiveVideoIndex(idx)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-                    activeVideoIndex === idx
-                      ? 'bg-emerald-600 text-white border-emerald-500 shadow-md'
-                      : 'bg-slate-900 text-slate-300 border-slate-800 hover:bg-slate-800'
+                  key={idx}
+                  onClick={() => setSelectedChapterIndex(idx)}
+                  className={`px-4 py-2 rounded-xl text-xs font-black transition ${
+                    selectedChapterIndex === idx
+                      ? 'bg-emerald-700 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  <Play className="w-3.5 h-3.5" />
-                  <span>제{idx + 1}강: {v.title.slice(0, 24)}... ({v.duration})</span>
+                  제{idx + 1}장
                 </button>
               ))}
             </div>
 
-            {/* 실제 HeyGen 영상 재생 iframe 플레이어 (P02-SEC02-STP02) */}
-            <div className="space-y-2">
-              <div className="aspect-video w-full bg-black rounded-2xl overflow-hidden border-2 border-slate-800 relative shadow-2xl">
-                <iframe
-                  src={currentHeygen.embedUrl}
-                  title={currentHeygen.title}
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-
-              {/* 하단 비디오 정보 바 및 외부 원본 링크 */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 bg-slate-900 rounded-xl text-xs">
-                <div>
-                  <div className="font-extrabold text-white text-sm">
-                    {currentHeygen.title}
-                  </div>
-                  <div className="text-slate-400 text-xs mt-0.5">
-                    {currentHeygen.desc}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <UiBadge serialId="P04-SEC01-PLY01" label="[P04-SEC01-PLY01]">
-                    <a
-                      href={currentHeygen.videoUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-400 font-bold border border-slate-700 transition"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                      <span>HeyGen 원본 링크 열기</span>
-                    </a>
-                  </UiBadge>
+            {/* 선택된 챕터 본문 */}
+            {track.chapters[selectedChapterIndex] && (
+              <div className="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-4">
+                <span className="text-xs font-black text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded">
+                  제{selectedChapterIndex + 1}장
+                </span>
+                <h3 className="text-xl font-black text-slate-900">
+                  {track.chapters[selectedChapterIndex].title}
+                </h3>
+                <div className="text-sm text-slate-800 leading-relaxed font-sans whitespace-pre-line pt-2">
+                  {track.chapters[selectedChapterIndex].content.replace(/^###\s*[^\n\r]+\n*/, '')}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* 하단 진도율 및 다음 단계 이동 */}
-            <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800">
-              <div className="flex items-center gap-2 text-xs text-emerald-400 font-bold">
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
-                <span>4K 실기 시뮬레이션 진도율 100% 충족 완료 (실기 4시간 인정)</span>
-              </div>
-
-              <UiBadge serialId="P04-SEC01-BTN02" label="[P04-SEC01-BTN02]">
-                <button
-                  onClick={() => setCurrentStep(4)}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold px-6 py-2.5 rounded-xl text-xs sm:text-sm transition shadow cursor-pointer"
-                >
-                  Step 4. 정규 자격검정 (실제 시험) 응시하기 ▷
-                </button>
-              </UiBadge>
+            {/* 교안 완독 버튼 */}
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                제{selectedChapterIndex + 1}장 / 총 {track.chapters.length}장
+              </span>
+              <button
+                onClick={() => {
+                  if (selectedChapterIndex < track.chapters.length - 1) {
+                    setSelectedChapterIndex((prev) => prev + 1);
+                  } else {
+                    setCurrentStep(2);
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition shadow-sm"
+              >
+                <span>
+                  {selectedChapterIndex < track.chapters.length - 1
+                    ? '다음 장으로 넘어가기'
+                    : '교안 완독 완료 ➔ Step 2 실기 VOD 시청하기'}
+                </span>
+                <ChevronLeft className="w-4 h-4 rotate-180" />
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* ====================================================================
-          Step 3: 단원별 OMR 모의고사 (P06-SEC01-CBT)
+          Step 2: HeyGen AI 실기 & 실습 VOD (P04-SEC01)
+          ==================================================================== */}
+      {currentStep === 2 && (
+        <div data-serial-id="P04-SEC01-VOD" className="space-y-6">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-200 pb-5">
+              <UiBadge serialId="P04-SEC01-TIT01" label="[P04-SEC01-TIT01]">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                  <span className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center text-sm font-black">
+                    視
+                  </span>
+                  Step 2. 4K 핵심 실기 시뮬레이션 VOD (HeyGen 공식 교육)
+                </h2>
+              </UiBadge>
+              <p className="text-xs text-slate-500 mt-1">
+                {track.videoTitle}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* 비디오 임베드 플레이어 */}
+              <div className="lg:col-span-2 space-y-4">
+                <div className="aspect-video bg-black rounded-2xl overflow-hidden border border-slate-300 shadow-md relative">
+                  <iframe
+                    src={track.embedUrl}
+                    title={track.videoTitle}
+                    className="w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+
+                {/* 배속 제어 및 원본 링크 */}
+                <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-600">배속 조절:</span>
+                    {[1.0, 1.2, 1.5, 2.0].map((spd) => (
+                      <button
+                        key={spd}
+                        onClick={() => handleSetSpeed(spd)}
+                        className={`px-2.5 py-1 rounded font-bold transition ${
+                          playbackSpeed === spd
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {spd}x
+                      </button>
+                    ))}
+                  </div>
+
+                  <a
+                    href={track.videoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-blue-700 font-bold hover:underline"
+                  >
+                    <span>HeyGen 원본 고화질 새창 열기</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+
+                {speedWarning && (
+                  <div className="text-xs text-rose-700 font-bold bg-rose-50 p-3 rounded-xl border border-rose-200 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                    <span>{speedWarning}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* 스크립트 전문 */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col space-y-3">
+                <h4 className="font-extrabold text-slate-900 text-sm flex items-center gap-2 border-b border-slate-200 pb-2">
+                  <FileText className="w-4 h-4 text-emerald-600" />
+                  강사 공식 녹취록 전문 (Script)
+                </h4>
+                <div className="text-xs text-slate-800 leading-relaxed font-sans overflow-y-auto max-h-[350px] whitespace-pre-line bg-white p-4 rounded-xl border border-slate-200 flex-1">
+                  {track.scriptText}
+                </div>
+              </div>
+            </div>
+
+            {/* 다음 단계 버튼 */}
+            <div className="pt-4 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setCurrentStep(3)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 transition shadow-sm"
+              >
+                <span>실기 VOD 시청 완료 ➔ Step 3 실전 모의고사 풀기</span>
+                <ChevronLeft className="w-4 h-4 rotate-180" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          Step 3: 실전 모의고사 30문항 CBT (P07-SEC01)
           ==================================================================== */}
       {currentStep === 3 && (
-        <div data-serial-id="P06-SEC01-CBT" className="space-y-6">
-          <div className="flex flex-col lg:flex-row gap-6 items-start">
-            <div className="flex-1 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 w-full">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <UiBadge serialId="P06-SEC01-TIT01" label="[P06-SEC01-TIT01]">
-                  <h2 className="text-xl font-extrabold text-slate-900">
-                    Step 3. 신경계 전문간병사 단원별 모의고사
+        <div data-serial-id="P07-SEC01-MOCK" className="space-y-6">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <UiBadge serialId="P07-SEC01-TIT01" label="[P07-SEC01-TIT01]">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center text-sm font-black">
+                      考
+                    </span>
+                    Step 3. 실전 모의고사 CBT ({track.mockQuestions.length}문항)
                   </h2>
                 </UiBadge>
-                <span className="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  모의평가 모드
-                </span>
-              </div>
-
-              <div className="space-y-6">
-                {MOCK_EXAM_QUESTIONS.map((q) => (
-                  <div
-                    key={q.id}
-                    className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3"
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="w-7 h-7 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-extrabold text-xs shrink-0">
-                        {q.questionNumber}
-                      </span>
-                      <div>
-                        <div className="font-extrabold text-base text-slate-900 leading-snug">
-                          {q.title}
-                        </div>
-                        {q.scenario && (
-                          <div className="mt-1.5 p-3 rounded-xl bg-amber-50 text-amber-900 text-xs font-medium border border-amber-200">
-                            {q.scenario}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 pt-2">
-                      {q.options.map((opt) => (
-                        <div
-                          key={opt.no}
-                          onClick={() => handleSelectMockOption(q.id, opt.no)}
-                          className={`p-3 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold transition flex items-center gap-3 border ${
-                            mockAnswers[q.id] === opt.no
-                              ? 'bg-emerald-50 border-emerald-600 text-emerald-950 font-bold'
-                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                          }`}
-                        >
-                          <span
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-mono font-bold border ${
-                              mockAnswers[q.id] === opt.no
-                                ? 'bg-emerald-600 text-white border-emerald-600'
-                                : 'border-slate-300 text-slate-400'
-                            }`}
-                          >
-                            {opt.no}
-                          </span>
-                          <span>{opt.text}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {mockSubmitted && (
-                      <div className="mt-4 p-3 bg-slate-100 rounded-xl text-xs space-y-1 border border-slate-300">
-                        <div className="font-bold text-slate-900">
-                          정답: {q.correctAnswer}번 | 핵심 케어: {q.carePointTag}
-                        </div>
-                        <div className="text-slate-600 leading-relaxed">
-                          {q.explanation}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 모의고사 제출 카드 */}
-            <div className="w-full lg:w-72 bg-amber-50/80 rounded-3xl p-5 border-2 border-amber-200 shadow-md sticky top-36 shrink-0 space-y-4">
-              <div className="border-b border-amber-200 pb-3">
-                <div className="text-xs font-extrabold text-amber-900">
-                  모의고사 채점판
-                </div>
-              </div>
-              <button
-                onClick={handleSubmitMock}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold py-3 rounded-xl text-xs transition"
-              >
-                모의고사 간이 채점
-              </button>
-              {mockSubmitted && (
-                <div className="p-3 bg-white rounded-xl text-center border border-emerald-200 space-y-2">
-                  <div className="text-xs text-slate-500">모의 채점 결과</div>
-                  <div className="text-2xl font-black text-emerald-700">{mockScore}점</div>
-                  <button
-                    onClick={() => setCurrentStep(4)}
-                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2 rounded-xl transition"
-                  >
-                    Step 4. 정규 자격검정 응시 ▷
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ====================================================================
-          Step 4: 실제 시험 항목으로 변경, 관련 통과는 실시간 (P02-SEC02-STP04)
-          ==================================================================== */}
-      {currentStep === 4 && (
-        <div data-serial-id="P08-SEC01-CERT" className="space-y-6">
-          {/* A. 실시간 시험 합격 완료된 경우: 디지털 공적 자격증 즉시 렌더링 */}
-          {realExamSubmitted && realExamPassed && realExamResultData ? (
-            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm max-w-3xl mx-auto space-y-8 animate-fade-in">
-              <div className="text-center space-y-2">
-                <UiBadge serialId="P08-SEC01-TIT01" label="[P08-SEC01-TIT01]">
-                  <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-black mb-1">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>실시간 합격 심사 승인 완료</span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                    축하합니다! 정규 자격검정 실시간 합격
-                  </h2>
-                </UiBadge>
-                <p className="text-sm text-slate-600">
-                  한국직업능력연구원(pqi.or.kr) 등록 민간자격 디지털 공적 자격증이 실시간 발급되었습니다.
+                <p className="text-xs text-slate-500 mt-1">
+                  ※ 시험 전 스스로 실무 지식을 점검하고 오답 노트를 확인할 수 있는 공식 모의고사입니다. (무제한 응시 가능)
                 </p>
               </div>
 
-              {/* 디지털 모바일 자격증 카드 (Wallet Card) */}
-              <div className="bg-gradient-to-tr from-slate-950 via-emerald-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl border-2 border-emerald-400 shadow-2xl relative overflow-hidden">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <span className="text-emerald-400 text-xs font-mono font-bold tracking-wider uppercase block">
-                      ecare24 Certified Specialized Caregiver
-                    </span>
-                    <div className="text-2xl font-black mt-1">
-                      {realExamResultData.certificate?.qualificationName || `${course.qualificationName} 1급`}
-                    </div>
-                    <div className="text-xs text-slate-400 font-mono mt-0.5">
-                      등록번호: {realExamResultData.certificate?.registryNo || 'EC24-2026-NEURO-77492'}
-                    </div>
-                  </div>
-
-                  <div className="bg-white p-2 rounded-xl shadow shrink-0">
-                    <div className="w-16 h-16 bg-slate-900 rounded flex items-center justify-center text-[10px] font-mono text-white text-center leading-tight">
-                      [2D QR<br />VERIFY]
-                    </div>
-                  </div>
+              {mockSubmitted && (
+                <div className="bg-amber-50 px-4 py-2 rounded-xl border border-amber-200 text-xs font-black text-amber-900 flex items-center gap-2">
+                  <span>모의고사 채점 결과:</span>
+                  <span className="text-base text-amber-700 font-mono">{mockScore}점</span>
+                  <span>({mockScore >= 60 ? '합격 가능권 ✓' : '보충 필요'})</span>
                 </div>
-
-                <div className="mt-8 pt-4 border-t border-slate-700/80 flex flex-col sm:flex-row justify-between text-xs gap-3">
-                  <div>
-                    <span className="text-slate-400 block">수검자 성명</span>
-                    <span className="font-extrabold text-sm text-white">{applicantName} (1965.04.12)</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block">실시간 취득 점수</span>
-                    <span className="font-extrabold text-sm text-emerald-400">
-                      {realExamScore}점 ({realExamResultData.grade || '우수 1급'})
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block">유효 기간 (2년)</span>
-                    <span className="font-mono text-slate-200">
-                      {realExamResultData.certificate?.issuedAt} ~ {realExamResultData.certificate?.expiresAt}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* 자격증 출력 및 공적 검증 링크 액션 */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-                <UiBadge serialId="P08-SEC01-BTN01" label="[P08-SEC01-BTN01]">
-                  <button
-                    onClick={() => alert(`[${applicantName}] 수검자의 고해상도 PDF 자격인증서가 정상 생성되었습니다.`)}
-                    className="flex items-center justify-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3 rounded-2xl text-xs sm:text-sm font-extrabold transition shadow"
-                  >
-                    <Download className="w-4 h-4" />
-                    <span>고해상도 PDF 자격인증서 인쇄/저장</span>
-                  </button>
-                </UiBadge>
-
-                <UiBadge serialId="P08-SEC01-BTN02" label="[P08-SEC01-BTN02]">
-                  <a
-                    href="/verify"
-                    className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-6 py-3 rounded-2xl text-xs sm:text-sm font-extrabold transition border border-slate-300"
-                  >
-                    <QrCode className="w-4 h-4 text-emerald-700" />
-                    <span>공적 QR 진위검증 페이지 바로가기</span>
-                  </a>
-                </UiBadge>
-              </div>
-
-              <div className="text-center pt-2">
-                <button
-                  onClick={handleRetakeExam}
-                  className="text-xs text-slate-400 hover:text-slate-600 underline"
-                >
-                  [테스트용: 자격검정 다시 응시하기]
-                </button>
-              </div>
+              )}
             </div>
-          ) : (
-            /* B. 시험 응시 모드: 실제 시험 항목 출제 및 실시간 통과 처리 (P02-SEC02-STP04) */
-            <div className="flex flex-col lg:flex-row gap-6 items-start">
-              {/* 좌측: 실제 시험 항목 문제 풀이 영역 */}
-              <div className="flex-1 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6 w-full">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-                  <div>
-                    <UiBadge serialId="P02-SEC02-STP04" label="[P02-SEC02-STP04]">
-                      <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                        4. 정규 자격검정 (한국돌봄종사자양성교육원 공인 시험)
-                      </h2>
-                    </UiBadge>
-                    <p className="text-xs text-slate-500 mt-1">
-                      실제 시험 항목으로 출제되며, 답안 제출 즉시 <b>실시간 통과 판정 및 자격증이 발급</b>됩니다.
-                    </p>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-600">수검자:</span>
-                    <input
-                      type="text"
-                      value={applicantName}
-                      onChange={(e) => setApplicantName(e.target.value)}
-                      className="px-2.5 py-1 text-xs border border-slate-300 rounded-lg font-bold w-24 text-center focus:ring-2 focus:ring-emerald-500"
-                    />
-                  </div>
-                </div>
+            {/* 30문항 리스트 */}
+            <div className="space-y-6">
+              {track.mockQuestions.map((q) => {
+                const userAns = mockAnswers[q.questionNumber];
+                const isCorrect = String(userAns) === String(q.correctAnswer);
 
-                {/* 불합격 시 안내 배너 */}
-                {realExamSubmitted && !realExamPassed && (
-                  <div className="bg-rose-50 border-2 border-rose-400 p-4 rounded-2xl text-rose-900 text-xs flex items-center justify-between">
-                    <div>
-                      <b>과락 불합격 판정 ({realExamScore}점 / 60점 미만)</b>
-                      <p className="mt-0.5 text-rose-700">임상 기준에 미달되었습니다. 오답을 확인하고 재시험에 응시하십시오.</p>
-                    </div>
-                    <button
-                      onClick={handleRetakeExam}
-                      className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-lg text-xs"
-                    >
-                      실시간 재응시
-                    </button>
-                  </div>
-                )}
-
-                {/* 실제 시험 항목 목록 */}
-                <div className="space-y-8">
-                  {realQuestions.map((q) => (
-                    <div
-                      key={q.id}
-                      className="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="w-8 h-8 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-black text-xs shrink-0">
+                return (
+                  <div
+                    key={q.questionNumber}
+                    className={`rounded-2xl p-6 border transition space-y-4 ${
+                      mockSubmitted
+                        ? isCorrect
+                          ? 'bg-emerald-50/40 border-emerald-300'
+                          : 'bg-rose-50/40 border-rose-300'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-7 h-7 rounded-lg bg-slate-900 text-white text-xs font-black flex items-center justify-center font-mono">
                           {q.questionNumber}
                         </span>
-                        <div>
-                          <div className="font-black text-base text-slate-900 leading-snug">
-                            {q.title}
-                            <span className="ml-2 text-xs font-mono font-bold text-emerald-700">
-                              [{q.points}점]
-                            </span>
-                          </div>
-                          {q.scenario && (
-                            <div className="mt-2 p-3 rounded-xl bg-amber-50 text-amber-900 text-xs font-medium border border-amber-200">
-                              <b>[실제 임상 상황]</b> {q.scenario}
-                            </div>
-                          )}
-                        </div>
+                        <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+                          {q.title}
+                        </h4>
                       </div>
+                      {mockSubmitted && (
+                        <span
+                          className={`text-xs font-black px-2.5 py-0.5 rounded-full ${
+                            isCorrect ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'
+                          }`}
+                        >
+                          {isCorrect ? '정답 ✓' : '오답 ✗'}
+                        </span>
+                      )}
+                    </div>
 
-                      {/* 4지선다 보기 */}
-                      <div className="space-y-2 pt-2">
-                        {q.options.map((opt: any) => (
-                          <div
+                    {/* 선택지 4개 */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
+                      {q.options.map((opt) => {
+                        const isSelected = userAns === opt.no;
+                        const isTheCorrectOpt = String(opt.no) === String(q.correctAnswer);
+
+                        return (
+                          <button
                             key={opt.no}
-                            onClick={() => handleSelectRealOption(q.id, opt.no)}
-                            className={`p-3.5 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold transition flex items-center gap-3 border ${
-                              realExamAnswers[q.id] === opt.no
-                                ? 'bg-emerald-50 border-emerald-600 text-emerald-950 font-bold shadow-sm'
+                            disabled={mockSubmitted}
+                            onClick={() => handleSelectMockOption(q.questionNumber, opt.no)}
+                            className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition ${
+                              isSelected
+                                ? 'bg-amber-600 text-white border-amber-600 font-bold shadow-sm'
                                 : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                            }`}
+                            } ${mockSubmitted && isTheCorrectOpt ? 'ring-2 ring-emerald-500 font-bold' : ''}`}
                           >
                             <span
-                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-mono font-bold border ${
-                                realExamAnswers[q.id] === opt.no
-                                  ? 'bg-emerald-700 text-white border-emerald-700'
-                                  : 'border-slate-300 text-slate-400'
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                                isSelected
+                                  ? 'bg-white text-amber-700'
+                                  : 'bg-slate-100 text-slate-700'
                               }`}
                             >
                               {opt.no}
                             </span>
                             <span>{opt.text}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* 시험 제출 후 오답 해설 */}
-                      {realExamSubmitted && (
-                        <div className={`mt-3 p-3.5 rounded-xl text-xs space-y-1 border ${
-                          realExamAnswers[q.id] === q.correctAnswer
-                            ? 'bg-emerald-50/70 border-emerald-300 text-emerald-900'
-                            : 'bg-rose-50/70 border-rose-300 text-rose-900'
-                        }`}>
-                          <div className="font-black">
-                            {realExamAnswers[q.id] === q.correctAnswer ? '✓ 정답!' : '✗ 오답!'} 정답은 [{q.correctAnswer}번]입니다. (핵심: {q.carePointTag})
-                          </div>
-                          <div className="text-slate-700 leading-relaxed mt-1">
-                            {q.explanation}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 우측: 실제 디지털 OMR 답안 마킹판 & 실시간 통과 제출 버튼 */}
-              <div
-                data-serial-id="P06-SEC02-OMR"
-                className="w-full lg:w-80 bg-amber-50/90 rounded-3xl p-6 border-2 border-amber-300 shadow-lg sticky top-36 shrink-0 space-y-5"
-              >
-                <div className="border-b border-amber-200 pb-3">
-                  <div className="text-xs font-black text-amber-950 flex items-center justify-between">
-                    <span>정규 자격검정 OMR 마킹판</span>
-                    <span className="font-mono text-[11px] text-emerald-700 font-bold">
-                      실시간 채점 연동
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs mt-3 font-bold">
-                    <span>미마킹 문항 수:</span>
-                    <span className="text-rose-600 font-black text-sm">
-                      {realExamUnansweredCount}문항 남음
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-xs mt-1 text-slate-500">
-                    <span>남은 시험 시간:</span>
-                    <span className="font-mono font-bold text-slate-800">
-                      {Math.floor(examRemainingSeconds / 60)}분 {examRemainingSeconds % 60}초
-                    </span>
-                  </div>
-                </div>
-
-                {/* 문항별 OMR 마킹 */}
-                <div className="space-y-3 font-mono text-xs">
-                  {realQuestions.map((q) => (
-                    <div key={q.id} className="flex items-center justify-between">
-                      <span className="font-bold text-slate-700 w-8">
-                        {q.questionNumber}번
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        {[1, 2, 3, 4].map((num) => (
-                          <button
-                            key={num}
-                            onClick={() => handleSelectRealOption(q.id, num)}
-                            className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs transition border ${
-                              realExamAnswers[q.id] === num
-                                ? 'bg-slate-900 text-white border-slate-900 shadow'
-                                : 'bg-white text-slate-400 border-amber-300 hover:border-slate-500'
-                            }`}
-                          >
-                            {num}
                           </button>
-                        ))}
-                      </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
 
-                {/* 실시간 통과 제출 버튼 */}
-                <div className="pt-4 border-t border-amber-200 space-y-3">
-                  <UiBadge serialId="P06-SEC02-BTN01" label="[P06-SEC02-BTN01]" className="w-full">
-                    <button
-                      disabled={isExamSubmitting}
-                      onClick={handleSubmitRealExam}
-                      className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3.5 rounded-2xl text-xs sm:text-sm transition shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-                    >
-                      {isExamSubmitting ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>실시간 채점 및 심사진행 중...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Award className="w-4 h-4" />
-                          <span>답안 최종 제출 및 실시간 통과 판정</span>
-                        </>
-                      )}
-                    </button>
-                  </UiBadge>
-
-                  <div className="text-[11px] text-center text-slate-500">
-                    {examAutoSavedTime}
+                    {/* 채점 후 정답 및 상세 해설 노출 */}
+                    {mockSubmitted && (
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans space-y-1">
+                        <div className="font-bold text-emerald-800">
+                          정답: {q.correctAnswer}번
+                        </div>
+                        <div><b>임상 해설:</b> {q.explanation}</div>
+                      </div>
+                    )}
                   </div>
+                );
+              })}
+            </div>
+
+            {/* 모의고사 채점 / 리셋 버튼 */}
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-between">
+              {mockSubmitted ? (
+                <button
+                  onClick={handleResetMock}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-300"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>다시 풀기</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmitMock}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-amber-600 text-white text-xs font-black hover:bg-amber-700 shadow-sm"
+                >
+                  <span>모의고사 자동 채점하기</span>
+                  <Check className="w-4 h-4" />
+                </button>
+              )}
+
+              <button
+                onClick={() => setCurrentStep(4)}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 shadow-sm"
+              >
+                <span>정규 자격검정 (Step 4) 바로 응시하기</span>
+                <ChevronLeft className="w-4 h-4 rotate-180" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====================================================================
+          Step 4: 정규 자격검정 평가시험 30문항 CBT & 실시간 통과 (P08-SEC01)
+          ==================================================================== */}
+      {currentStep === 4 && (
+        <div data-serial-id="P08-SEC01-FINAL" className="space-y-6">
+          <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-sm space-y-6">
+            <div className="border-b border-slate-200 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <UiBadge serialId="P08-SEC01-TIT01" label="[P08-SEC01-TIT01]">
+                  <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                    <span className="w-9 h-9 rounded-xl bg-purple-700 text-white flex items-center justify-center text-sm font-black">
+                      試
+                    </span>
+                    Step 4. {track.qualificationName} 1급 정규 자격검정
+                  </h2>
+                </UiBadge>
+                <p className="text-xs text-slate-500 mt-1">
+                  ※ 한국직업능력연구원(pqi.or.kr) 제2026-0814호 등록 정규 검정 (60점 이상 즉시 합격 및 자격증 발급)
+                </p>
+              </div>
+
+              {!realExamSubmitted && (
+                <div className="flex items-center gap-3">
+                  <div className="bg-slate-100 px-3 py-1.5 rounded-xl text-xs font-mono font-bold text-slate-700 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-slate-500" />
+                    <span>
+                      {Math.floor(examRemainingSeconds / 60)}:
+                      {(examRemainingSeconds % 60).toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+                    {examAutoSavedTime}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* 수험자 정보 입력 */}
+            {!realExamSubmitted && (
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-wrap items-center justify-between gap-4 text-xs">
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-slate-700">수험자 성명:</span>
+                  <input
+                    type="text"
+                    value={applicantName}
+                    onChange={(e) => setApplicantName(e.target.value)}
+                    className="border border-slate-300 rounded-lg px-3 py-1.5 font-bold text-slate-900 bg-white w-32 focus:ring-2 focus:ring-emerald-500"
+                  />
+                  <span className="text-slate-500">※ 자격증에 표기될 성함입니다.</span>
+                </div>
+                <div className="text-slate-600 font-bold">
+                  미응시 문항: <b className="text-rose-600">{realExamUnansweredCount}</b> / {track.finalQuestions.length}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* 시험 30문항 리스트 */}
+            {!realExamSubmitted ? (
+              <div className="space-y-6">
+                {track.finalQuestions.map((q) => {
+                  const userAns = realExamAnswers[q.questionNumber];
+
+                  return (
+                    <div
+                      key={q.questionNumber}
+                      className="rounded-2xl p-6 bg-slate-50 border border-slate-200 space-y-4 hover:border-slate-300 transition"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-7 h-7 rounded-lg bg-purple-700 text-white text-xs font-black flex items-center justify-center font-mono">
+                            {q.questionNumber}
+                          </span>
+                          <h4 className="font-bold text-slate-900 text-sm sm:text-base">
+                            {q.title}
+                          </h4>
+                        </div>
+                        <span className="text-[11px] font-mono font-bold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200">
+                          배점: 20점
+                        </span>
+                      </div>
+
+                      {/* 4지선다 옵션 리스트 */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs sm:text-sm">
+                        {q.options.map((opt) => {
+                          const isSelected = userAns === opt.no;
+
+                          return (
+                            <button
+                              key={opt.no}
+                              onClick={() => handleSelectRealOption(q.questionNumber, opt.no)}
+                              className={`p-3 rounded-xl border text-left flex items-center gap-2.5 transition ${
+                                isSelected
+                                  ? 'bg-purple-700 text-white border-purple-700 font-bold shadow-sm ring-2 ring-purple-200'
+                                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                              }`}
+                            >
+                              <span
+                                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                                  isSelected
+                                    ? 'bg-white text-purple-700'
+                                    : 'bg-slate-100 text-slate-700'
+                                }`}
+                              >
+                                {opt.no}
+                              </span>
+                              <span>{opt.text}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* 답안 최종 제출 바 */}
+                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="text-xs text-slate-500">
+                    전체 30문항 중 {Object.keys(realExamAnswers).length}문항 마킹 완료. 60점 이상 획득 시 자격증이 즉시 발급됩니다.
+                  </div>
+                  <button
+                    onClick={handleSubmitRealExam}
+                    disabled={isExamSubmitting}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-purple-700 text-white text-sm font-black hover:bg-purple-800 transition shadow-md"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>정규 자격검정 최종 답안 제출 및 즉시 채점</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* 합격 결과 및 공식 자격증 발급 UI */
+              <div className="space-y-8 pt-2">
+                {/* 결과 요약 배너 */}
+                <div
+                  className={`rounded-3xl p-6 sm:p-8 border text-center space-y-3 ${
+                    realExamPassed
+                      ? 'bg-emerald-50 border-emerald-300 text-emerald-950'
+                      : 'bg-rose-50 border-rose-300 text-rose-950'
+                  }`}
+                >
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white shadow-sm mb-1">
+                    {realExamPassed ? (
+                      <Award className="w-8 h-8 text-emerald-600" />
+                    ) : (
+                      <AlertTriangle className="w-8 h-8 text-rose-600" />
+                    )}
+                  </div>
+                  <h3 className="text-2xl font-black">
+                    {realExamPassed
+                      ? '🎉 축하합니다! 정규 자격검정에 당당히 합격하셨습니다!'
+                      : '아쉽게도 합격 기준(60점)에 미달하였습니다.'}
+                  </h3>
+                  <div className="text-sm font-bold flex items-center justify-center gap-4">
+                    <span>취득 점수: <b className="text-lg font-mono">{realExamScore}점</b></span>
+                    <span>판정: <b className="text-lg">{realExamResultData?.grade}</b></span>
+                  </div>
+                </div>
+
+                {/* 실시간 발급된 공식 자격증 뷰어 */}
+                {realExamPassed && realExamResultData?.certificate && (
+                  <div className="max-w-2xl mx-auto bg-gradient-to-b from-amber-50/60 to-white rounded-3xl p-8 border-4 border-amber-300 shadow-xl space-y-6 font-sans relative overflow-hidden">
+                    {/* 상단 장식 문양 */}
+                    <div className="text-center space-y-2 border-b-2 border-amber-200 pb-5">
+                      <span className="text-[11px] font-black tracking-widest text-amber-800 uppercase">
+                        CERTIFICATE OF QUALIFICATION
+                      </span>
+                      <h4 className="text-2xl font-black text-slate-900 tracking-tight">
+                        전 문 간 병 사 자 격 증
+                      </h4>
+                      <div className="text-xs font-mono font-bold text-slate-500">
+                        등록번호: {realExamResultData.certificate.registryNo}
+                      </div>
+                    </div>
+
+                    {/* 자격증 본문 */}
+                    <div className="space-y-4 text-xs sm:text-sm text-slate-800 leading-relaxed">
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <span className="font-bold text-slate-500">성 명:</span>
+                        <span className="col-span-2 font-black text-slate-900 text-base">{realExamResultData.certificate.applicantName}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <span className="font-bold text-slate-500">자 격 종 목:</span>
+                        <span className="col-span-2 font-black text-emerald-800">{realExamResultData.certificate.qualificationName}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <span className="font-bold text-slate-500">검 정 성 적:</span>
+                        <span className="col-span-2 font-bold">{realExamResultData.certificate.score}점 (최종 합격)</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <span className="font-bold text-slate-500">발 행 일 자:</span>
+                        <span className="col-span-2 font-mono font-bold">{realExamResultData.certificate.issuedAt}</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 py-1">
+                        <span className="font-bold text-slate-500">유 효 기 한:</span>
+                        <span className="col-span-2 font-mono font-bold text-slate-600">{realExamResultData.certificate.expiresAt}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-600 pt-3 border-t border-amber-100 text-center leading-relaxed">
+                      위 사람은 한국직업능력연구원(pqi.or.kr) 민간자격 관리규정에 의거하여<br />
+                      본 교육원이 주관한 소정의 전문 교육 및 정규 자격 검정을 통과하였으므로<br />
+                      본 자격증을 수여합니다.
+                    </p>
+
+                    {/* 발급 기관 직인 및 QR 코드 */}
+                    <div className="pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <QrCode className="w-12 h-12 text-slate-700 bg-white p-1 rounded-lg border border-slate-200" />
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          QR 위변조 검증 완료<br />
+                          {realExamResultData.certificate.qrVerifyToken}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-black text-slate-900 text-sm">한국돌봄종사자양성교육원장</div>
+                        <div className="text-[10px] text-emerald-700 font-extrabold">[직인생략]</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 재응시 / 마이페이지 이동 */}
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-center gap-4">
+                  <button
+                    onClick={handleRetakeExam}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-200 text-slate-800 text-xs font-bold hover:bg-slate-300"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>시험 다시 풀기</span>
+                  </button>
+                  <a
+                    href="/mypage"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white text-xs font-black hover:bg-emerald-700 shadow-sm"
+                  >
+                    <span>마이페이지에서 발급 자격증 보관함 확인</span>
+                    <ChevronLeft className="w-4 h-4 rotate-180" />
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

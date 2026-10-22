@@ -86,7 +86,7 @@ CREATE TABLE courses (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id INT REFERENCES disease_categories(id),
     title VARCHAR(200) NOT NULL,
-    target_disease VARCHAR(100) NOT NULL,
+    target_disease VARCHAR(255) NOT NULL,
     summary TEXT,
     price INT DEFAULT 0,
     -- 질환군별 차등 이수시간 체계

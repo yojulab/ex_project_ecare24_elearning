@@ -29,7 +29,7 @@ export default function HomePage() {
             </span>
             <span className="text-slate-300 font-medium">최근 학습 이어보기:</span>
             <strong className="text-emerald-300 font-semibold truncate max-w-[280px] sm:max-w-md">
-              [01. 신경계 돌봄 트랙] 뇌졸중 편마비 q2hr 체위변경 실기 VOD
+              [트랙 1. 호흡기계·폐질환] 청색증·빈호흡 감시 및 산소요법 안전 수칙 VOD
             </strong>
           </div>
 

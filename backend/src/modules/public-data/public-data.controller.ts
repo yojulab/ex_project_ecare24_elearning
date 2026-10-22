@@ -132,13 +132,40 @@ export class PublicDataController {
   }
 
   @Get('exam-questions')
-  async getExamQuestions(@Query('categoryId') categoryId?: string) {
+  async getExamQuestions(
+    @Query('categoryId') categoryId?: string,
+    @Query('subjectCode') subjectCode?: string,
+    @Query('trackCode') trackCode?: string,
+    @Query('examType') examType?: 'MOCK' | 'FINAL',
+    @Query('courseId') courseId?: string,
+  ) {
     const qb = this.examQuestionRepo.createQueryBuilder('q');
-    if (categoryId) {
-      qb.where('q.categoryId = :categoryId', { categoryId: Number(categoryId) });
+
+    // courseId 매핑 지원
+    if (courseId) {
+      const courseMap: Record<string, string> = {
+        'a0000000-0000-0000-0000-000000000001': 'TRK-01',
+        'a0000000-0000-0000-0000-000000000002': 'TRK-02',
+        'a0000000-0000-0000-0000-000000000003': 'TRK-03',
+      };
+      if (courseMap[courseId] && !trackCode && !subjectCode) {
+        trackCode = courseMap[courseId];
+      }
     }
-    const questions = await qb.orderBy('q.createdAt', 'ASC').getMany();
-    // 프론트엔드 시험 응시 화면 전달용 (정답 필드 포함 또는 해설과 함께 제공)
+
+    if (subjectCode) {
+      qb.andWhere('q.subjectCode = :subjectCode', { subjectCode });
+    } else if (trackCode && examType) {
+      qb.andWhere('q.subjectCode = :subjectCode', { subjectCode: `${trackCode}-${examType}` });
+    } else if (trackCode) {
+      qb.andWhere('q.subjectCode LIKE :trackPattern', { trackPattern: `${trackCode}%` });
+    }
+
+    if (categoryId) {
+      qb.andWhere('q.categoryId = :categoryId', { categoryId: Number(categoryId) });
+    }
+
+    const questions = await qb.orderBy('q.createdAt', 'ASC').addOrderBy('q.id', 'ASC').getMany();
     return questions;
   }
 

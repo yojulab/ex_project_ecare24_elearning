@@ -26,6 +26,7 @@ import {
   CertificateEntity,
   CertApplicationEntity,
   CourseEntity,
+  ExamQuestionEntity,
 } from '../../database/entities';
 
 @Controller('admin')
@@ -54,6 +55,8 @@ export class AdminController {
     private certAppRepo: Repository<CertApplicationEntity>,
     @InjectRepository(CourseEntity)
     private courseRepo: Repository<CourseEntity>,
+    @InjectRepository(ExamQuestionEntity)
+    private examQuestionRepo: Repository<ExamQuestionEntity>,
   ) {}
 
   // 1. 대시보드 KPI 및 대기 큐
@@ -328,5 +331,54 @@ export class AdminController {
       isPublished: course.isPublished,
       message: `교육과정 [${course.title}]이(가) ${course.isPublished ? '공개(수강생 포털 노출)' : '비공개(수강생 포털 미노출)'}로 전환되었습니다.`,
     };
+  }
+
+  // 17. 특정 트랙의 시험 문제 목록 (모의고사 30문항 + 최종평가 30문항)
+  @Get('courses/:id/questions')
+  @RequirePermissions('COURSE_READ')
+  async getCourseQuestions(@Param('id') id: string) {
+    const course = await this.courseRepo.findOne({ where: { id }, relations: ['category'] });
+    if (!course) {
+      throw new NotFoundException('교육과정을 찾을 수 없습니다.');
+    }
+
+    const trackCodeMap: Record<string, string> = {
+      'a0000000-0000-0000-0000-000000000001': 'TRK-01',
+      'a0000000-0000-0000-0000-000000000002': 'TRK-02',
+      'a0000000-0000-0000-0000-000000000003': 'TRK-03',
+    };
+    const trackCode = trackCodeMap[id] || 'TRK-01';
+
+    const mockQuestions = await this.examQuestionRepo.find({
+      where: { subjectCode: `${trackCode}-MOCK` },
+      order: { id: 'ASC' },
+    });
+
+    const finalQuestions = await this.examQuestionRepo.find({
+      where: { subjectCode: `${trackCode}-FINAL` },
+      order: { id: 'ASC' },
+    });
+
+    return {
+      courseId: course.id,
+      courseTitle: course.title,
+      trackCode,
+      mockCount: mockQuestions.length,
+      finalCount: finalQuestions.length,
+      totalCount: mockQuestions.length + finalQuestions.length,
+      mockQuestions,
+      finalQuestions,
+    };
+  }
+
+  // 18. 전체 문제은행 조회 (관리자 인스펙션용)
+  @Get('exam-questions')
+  @RequirePermissions('COURSE_READ')
+  async getAllAdminQuestions(@Query('trackCode') trackCode?: string) {
+    const qb = this.examQuestionRepo.createQueryBuilder('q');
+    if (trackCode) {
+      qb.where('q.subjectCode LIKE :pattern', { pattern: `${trackCode}%` });
+    }
+    return qb.orderBy('q.subjectCode', 'ASC').addOrderBy('q.id', 'ASC').getMany();
   }
 }

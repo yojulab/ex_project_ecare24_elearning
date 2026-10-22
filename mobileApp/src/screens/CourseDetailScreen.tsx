@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MOCK_DISEASES, MOCK_MVP_COURSES } from '@ecare24/utils';
+import { REAL_TRACKS, TrackData } from '@ecare24/utils';
 import { UiBadge } from '../components/UiBadge';
 import {
   BookOpen,
@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Play,
   FileText,
+  ShieldCheck,
+  ChevronRight,
 } from 'lucide-react';
 
 interface CourseDetailScreenProps {
@@ -29,11 +31,12 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
   onOpenExam,
   isOffline,
 }) => {
-  const [selectedDiseaseId, setSelectedDiseaseId] = useState<number>(initialDiseaseId);
+  const [selectedTrackIndex, setSelectedTrackIndex] = useState<number>(
+    initialDiseaseId >= 1 && initialDiseaseId <= 3 ? initialDiseaseId - 1 : 0
+  );
   const [downloaded, setDownloaded] = useState<boolean>(true);
 
-  const disease = MOCK_DISEASES.find((d) => d.id === selectedDiseaseId) || MOCK_DISEASES[0];
-  const course = MOCK_MVP_COURSES.find((c) => c.categoryId === selectedDiseaseId) || MOCK_MVP_COURSES[0];
+  const track: TrackData = REAL_TRACKS[selectedTrackIndex] || REAL_TRACKS[0];
 
   const handleDownload = () => {
     setDownloaded(!downloaded);
@@ -41,20 +44,21 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
 
   return (
     <div className="flex-1 overflow-y-auto no-scrollbar pb-8 bg-slate-50">
-      {/* Disease Category Horizontal Tabs */}
+      {/* 3대 실데이터 트랙 가로 탭 */}
       <div className="bg-white border-b border-slate-200 px-3 py-2.5 overflow-x-auto no-scrollbar sticky top-0 z-20">
-        <div className="flex gap-1.5 min-w-max">
-          {MOCK_DISEASES.filter((d) => d.isMvp).map((d) => (
-            <UiBadge key={d.id} serialId={`P42-DIS-TAB${String(d.id).padStart(2, '0')}`}>
+        <div className="flex gap-2 min-w-max">
+          {REAL_TRACKS.map((t, idx) => (
+            <UiBadge key={t.id} serialId={`P42-TRK-TAB0${idx + 1}`}>
               <button
-                onClick={() => setSelectedDiseaseId(d.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
-                  selectedDiseaseId === d.id
-                    ? 'bg-blue-600 text-white shadow-sm'
+                onClick={() => setSelectedTrackIndex(idx)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 ${
+                  selectedTrackIndex === idx
+                    ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                {d.nameKo}
+                <span className="font-mono text-[10px] opacity-80">{t.trackCode}</span>
+                <span>{t.categoryName}</span>
               </button>
             </UiBadge>
           ))}
@@ -62,17 +66,17 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
       </div>
 
       {/* Course Hero Card */}
-      <div className="p-4 bg-gradient-to-br from-slate-900 to-blue-950 text-white">
+      <div className="p-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-black bg-blue-500/80 px-2 py-0.5 rounded text-white">
-            직능원 민간자격 과정
+          <span className="text-[11px] font-black bg-emerald-600 px-2 py-0.5 rounded text-white">
+            직능원 민간자격 공식 트랙
           </span>
           <UiBadge serialId="P42-SEC00-DL">
             <button
               onClick={handleDownload}
               className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg font-bold border transition-colors ${
                 downloaded
-                  ? 'bg-emerald-600/90 text-white border-emerald-500'
+                  ? 'bg-emerald-600 text-white border-emerald-500'
                   : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
               }`}
             >
@@ -83,212 +87,220 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
         </div>
 
         <h1 className="text-lg font-black mt-2 leading-snug">
-          {disease.nameKo} 집중 간병전문과정
+          {track.title}
         </h1>
-        <p className="text-xs text-slate-300 font-medium mt-1">
-          {disease.shortDesc}
+        <p className="text-xs text-slate-300 font-medium mt-1 line-clamp-2">
+          대상: {track.targetDisease}
         </p>
 
         {/* Requirements info pills */}
         <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
           <div className="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
-            <span className="text-[10px] text-slate-300 block">이론 시간</span>
-            <span className="font-black text-yellow-300">{disease.theoryHours}시간</span>
+            <span className="text-[10px] text-slate-300 block">이론 교안</span>
+            <span className="font-black text-yellow-300">4시간 (5개 장)</span>
           </div>
           <div className="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
             <span className="text-[10px] text-slate-300 block">실기 VOD</span>
-            <span className="font-black text-yellow-300">{disease.practicalHours}시간</span>
+            <span className="font-black text-yellow-300">4시간 (HeyGen)</span>
           </div>
           <div className="bg-white/10 p-2 rounded-xl backdrop-blur-sm">
-            <span className="text-[10px] text-slate-300 block">실습 평가</span>
-            <span className="font-black text-yellow-300">{disease.practicumHours}시간</span>
+            <span className="text-[10px] text-slate-300 block">시험 검정</span>
+            <span className="font-black text-yellow-300">60문항 (60점 합격)</span>
           </div>
         </div>
       </div>
 
-      {/* Core Clinical Care Points Alert */}
+      {/* HeyGen VOD 및 공식 강사 안내 */}
       <div className="p-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5">
-          <div className="flex items-center gap-1.5 text-blue-900 font-black text-sm">
-            <AlertCircle size={16} />
-            <span>핵심 임상 케어 포인트 (Care Points)</span>
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-3.5 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-black text-emerald-900 flex items-center gap-1">
+              <Video size={15} className="text-emerald-700" />
+              <span>HeyGen AI 공식 실기 교육 VOD</span>
+            </span>
+            <span className="text-[11px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
+              {track.id.endsWith('03') ? '1분 50초' : '1분 15초'}
+            </span>
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            {disease.coreCarePoints.map((point, idx) => (
-              <span
-                key={idx}
-                className="text-[11px] font-bold text-blue-800 bg-white/80 px-2 py-1 rounded-lg border border-blue-100 flex items-center gap-1"
-              >
-                <span className="text-blue-500 font-black">•</span>
-                <span className="truncate">{point}</span>
-              </span>
-            ))}
+          <p className="text-xs text-emerald-950 font-bold">
+            {track.videoTitle}
+          </p>
+          <div className="text-[11px] text-emerald-800 line-clamp-2 leading-relaxed bg-white/70 p-2 rounded-xl border border-emerald-100">
+            "{track.scriptText.slice(0, 150)}..."
           </div>
         </div>
       </div>
 
-      {/* SEC01: 4-Step Interactive Curriculum Stepper */}
+      {/* 4단계 이수 커리큘럼 */}
       <div className="px-4 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-black text-slate-900">
-            4단계 이수 커리큘럼 (필수 단계별 이수제)
+            4단계 원클릭 패스 학습 동선
           </h2>
-          <span className="text-xs font-bold text-blue-600">진도율 85%</span>
+          <span className="text-xs font-bold text-emerald-700">총 8시간 완비</span>
         </div>
 
-        {/* Step 1: Theory Materials */}
+        {/* Step 1: 문구형 정규 교안 */}
         <UiBadge serialId="P42-SEC01-STEP1" className="w-full">
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-black">
                   <BookOpen size={18} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded">
                     Step 1 · 이론 교안
                   </span>
                   <h3 className="text-sm font-black text-slate-900 mt-0.5">
-                    전문 교안 뷰어 & TTS 음성강의
+                    정규 교안 ({track.chapters.length}개 챕터 전문)
                   </h3>
                 </div>
               </div>
               <CheckCircle size={20} className="text-emerald-500 shrink-0" />
             </div>
 
-            <p className="mt-2 text-xs font-medium text-slate-600">
-              간병 실무 전문 용어(피딩, 엘튜브, PEG, 체변 등) 하이라이트 및 음성 듣기 지원.
+            <p className="mt-2 text-xs font-medium text-slate-600 line-clamp-2">
+              {track.chapters.map((c) => c.title).join(' • ')}
             </p>
 
             <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">
               <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
                 <Clock size={13} />
-                <span>총 {disease.theoryHours}시간 이수 완료</span>
+                <span>4시간 필수 이수</span>
               </span>
               <button
-                onClick={() => onOpenMaterial(disease.id)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 active:scale-95 shadow-sm"
+                onClick={() => onOpenMaterial(track.categoryId)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <FileText size={14} />
-                <span>교안 열람하기</span>
+                <span>교안 열람</span>
               </button>
             </div>
           </div>
         </UiBadge>
 
-        {/* Step 2: Practical Videos (SNUBH Curated) */}
+        {/* Step 2: HeyGen 4K VOD */}
         <UiBadge serialId="P42-SEC01-STEP2" className="w-full">
-          <div className="bg-white rounded-2xl p-4 border border-blue-300 ring-2 ring-blue-500/20 shadow-md">
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-black">
                   <Video size={18} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded">
+                  <span className="text-[10px] font-black uppercase text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded">
                     Step 2 · 실기 VOD
                   </span>
                   <h3 className="text-sm font-black text-slate-900 mt-0.5">
-                    임상 실기 VOD (대학병원 임상간호 큐레이션)
+                    4K 핵심 실기 시연 VOD
                   </h3>
                 </div>
               </div>
-              <span className="text-xs font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                학습 진행중
+              <span className="text-xs font-black text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                100% 연동
               </span>
             </div>
 
             <p className="mt-2 text-xs font-medium text-slate-600">
-              대학병원 표준 임상 간호 실기 영상 연계. 골든 룰 팁 팝업 제공.
+              {track.videoTitle} (HeyGen 공식 실기 시뮬레이션)
             </p>
 
             <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">
               <span className="text-xs font-bold text-slate-500 flex items-center gap-1">
                 <Clock size={13} />
-                <span>인정 상한 {disease.snubhCreditCapHours}시간 반영</span>
+                <span>4시간 필수 이수</span>
               </span>
               <button
                 onClick={() =>
                   onOpenVideoPlayer({
-                    title: `${disease.nameKo} 임상 실기 트레이닝`,
-                    diseaseName: disease.nameKo,
+                    title: track.videoTitle,
+                    videoUrl: track.videoUrl,
+                    embedUrl: track.embedUrl,
                   })
                 }
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-3.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 active:scale-95 shadow-sm"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 active:scale-95 shadow-sm"
               >
                 <Play size={14} />
-                <span>실기 영상 재생</span>
+                <span>VOD 재생</span>
               </button>
             </div>
           </div>
         </UiBadge>
 
-        {/* Step 3: Practicum Log */}
+        {/* Step 3: 실전 모의고사 30문항 */}
         <UiBadge serialId="P42-SEC01-STEP3" className="w-full">
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-black">
                   <FileSpreadsheet size={18} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-purple-600 bg-purple-50 px-1.5 py-0.2 rounded">
-                    Step 3 · 실습일지
+                  <span className="text-[10px] font-black uppercase text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded">
+                    Step 3 · 모의평가
                   </span>
                   <h3 className="text-sm font-black text-slate-900 mt-0.5">
-                    현장 실습일지 및 지도자 승인
+                    실전 모의고사 ({track.mockQuestions.length}문항)
                   </h3>
                 </div>
               </div>
-              <CheckCircle size={20} className="text-emerald-500 shrink-0" />
+              <span className="text-xs font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                무제한 응시
+              </span>
             </div>
 
             <p className="mt-2 text-xs font-medium text-slate-600">
-              환자 상태 관찰 기록, 체위변경(q2hr) 기록표 작성 및 지도간호사 서명 완료.
+              실무 상황별 4지선다 30문항 CBT 및 오답노트 해설 확인
             </p>
 
-            <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100 text-xs font-bold text-slate-500">
-              <span>서명 완료 (수석간호사 이영희)</span>
-              <span className="text-emerald-600 font-black">승인 완료 ✓</span>
+            <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-500">배점 20점 · 60점 합격선</span>
+              <button
+                onClick={() => onOpenExam(track.categoryId)}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 active:scale-95 shadow-sm"
+              >
+                <Award size={14} />
+                <span>모의평가 응시</span>
+              </button>
             </div>
           </div>
         </UiBadge>
 
-        {/* Step 4: CBT Exam */}
+        {/* Step 4: 정규 자격검정 30문항 */}
         <UiBadge serialId="P42-SEC01-STEP4" className="w-full">
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200 shadow-sm">
+          <div className="bg-white rounded-2xl p-4 border-2 border-purple-500 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black">
+                <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-black">
                   <Award size={18} />
                 </div>
                 <div>
-                  <span className="text-[10px] font-black uppercase text-blue-700 bg-blue-100 px-1.5 py-0.2 rounded">
-                    Step 4 · 최종 평가
+                  <span className="text-[10px] font-black uppercase text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded">
+                    Step 4 · 최종 검정
                   </span>
                   <h3 className="text-sm font-black text-slate-900 mt-0.5">
-                    디지털 OMR CBT 자격시험 응시
+                    정규 자격검정 ({track.finalQuestions.length}문항)
                   </h3>
                 </div>
               </div>
-              <span className="text-xs font-black text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full animate-pulse">
-                응시 가능
+              <span className="text-xs font-black text-purple-700 bg-purple-50 px-2 py-0.5 rounded-full">
+                즉시 합격증 발급
               </span>
             </div>
 
             <p className="mt-2 text-xs font-medium text-slate-600">
-              10대 골든 룰 및 임상 실무 시험. 합격 기준: 평균 60점 이상 (과목 과락 40점).
+              한국직업능력연구원(pqi.or.kr) 등록 공인 자격증 실시간 발급
             </p>
 
-            <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-blue-200">
-              <span className="text-xs font-bold text-slate-600">
-                시험 시간: 60분 (총 40문항)
-              </span>
+            <div className="mt-3 flex items-center justify-between pt-2.5 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-500">60점 이상 합격 시 공식 배지 부여</span>
               <button
-                onClick={() => onOpenExam(disease.id)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-xl font-black text-xs flex items-center gap-1 active:scale-95 shadow-md"
+                onClick={() => onOpenExam(track.categoryId)}
+                className="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-1.5 rounded-xl font-bold text-xs flex items-center gap-1 active:scale-95 shadow-sm"
               >
-                <span>시험 응시하기</span>
+                <Award size={14} />
+                <span>자격시험 응시</span>
               </button>
             </div>
           </div>
@@ -297,4 +309,5 @@ export const CourseDetailScreen: React.FC<CourseDetailScreenProps> = ({
     </div>
   );
 };
+
 export default CourseDetailScreen;

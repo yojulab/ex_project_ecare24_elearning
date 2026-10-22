@@ -82,10 +82,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
 
               <h2 className="mt-2 text-base font-black leading-snug">
-                신경계(뇌졸중/편마비) Step 2 실기 VOD
+                호흡기계·폐질환 케어 Step 2 실기 VOD
               </h2>
               <p className="text-xs text-blue-100 font-medium mt-0.5">
-                제3강: 휠체어 이승(Transfer) 및 탈건착환 안전 탈의법
+                제1강: 청색증·빈호흡 감시 및 산소요법 안전 수칙
               </p>
 
               {/* Progress bar */}
@@ -124,7 +124,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 돌봄종사자 수강신청 바로가기
               </h3>
               <p className="text-xs text-emerald-100 font-medium mt-0.5">
-                16대 질환별 전문 돌봄 자격 트랙 및 실습 연계
+                3대 공식 질환별 전문 돌봄 자격 트랙 및 실습 연계
               </p>
             </div>
             <button

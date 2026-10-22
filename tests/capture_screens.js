@@ -37,7 +37,7 @@ const SCREENS = [
     url: `${USER_BASE}/curriculum`,
     viewport: { width: 1440, height: 900 },
     waitForSelector: 'body',
-    desc: '교육 체계 / 커리큘럼 (정규 240시간 + 16대 질환 전문 트랙)',
+    desc: '교육 체계 / 커리큘럼 (공식 제공 3대 질환 전문 자격 트랙)',
   },
   {
     category: '수강생 포털 (웹)',
@@ -130,7 +130,7 @@ const SCREENS = [
     url: `${ADMIN_BASE}/#tab=curriculum`,
     viewport: { width: 1920, height: 1080 },
     waitForSelector: 'body',
-    desc: '교육과정 관리 (정규과정 및 16대 질환 전문 트랙 편성)',
+    desc: '교육과정 관리 (공식 제공 3대 실데이터 전문 트랙 편성)',
   },
   {
     category: '관리자/CS 포털 (웹)',
