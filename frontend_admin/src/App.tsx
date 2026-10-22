@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Tag, Avatar, message } from 'antd';
+import { Button, Tag, Avatar, message, Tooltip } from 'antd';
 import {
   LayoutDashboard,
   Headphones,
@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   UserCheck,
   ExternalLink,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { initUiInspectorGlobalListener } from '@ecare24/utils';
 import CallCenterScreen from './features/callcenter/CallCenterScreen';
@@ -34,6 +36,7 @@ export type AdminTab =
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('DASHBOARD');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isInspectorActive, setIsInspectorActive] = useState(false);
   const [adminUser, setAdminUser] = useState<any>({
     fullName: '시스템관리자',
@@ -61,10 +64,11 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('hashchange', parseHashTab);
   }, []);
 
-  const handleTabChange = (tab: AdminTab) => {
-    setActiveTab(tab);
+  const handleTabChange = (tab: AdminTab | string) => {
+    const validTab = tab as AdminTab;
+    setActiveTab(validTab);
     if (typeof window !== 'undefined') {
-      window.location.hash = `#tab=${tab.toLowerCase()}`;
+      window.location.hash = `#tab=${validTab.toLowerCase()}`;
     }
   };
 
@@ -122,6 +126,16 @@ export const App: React.FC = () => {
       {/* 1. 최상단 글로벌 헤더 */}
       <header className="bg-slate-950 text-white px-5 py-2.5 flex items-center justify-between border-b border-slate-800 text-xs">
         <div className="flex items-center gap-3">
+          <UiBadge serialId="P50-LNB-TOGGLE" label="[P50-LNB-TOGGLE]">
+            <button
+              onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition flex items-center justify-center border border-slate-700/60"
+              title={isSidebarCollapsed ? "메뉴 펼치기" : "메뉴 아이콘화 (접기)"}
+            >
+              {isSidebarCollapsed ? <PanelLeftOpen className="w-4 h-4 text-indigo-400" /> : <PanelLeftClose className="w-4 h-4 text-slate-300" />}
+            </button>
+          </UiBadge>
+
           <div className="flex items-center gap-2 font-bold tracking-tight text-sm text-indigo-400">
             <span>🏥 한국돌봄종사자양성교육원</span>
             <span className="text-[11px] bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-2 py-0.5 rounded font-mono">
@@ -183,123 +197,176 @@ export const App: React.FC = () => {
 
       {/* 2. 좌측 LNB + 우측 콘텐츠 영역 레이아웃 */}
       <div className="flex-1 flex overflow-hidden">
-        {/* 좌측 LNB 사이드바 */}
-        <aside className="w-64 bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col justify-between shrink-0">
-          <div className="p-3 space-y-1">
-            <div className="px-3 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              핵심 운영 및 CS
-            </div>
+        {/* 좌측 LNB 사이드바 (아이콘화 토글 지원) */}
+        <aside
+          className={`${
+            isSidebarCollapsed ? 'w-16' : 'w-64'
+          } bg-slate-900 text-slate-300 border-r border-slate-800 flex flex-col justify-between shrink-0 transition-all duration-200 ease-in-out`}
+        >
+          <div className="p-2 space-y-1 overflow-y-auto">
+            {/* 핵심 운영 및 CS */}
+            {!isSidebarCollapsed ? (
+              <div className="px-3 py-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                핵심 운영 및 CS
+              </div>
+            ) : (
+              <div className="border-t border-slate-800/80 my-1" />
+            )}
 
             <UiBadge serialId="P50-LNB-DASH" label="[P50-LNB-DASH]">
-              <button
-                onClick={() => handleTabChange('DASHBOARD')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'DASHBOARD'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>통합 대시보드</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '통합 대시보드' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('DASHBOARD')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'DASHBOARD'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <LayoutDashboard className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>통합 대시보드</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
             <UiBadge serialId="P52-LNB-CALL" label="[P52-LNB-CALL]">
-              <button
-                onClick={() => handleTabChange('CALLCENTER')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'CALLCENTER'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <Headphones className="w-4 h-4" />
-                <span>콜센터 CS (3분할 원스크린)</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '콜센터 CS (3분할 원스크린)' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('CALLCENTER')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'CALLCENTER'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <Headphones className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>콜센터 CS (3분할 원스크린)</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
             <UiBadge serialId="P56-LNB-PAY" label="[P56-LNB-PAY]">
-              <button
-                onClick={() => handleTabChange('PAYMENTS')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'PAYMENTS'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <CreditCard className="w-4 h-4" />
-                <span>납부 & 입금확인 관리</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '납부 & 입금확인 관리' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('PAYMENTS')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'PAYMENTS'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>납부 & 입금확인 관리</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
-            <div className="px-3 pt-4 pb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              교육 및 자격 관리
-            </div>
+            {/* 교육 및 자격 관리 */}
+            {!isSidebarCollapsed ? (
+              <div className="px-3 pt-4 pb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                교육 및 자격 관리
+              </div>
+            ) : (
+              <div className="border-t border-slate-800/80 my-2" />
+            )}
 
             <UiBadge serialId="P51-LNB-CRS" label="[P51-LNB-CRS]">
-              <button
-                onClick={() => handleTabChange('CURRICULUM')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'CURRICULUM'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <BookOpen className="w-4 h-4" />
-                <span>16대 질환 커리큘럼 & 실기 VOD</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '16대 질환 커리큘럼 & 실기 VOD' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('CURRICULUM')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'CURRICULUM'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <BookOpen className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>16대 질환 커리큘럼 & 실기 VOD</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
             <UiBadge serialId="P53-LNB-CERT" label="[P53-LNB-CERT]">
-              <button
-                onClick={() => handleTabChange('CERT')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'CERT'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <Award className="w-4 h-4" />
-                <span>직능원 자격증 발급 대장</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '직능원 자격증 발급 대장' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('CERT')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'CERT'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <Award className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>직능원 자격증 발급 대장</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
-            <div className="px-3 pt-4 pb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              공지 및 시스템
-            </div>
+            {/* 공지 및 시스템 */}
+            {!isSidebarCollapsed ? (
+              <div className="px-3 pt-4 pb-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                공지 및 시스템
+              </div>
+            ) : (
+              <div className="border-t border-slate-800/80 my-2" />
+            )}
 
             <UiBadge serialId="P58-LNB-POP" label="[P58-LNB-POP]">
-              <button
-                onClick={() => handleTabChange('POPUPS')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'POPUPS'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <Bell className="w-4 h-4" />
-                <span>팝업 공지 관리</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '팝업 공지 관리' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('POPUPS')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'POPUPS'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <Bell className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>팝업 공지 관리</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
 
             <UiBadge serialId="P59-LNB-SYS" label="[P59-LNB-SYS]">
-              <button
-                onClick={() => handleTabChange('PERMISSIONS')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition ${
-                  activeTab === 'PERMISSIONS'
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                }`}
-              >
-                <ShieldCheck className="w-4 h-4" />
-                <span>권한 매트릭스 (역할없음)</span>
-              </button>
+              <Tooltip title={isSidebarCollapsed ? '권한 매트릭스 (역할없음)' : ''} placement="right">
+                <button
+                  onClick={() => handleTabChange('PERMISSIONS')}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center p-2.5' : 'gap-3 px-3 py-2.5'
+                  } rounded-lg text-xs font-semibold transition ${
+                    activeTab === 'PERMISSIONS'
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 shrink-0" />
+                  {!isSidebarCollapsed && <span>권한 매트릭스 (역할없음)</span>}
+                </button>
+              </Tooltip>
             </UiBadge>
           </div>
 
           <div className="p-3 border-t border-slate-800 text-[11px] text-slate-500">
-            <div className="truncate" title={ENV.API_BASE_URL}>REST API: {ENV.API_BASE_URL}</div>
-            <div>PostgreSQL 17 Clean DB</div>
+            {!isSidebarCollapsed ? (
+              <>
+                <div className="truncate" title={ENV.API_BASE_URL}>REST API: {ENV.API_BASE_URL}</div>
+                <div>PostgreSQL 17 Clean DB</div>
+              </>
+            ) : (
+              <div className="text-center font-mono text-[10px] text-slate-600">v2.0</div>
+            )}
           </div>
         </aside>
 
@@ -309,7 +376,7 @@ export const App: React.FC = () => {
           data-service-name="eCare24 관리자"
           data-page-name={`${pageInfo.name} (${pageInfo.code})`}
         >
-          {activeTab === 'DASHBOARD' && <DashboardScreen />}
+          {activeTab === 'DASHBOARD' && <DashboardScreen onNavigateTab={handleTabChange} />}
           {activeTab === 'CALLCENTER' && <CallCenterScreen />}
           {activeTab === 'CURRICULUM' && <CurriculumManager />}
           {activeTab === 'CERT' && <CertRegistry />}
