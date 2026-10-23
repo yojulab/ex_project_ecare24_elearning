@@ -17,40 +17,16 @@ import {
   SEED_COUNSELING_TICKETS,
 } from '../seeds/data/operational.data';
 
-function getDbHost(): string {
-  const host = process.env.DB_HOST || '127.0.0.1';
-  return host === 'localhost' ? '127.0.0.1' : host;
-}
-
-async function connectWithRetry(client: Client, maxRetries = 5, delayMs = 1500): Promise<void> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      await client.connect();
-      return;
-    } catch (err: any) {
-      if (attempt === maxRetries || (err.code !== 'ECONNREFUSED' && err.code !== 'ETIMEDOUT')) {
-        throw err;
-      }
-      console.log(`⏳ [DB] PostgreSQL 컨테이너 연결 대기 중... (${attempt}/${maxRetries})`);
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-}
+import { getConnectedClient } from './db-client.helper';
 
 export async function runSeeds() {
   console.log('🌱 [DB:SEED] eCare24 기준 데이터 및 운영 데이터 전체 시드 주입 시작...');
 
-  const client = new Client({
-    host: getDbHost(),
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    database: process.env.DB_NAME || 'ecare24',
-    user: process.env.DB_USER || 'ecare24_app',
-    password: process.env.DB_PASSWORD || 'ecare24_secret_2026',
-    ssl: process.env.DB_SSL === 'true',
-  });
-
+  let client: Client | null = null;
   try {
-    await connectWithRetry(client);
+    const res = await getConnectedClient();
+    client = res.client;
+    console.log(`✅ PostgreSQL 연결 성공 (host: ${res.activeHost}, user: ${process.env.DB_USER || 'ecare24_app'})`);
 
     // 1. 권한 마스터 시드 (25개)
     console.log(`🔐 [1/13] 권한 마스터 ${SEED_PERMISSIONS.length}건 주입 중...`);
@@ -449,7 +425,9 @@ export async function runSeeds() {
     console.error('❌ [DB:SEED] 시드 주입 중 오류 발생:', error);
     process.exit(1);
   } finally {
-    await client.end();
+    if (client) {
+      await client.end();
+    }
   }
 }
 

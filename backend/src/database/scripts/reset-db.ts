@@ -1,36 +1,16 @@
-import { Client } from 'pg';
 import * as dotenv from 'dotenv';
 import { runInitDb } from './init-db';
 import { runSeeds } from './seed-runner';
+import { getConnectedClient } from './db-client.helper';
 
 dotenv.config();
-
-function getDbHost(): string {
-  const host = process.env.DB_HOST || '127.0.0.1';
-  return host === 'localhost' ? '127.0.0.1' : host;
-}
-
-async function connectWithRetry(client: Client, maxRetries = 5, delayMs = 1500): Promise<void> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      await client.connect();
-      return;
-    } catch (err: any) {
-      if (attempt === maxRetries || (err.code !== 'ECONNREFUSED' && err.code !== 'ETIMEDOUT')) {
-        throw err;
-      }
-      console.log(`⏳ [DB] PostgreSQL 컨테이너 연결 대기 중... (${attempt}/${maxRetries})`);
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-    }
-  }
-}
 
 export async function runResetDb() {
   const isForce = process.argv.includes('--force') || process.env.FORCE_RESET === 'true';
   if (process.env.NODE_ENV === 'production' && !isForce) {
     console.error('🛑 [DB:RESET] 운영 환경(NODE_ENV=production)에서는 데이터베이스를 리셋할 수 없습니다!');
     console.error('   운영 환경에서 강제로 초기화하려면 아래 중 하나를 실행해 주십시오:');
-    console.error('   👉 npm run db:reset -- --force');
+    console.error('   👉 npm run db:reset:force');
     console.error('   👉 FORCE_RESET=true npm run db:reset');
     console.error('   👉 NODE_ENV=development npm run db:reset');
     process.exit(1);
@@ -38,17 +18,9 @@ export async function runResetDb() {
 
   console.log('⚠️ [DB:RESET] 데이터베이스 전체 테이블 삭제 및 재생성 시작...');
 
-  const client = new Client({
-    host: getDbHost(),
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    database: process.env.DB_NAME || 'ecare24',
-    user: process.env.DB_USER || 'ecare24_app',
-    password: process.env.DB_PASSWORD || 'ecare24_secret_2026',
-    ssl: process.env.DB_SSL === 'true',
-  });
-
   try {
-    await connectWithRetry(client);
+    const { client, activeHost } = await getConnectedClient();
+    console.log(`✅ PostgreSQL 연결 성공 (host: ${activeHost}, user: ${process.env.DB_USER || 'ecare24_app'})`);
 
     // public 스키마 내 모든 테이블/타입 cascade drop
     console.log('💣 기존 public 스키마 초기화(DROP & CREATE SCHEMA public)...');
