@@ -17,10 +17,14 @@ import {
   SEED_COUNSELING_TICKETS,
 } from '../seeds/data/operational.data';
 
-import { getConnectedClient } from './db-client.helper';
+import { getConnectedClient, loadBackendEnv, loadedEnvPath } from './db-client.helper';
+
+// backend/.env 환경 변수 최우선 로드
+loadBackendEnv();
 
 export async function runSeeds() {
   console.log('🌱 [DB:SEED] eCare24 기준 데이터 및 운영 데이터 전체 시드 주입 시작...');
+  console.log(`📁 [DB:SEED] 환경 변수 출처: ${loadedEnvPath}`);
 
   let client: Client | null = null;
   try {
@@ -203,11 +207,13 @@ export async function runSeeds() {
     console.log('✅ 시스템 설정 주입 완료.');
 
     // 8. 최고관리자(Super Admin) 계정 및 전체 권한 부여
-    console.log('👑 [8/13] 최고관리자(Super Admin) 계정 생성 및 전권 부여 중...');
     const superAdminLoginId = process.env.SEED_SUPER_ADMIN_LOGIN_ID || 'admin';
     const superAdminPassword = process.env.SEED_SUPER_ADMIN_PASSWORD || 'admin1234!';
     const superAdminName = process.env.SEED_SUPER_ADMIN_NAME || '시스템관리자';
     const superAdminPhone = process.env.SEED_SUPER_ADMIN_PHONE || '010-0000-0000';
+    console.log(
+      `👑 [8/13] 최고관리자(Super Admin) 계정 생성 및 전권 부여 (backend/.env 기준: login_id="${superAdminLoginId}")...`
+    );
     const saltRounds = parseInt(process.env.BCRYPT_COST || '10', 10);
     const passwordHash = await bcrypt.hash(superAdminPassword, saltRounds);
 
@@ -234,11 +240,14 @@ export async function runSeeds() {
         [superAdminId, p.code]
       );
     }
-    console.log(`✅ 최고관리자 계정 준비 완료: login_id="${superAdminLoginId}"`);
+    console.log(`✅ 최고관리자 계정 준비 완료: login_id="${superAdminLoginId}" (backend/.env 반영)`);
 
     // 9. 학생 및 상담원 사용자 계정 주입
     console.log(`👥 [9/13] 학생 및 상담원 사용자 계정 ${SEED_USERS.length}건 주입 중...`);
-    const userMap: Record<string, string> = { admin: superAdminId };
+    const userMap: Record<string, string> = {
+      admin: superAdminId,
+      [superAdminLoginId]: superAdminId,
+    };
 
     for (const u of SEED_USERS) {
       const uHash = await bcrypt.hash(u.password, saltRounds);

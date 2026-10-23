@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import * as dotenv from 'dotenv';
-import { getConnectedClient } from './db-client.helper';
+import { getConnectedClient, loadBackendEnv, loadedEnvPath } from './db-client.helper';
 
-dotenv.config();
+// backend/.env 환경 변수 최우선 로드
+loadBackendEnv();
 
 export async function runInitDb() {
   console.log('🚀 [DB:INIT] eCare24 PostgreSQL 데이터베이스 스키마 초기화 시작...');
+  console.log(`📁 [DB:INIT] 환경 변수 출처: ${loadedEnvPath}`);
 
   try {
     const { client, activeHost } = await getConnectedClient();

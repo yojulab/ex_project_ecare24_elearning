@@ -1,9 +1,16 @@
-import * as dotenv from 'dotenv';
 import { runInitDb } from './init-db';
 import { runSeeds } from './seed-runner';
-import { getConnectedClient } from './db-client.helper';
+import { getConnectedClient, loadBackendEnv, loadedEnvPath } from './db-client.helper';
 
-dotenv.config();
+// CLI 인자 및 사전 실행 환경 변수 보존
+const initialNodeEnv = process.env.NODE_ENV;
+const initialForceReset = process.env.FORCE_RESET;
+
+// backend/.env 환경 변수 최우선 로드
+loadBackendEnv();
+
+if (initialNodeEnv !== undefined) process.env.NODE_ENV = initialNodeEnv;
+if (initialForceReset !== undefined) process.env.FORCE_RESET = initialForceReset;
 
 export async function runResetDb() {
   const isForce = process.argv.includes('--force') || process.env.FORCE_RESET === 'true';
@@ -17,6 +24,7 @@ export async function runResetDb() {
   }
 
   console.log('⚠️ [DB:RESET] 데이터베이스 전체 테이블 삭제 및 재생성 시작...');
+  console.log(`📁 [DB:RESET] 환경 변수 출처: ${loadedEnvPath}`);
 
   try {
     const { client, activeHost } = await getConnectedClient();

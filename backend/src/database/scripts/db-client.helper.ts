@@ -1,11 +1,35 @@
 import { Client, ClientConfig } from 'pg';
+import * as fs from 'fs';
+import * as path from 'path';
 import * as dotenv from 'dotenv';
 
-dotenv.config();
+/**
+ * DB 초기화 및 시드 스크립트 실행 시 backend/.env 파일을 최우선 로드합니다.
+ */
+export function loadBackendEnv(): string {
+  const candidates = [
+    path.resolve(__dirname, '../../../.env'),
+    path.resolve(process.cwd(), 'backend/.env'),
+    path.resolve(process.cwd(), '.env'),
+  ];
+
+  for (const envPath of candidates) {
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath, override: true });
+      return envPath;
+    }
+  }
+
+  dotenv.config();
+  return process.cwd();
+}
+
+export const loadedEnvPath = loadBackendEnv();
 
 export interface DbConnectionResult {
   client: Client;
   activeHost: string;
+  loadedEnvPath: string;
 }
 
 /**
@@ -62,7 +86,7 @@ export async function getConnectedClient(
 
       try {
         await client.connect();
-        return { client, activeHost: host };
+        return { client, activeHost: host, loadedEnvPath };
       } catch (err: any) {
         lastError = err;
         try {

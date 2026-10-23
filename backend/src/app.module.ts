@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
+import * as path from 'path';
 import configuration from './config/configuration';
 import { envValidationSchema } from './config/env.validation';
 import * as entities from './database/entities';
@@ -15,6 +16,11 @@ import { AdminModule } from './modules/admin/admin.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: [
+        path.resolve(__dirname, '../.env'),
+        path.resolve(process.cwd(), 'backend/.env'),
+        path.resolve(process.cwd(), '.env'),
+      ],
       load: [configuration],
       validationSchema: envValidationSchema,
     }),
