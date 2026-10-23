@@ -23,14 +23,31 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   const handleLogin = async (values: any) => {
     setLoading(true);
     try {
-      const res = await fetch(`${ENV.API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || '로그인에 실패했습니다.');
+      const executeLogin = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(values),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '로그인에 실패했습니다.');
+        return data;
+      };
+
+      let data;
+      try {
+        data = await executeLogin(ENV.API_BASE_URL);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (ENV.API_BASE_URL !== fallback) {
+            data = await executeLogin(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
       }
 
       localStorage.setItem('ecare24_admin_token', data.accessToken);
@@ -48,20 +65,39 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
   const handleSignup = async (values: any) => {
     setLoading(true);
     try {
-      const res = await fetch(`${ENV.API_BASE_URL}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          loginId: values.loginId,
-          fullName: values.fullName,
-          phoneNumber: values.phoneNumber,
-          password: values.password,
-          email: values.email || undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || '계정 생성에 실패했습니다.');
+      const payload = {
+        loginId: values.loginId,
+        fullName: values.fullName,
+        phoneNumber: values.phoneNumber,
+        password: values.password,
+        email: values.email || undefined,
+      };
+
+      const executeSignup = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '계정 생성에 실패했습니다.');
+        return data;
+      };
+
+      let data;
+      try {
+        data = await executeSignup(ENV.API_BASE_URL);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (ENV.API_BASE_URL !== fallback) {
+            data = await executeSignup(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
       }
 
       if (data.accessToken) {

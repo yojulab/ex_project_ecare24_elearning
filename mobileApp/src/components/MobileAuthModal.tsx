@@ -47,13 +47,32 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ loginId, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || '로그인 실패');
+      const executeLogin = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginId, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '로그인 실패');
+        return data;
+      };
+
+      let data;
+      try {
+        data = await executeLogin(API_BASE);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (API_BASE !== fallback) {
+            data = await executeLogin(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
 
       localStorage.setItem('mobile_token', data.accessToken);
       localStorage.setItem('mobile_user_info', JSON.stringify(data.user));
@@ -81,18 +100,39 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          loginId: signupLoginId,
-          fullName: signupFullName,
-          phoneNumber: signupPhone,
-          password: signupPassword,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || '회원가입 실패');
+      const payload = {
+        loginId: signupLoginId,
+        fullName: signupFullName,
+        phoneNumber: signupPhone,
+        password: signupPassword,
+      };
+
+      const executeSignup = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '회원가입 실패');
+        return data;
+      };
+
+      let data;
+      try {
+        data = await executeSignup(API_BASE);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (API_BASE !== fallback) {
+            data = await executeSignup(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
 
       if (data.accessToken) {
         localStorage.setItem('mobile_token', data.accessToken);
@@ -111,30 +151,52 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
     }
   };
 
-  const handleQuickLogin = (id: string, pw: string) => {
+  const handleQuickLogin = async (id: string, pw: string) => {
     setLoginId(id);
     setPassword(pw);
     setLoading(true);
-    fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loginId: id, password: pw }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || '로그인 실패');
-        localStorage.setItem('mobile_token', data.accessToken);
-        localStorage.setItem('mobile_user_info', JSON.stringify(data.user));
-        setSuccessMessage(`${data.user.fullName} 교육생님, 로그인되었습니다.`);
-        setTimeout(() => {
-          onSuccess(data.user);
-          onClose();
-        }, 500);
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      })
-      .finally(() => setLoading(false));
+    setErrorMessage('');
+
+    const executeLogin = async (baseUrl: string) => {
+      const res = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId: id, password: pw }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || '로그인 실패');
+      return data;
+    };
+
+    try {
+      let data;
+      try {
+        data = await executeLogin(API_BASE);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (API_BASE !== fallback) {
+            data = await executeLogin(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
+
+      localStorage.setItem('mobile_token', data.accessToken);
+      localStorage.setItem('mobile_user_info', JSON.stringify(data.user));
+      setSuccessMessage(`${data.user.fullName} 교육생님, 로그인되었습니다.`);
+      setTimeout(() => {
+        onSuccess(data.user);
+        onClose();
+      }, 500);
+    } catch (err: any) {
+      setErrorMessage(err.message || '로그인 오류');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

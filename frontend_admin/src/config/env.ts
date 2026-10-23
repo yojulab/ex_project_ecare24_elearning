@@ -2,13 +2,33 @@
 
 /**
  * frontend_admin 환경 변수 통합 관리 모듈
- * 모든 외부 연동 URL 및 REST API URI는 이 모듈을 통해 참조합니다.
+ * 브라우저 런타임 호스트(localhost/IP)를 스마트하게 감지하여
+ * 항상 활성 백엔드(:30014)와 완벽히 통신하도록 지원합니다.
  */
+
+function resolveApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return '/api/v1';
+  }
+  return import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:30014/api/v1';
+}
+
+function resolveApiDocsUrl(): string {
+  if (typeof window !== 'undefined') {
+    return '/api/docs';
+  }
+  return import.meta.env.VITE_API_DOCS_URL || 'http://127.0.0.1:30014/api/docs';
+}
+
 export const ENV = {
   // 백엔드 REST API URI 엔드포인트
-  API_BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:30014/api/v1',
+  get API_BASE_URL(): string {
+    return resolveApiBaseUrl();
+  },
   // 백엔드 Swagger API 문서 URL
-  API_DOCS_URL: import.meta.env.VITE_API_DOCS_URL || 'http://localhost:30014/api/docs',
+  get API_DOCS_URL(): string {
+    return resolveApiDocsUrl();
+  },
   // 수강생 포털 URL
   USER_PORTAL_URL: import.meta.env.VITE_USER_PORTAL_URL || 'http://localhost:30010',
   // 관리자 서비스명

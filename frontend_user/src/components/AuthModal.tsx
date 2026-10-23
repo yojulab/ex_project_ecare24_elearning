@@ -55,15 +55,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await fetch(`${ENV.API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ loginId, password }),
-      });
+      const executeLogin = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ loginId, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '로그인에 실패했습니다.');
+        return data;
+      };
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || '로그인에 실패했습니다.');
+      let data;
+      try {
+        data = await executeLogin(ENV.API_BASE_URL);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (ENV.API_BASE_URL !== fallback) {
+            console.warn('[eCare24] API_BASE_URL 접속 실패, 로컬 백엔드(:30014)로 자동 Failover 시도...');
+            data = await executeLogin(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
       }
 
       localStorage.setItem('access_token', data.accessToken);
@@ -80,30 +97,53 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickLogin = (id: string, pw: string) => {
+  const handleQuickLogin = async (id: string, pw: string) => {
     setLoginId(id);
     setPassword(pw);
     setLoading(true);
-    fetch(`${ENV.API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ loginId: id, password: pw }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || '로그인 실패');
-        localStorage.setItem('access_token', data.accessToken);
-        localStorage.setItem('user_info', JSON.stringify(data.user));
-        setSuccessMessage(`${data.user.fullName} 교육생님, 로그인되었습니다.`);
-        setTimeout(() => {
-          onSuccess(data.user);
-          onClose();
-        }, 600);
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      })
-      .finally(() => setLoading(false));
+    setErrorMessage('');
+
+    const executeLogin = async (baseUrl: string) => {
+      const res = await fetch(`${baseUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginId: id, password: pw }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || '로그인 실패');
+      return data;
+    };
+
+    try {
+      let data;
+      try {
+        data = await executeLogin(ENV.API_BASE_URL);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (ENV.API_BASE_URL !== fallback) {
+            console.warn('[eCare24] 원격 API 접속 실패, 로컬 백엔드(:30014)로 자동 Failover 시도...');
+            data = await executeLogin(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
+      }
+
+      localStorage.setItem('access_token', data.accessToken);
+      localStorage.setItem('user_info', JSON.stringify(data.user));
+      setSuccessMessage(`${data.user.fullName} 교육생님, 로그인되었습니다.`);
+      setTimeout(() => {
+        onSuccess(data.user);
+        onClose();
+      }, 600);
+    } catch (err: any) {
+      setErrorMessage(err.message || '로그인 서버 연결 실패');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -123,21 +163,39 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await fetch(`${ENV.API_BASE_URL}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          loginId: signupLoginId,
-          fullName: signupFullName,
-          phoneNumber: signupPhone,
-          password: signupPassword,
-          email: signupEmail || undefined,
-        }),
-      });
+      const payload = {
+        loginId: signupLoginId,
+        fullName: signupFullName,
+        phoneNumber: signupPhone,
+        password: signupPassword,
+        email: signupEmail || undefined,
+      };
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || '회원가입에 실패했습니다.');
+      const executeSignup = async (baseUrl: string) => {
+        const res = await fetch(`${baseUrl}/auth/signup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || '회원가입에 실패했습니다.');
+        return data;
+      };
+
+      let data;
+      try {
+        data = await executeSignup(ENV.API_BASE_URL);
+      } catch (err: any) {
+        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
+          const fallback = 'http://localhost:30014/api/v1';
+          if (ENV.API_BASE_URL !== fallback) {
+            data = await executeSignup(fallback);
+          } else {
+            throw err;
+          }
+        } else {
+          throw err;
+        }
       }
 
       if (data.accessToken) {

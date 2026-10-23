@@ -9,12 +9,6 @@
 # DB          : external_project_db_postgres (localhost:5432)
 # ==============================================================================
 
-# source/dot(.) 실행 시 현재 대화형 터미널 닫힘 방지 가드
-if [ "$0" != "${BASH_SOURCE[0]}" ]; then
-  bash "${BASH_SOURCE[0]}" "$@"
-  return $? 2>/dev/null || true
-fi
-
 set -e
 
 # 프로젝트 루트 디렉터리 설정 (스크립트 위치 기준 상위 디렉터리)
@@ -26,7 +20,7 @@ else
 fi
 cd "$ROOT_DIR"
 
-TARGET_MODE="${1:-prod}"
+TARGET_MODE="${1:-${NODE_ENV:-dev}}"
 if [ "$TARGET_MODE" = "dev" ] || [ "$TARGET_MODE" = "development" ]; then
   IS_PROD=false
   echo "⚙️  [개발 모드 (development)] 각 폴더에 .env 파일을 생성합니다..."
