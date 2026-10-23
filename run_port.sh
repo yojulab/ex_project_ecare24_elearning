@@ -37,11 +37,11 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-# 하위 워크스페이스 .bin 심볼릭 링크 자동 점검 및 복원 (vite: not found 영구 방지)
+# 하위 워크스페이스 .bin 심볼릭 링크 자동 점검 및 복원 (vite/nest: not found 영구 방지)
 ensure_bin_links() {
   local root_bin="${PROJECT_DIR}/node_modules/.bin"
   if [ -d "$root_bin" ]; then
-    for sub in frontend_user frontend_admin mobileApp; do
+    for sub in frontend_user frontend_admin mobileApp backend; do
       if [ -d "${PROJECT_DIR}/${sub}" ]; then
         mkdir -p "${PROJECT_DIR}/${sub}/node_modules"
         if [ ! -e "${PROJECT_DIR}/${sub}/node_modules/.bin" ]; then
@@ -103,12 +103,12 @@ get_service_meta() {
 # ------------------------------------------------------------------------------
 # 1. 컴파일 (Build / Compile)
 # ------------------------------------------------------------------------------
-# 빌드 도구(tsc, vite, next) 누락 시 devDependencies 포함 재설치
+# 빌드 도구(tsc, vite, next, nest) 누락 시 devDependencies 포함 재설치
 # (NODE_ENV=production 환경에서 npm install 시 devDependencies가 생략되어 'tsc: not found' 발생 방지)
 ensure_build_deps() {
   local root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  if [ ! -e "$root/node_modules/typescript/bin/tsc" ] || [ ! -e "$root/node_modules/vite/bin/vite.js" ]; then
-    echo -e "${YELLOW}⚠ 빌드 도구(typescript/vite) 누락 감지 → devDependencies 포함 설치 진행...${NC}"
+  if [ ! -e "$root/node_modules/typescript/bin/tsc" ] || [ ! -e "$root/node_modules/vite/bin/vite.js" ] || [ ! -e "$root/node_modules/.bin/nest" ]; then
+    echo -e "${YELLOW}⚠ 빌드 도구(typescript/vite/nest) 누락 감지 → devDependencies 포함 설치 진행...${NC}"
     (cd "$root" && NODE_ENV=development npm install --include=dev) || return 1
   fi
 }
