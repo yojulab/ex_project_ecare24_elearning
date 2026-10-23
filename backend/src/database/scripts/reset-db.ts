@@ -26,8 +26,13 @@ async function connectWithRetry(client: Client, maxRetries = 5, delayMs = 1500):
 }
 
 export async function runResetDb() {
-  if (process.env.NODE_ENV === 'production') {
+  const isForce = process.argv.includes('--force') || process.env.FORCE_RESET === 'true';
+  if (process.env.NODE_ENV === 'production' && !isForce) {
     console.error('🛑 [DB:RESET] 운영 환경(NODE_ENV=production)에서는 데이터베이스를 리셋할 수 없습니다!');
+    console.error('   운영 환경에서 강제로 초기화하려면 아래 중 하나를 실행해 주십시오:');
+    console.error('   👉 npm run db:reset -- --force');
+    console.error('   👉 FORCE_RESET=true npm run db:reset');
+    console.error('   👉 NODE_ENV=development npm run db:reset');
     process.exit(1);
   }
 

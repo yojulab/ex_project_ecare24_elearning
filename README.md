@@ -141,16 +141,20 @@ PostgreSQL 17 기반의 데이터베이스 스키마 및 마스터/운영 데이
 기존 `public` 스키마 내 모든 테이블을 삭제(`DROP SCHEMA public CASCADE`)한 후, 최신 DDL 스키마를 생성하고 13대 공식 시드 데이터(16대 질환군, 3대 실데이터 트랙, 15개 챕터 교안/HeyGen VOD, 180문항 CBT 문제은행, 25개 권한 마스터, 기본 계정 등)를 완전히 초기 상태로 복원합니다.
 
 ```bash
-# 프로젝트 루트(/apps/ex_project_ecare24_elearning)에서 실행
+# 기본 실행 (개발 환경)
 npm run db:reset
+
+# 운영 환경(NODE_ENV=production)에서 명시적 강제 초기화
+npm run db:reset:force
+# 또는
+NODE_ENV=development npm run db:reset
 ```
 
-> [!IMPORTANT]
-> **운영 환경 안전 가드 해제**:  
-> 현재 쉘에 `NODE_ENV=production`이 설정되어 있는 경우, 실수로 인한 데이터 삭제를 방지하기 위해 가드가 작동합니다. 강제 초기화 시 아래와 같이 실행합니다:
-> ```bash
-> NODE_ENV=development npm run db:reset
-> ```
+> [!NOTE]
+> **Docker PostgreSQL 컨테이너 (`external_project_db_postgres`) 연동 안내**:  
+> - **호스트 실행 시**: `backend/.env`의 `DB_HOST=127.0.0.1` (또는 `localhost`), `DB_PORT=5432`로 바인딩됩니다.
+> - **Docker Network 상의 컨테이너 간 통신 시**: 같은 도커 네트워크에 속해 있다면 `DB_HOST=external_project_db_postgres`로 컨테이너 이름을 직접 지정할 수 있습니다.
+> - 컨테이너가 부팅 중일 때도 자동 재시도(`connectWithRetry`)를 지원하므로 일시적 접속 거부 없이 안전하게 연결됩니다.
 
 ---
 

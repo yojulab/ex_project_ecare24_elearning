@@ -38,6 +38,7 @@
     "db:init": "npm run db:init --workspace=backend",
     "db:seed": "npm run db:seed --workspace=backend",
     "db:reset": "npm run db:reset --workspace=backend",
+    "db:reset:force": "FORCE_RESET=true npm run db:reset",
     "port": "bash run_port.sh",
     "tunnel:share": "bash scripts/start_tunnels.sh",
     "tunnel:status": "bash scripts/status_tunnels.sh",
