@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { X, User, Lock, Phone, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { UiBadge } from './UiBadge';
-
-const API_BASE = 'http://localhost:30014/api/v1';
+import { ENV } from '../config/env';
 
 interface MobileAuthModalProps {
   isOpen: boolean;
@@ -60,11 +59,11 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
 
       let data;
       try {
-        data = await executeLogin(API_BASE);
+        data = await executeLogin(ENV.API_BASE_URL);
       } catch (err: any) {
         if (err.name === 'TypeError' || err.message?.includes('fetch')) {
           const fallback = 'http://localhost:30014/api/v1';
-          if (API_BASE !== fallback) {
+          if (ENV.API_BASE_URL !== fallback) {
             data = await executeLogin(fallback);
           } else {
             throw err;
@@ -120,11 +119,11 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
 
       let data;
       try {
-        data = await executeSignup(API_BASE);
+        data = await executeSignup(ENV.API_BASE_URL);
       } catch (err: any) {
         if (err.name === 'TypeError' || err.message?.includes('fetch')) {
           const fallback = 'http://localhost:30014/api/v1';
-          if (API_BASE !== fallback) {
+          if (ENV.API_BASE_URL !== fallback) {
             data = await executeSignup(fallback);
           } else {
             throw err;
@@ -171,11 +170,11 @@ export const MobileAuthModal: React.FC<MobileAuthModalProps> = ({
     try {
       let data;
       try {
-        data = await executeLogin(API_BASE);
+        data = await executeLogin(ENV.API_BASE_URL);
       } catch (err: any) {
         if (err.name === 'TypeError' || err.message?.includes('fetch')) {
           const fallback = 'http://localhost:30014/api/v1';
-          if (API_BASE !== fallback) {
+          if (ENV.API_BASE_URL !== fallback) {
             data = await executeLogin(fallback);
           } else {
             throw err;

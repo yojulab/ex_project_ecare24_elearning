@@ -16,6 +16,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { MobileAuthModal } from '../components/MobileAuthModal';
+import { ENV } from '../config/env';
 
 interface MyScreenProps {
   onNavigateCourse?: () => void;
@@ -37,7 +38,7 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
           const user = JSON.parse(stored);
           setCurrentUser(user);
           try {
-            const res = await fetch(`http://localhost:30014/api/v1/me/summary`, {
+            const res = await fetch(`${ENV.API_BASE_URL}/me/summary`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             if (res.ok) {
@@ -333,7 +334,7 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
           setCurrentUser(user);
           const token = localStorage.getItem('mobile_token');
           if (token) {
-            fetch(`http://localhost:30014/api/v1/me/summary`, {
+            fetch(`${ENV.API_BASE_URL}/me/summary`, {
               headers: { Authorization: `Bearer ${token}` },
             })
               .then((res) => (res.ok ? res.json() : null))
