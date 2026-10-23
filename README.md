@@ -189,11 +189,44 @@ DB 초기화 완료 후 아래 기본 계정으로 즉시 로그인 및 기능 �
 
 ---
 
-### 3.5. 브라우저 로컬 세션 캐시 초기화
+### 3.5. 개발 / 운영 환경 DB 일원화 및 자동 프로비저닝 (Auto-Provisioning)
+
+운영 환경(외부 PostgreSQL 도커 컨테이너 `external_project_db_postgres`의 `admin`/`admin123`/`db_graphrag_agent`)과 로컬 개발 환경(`ecare24_app`/`ecare24_secret_2026`) 간의 계정 및 데이터베이스 불일치 문제를 **완전 일원화**하였습니다.
+
+1. **자동 프로비저닝 (Self-Healing)**:
+   - `ecare24_app` 계정 또는 `ecare24` 데이터베이스가 생성되어 있지 않은 환경(운영 서버 등)에서 `npm run db:reset:force`나 `npm run db:init`을 실행하면, 스크립트가 `admin` 슈퍼유저로 자동 접속하여:
+     - `ecare24_app` 계정 생성 및 전용 권한 부여
+     - `ecare24` 전용 독립 데이터베이스 생성 (기존 `db_graphrag_agent` 데이터 100% 보존)
+     - `age` (Apache AGE) 확장 활성화
+   - 를 **전자동으로 수행한 뒤 즉시 정상 연결**합니다.
+   - 따라서 호스트에서 수동으로 `docker exec psql ...` 명령을 입력할 필요가 없습니다.
+
+2. **투명한 실시간 진단 로깅 (에러 착시 원천 방지)**:
+   - 각 호스트(`172.20.0.4`, `external_project_db_postgres`, `127.0.0.1` 등) 연결 시 발생하는 오류(네트워크 단절, 인증 실패, Role/DB 부재)를 단계별로 명확하게 출력하여 마지막 호스트의 `ECONNREFUSED`만 보이는 착시 현상을 원천 차단했습니다.
+
+3. **환경 변수 일원화 (`backend/.env`)**:
+   ```env
+   # 앱 전용 접속 계정
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=ecare24
+   DB_USER=ecare24_app
+   DB_PASSWORD=ecare24_secret_2026
+
+   # 자동 프로비저닝용 슈퍼유저 정보 (운영/개발 일원화)
+   DB_ADMIN_USER=admin
+   DB_ADMIN_PASSWORD=admin123
+   DB_ADMIN_NAME=db_graphrag_agent
+   ```
+
+---
+
+### 3.6. 브라우저 로컬 세션 캐시 초기화
 이전 로그인 세션 토큰이나 클라이언트 상태를 깨끗이 초기화하고 싶을 경우, 브라우저 개발자 도구(`F12`) 콘솔에서 아래 스크립트를 실행합니다:
 ```javascript
 localStorage.clear(); sessionStorage.clear(); location.reload();
 ```
+
 
 ---
 
