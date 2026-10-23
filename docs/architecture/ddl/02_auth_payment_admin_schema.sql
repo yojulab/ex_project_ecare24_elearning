@@ -9,15 +9,15 @@
 -- ----------------------------------------------------------------------------
 ALTER TYPE video_source_enum ADD VALUE IF NOT EXISTS 'HEYGEN';
 
-CREATE TYPE user_type_enum      AS ENUM ('STUDENT', 'STAFF');
-CREATE TYPE user_status_enum    AS ENUM ('ACTIVE', 'LOCKED', 'DORMANT', 'WITHDRAWN');
-CREATE TYPE course_type_enum    AS ENUM ('MAIN', 'TRACK');
-CREATE TYPE payment_status_enum AS ENUM ('PENDING', 'PAID', 'CANCELED', 'REFUND_REQUESTED', 'REFUNDED');
-CREATE TYPE payment_method_enum AS ENUM ('BANK_TRANSFER', 'CARD', 'VIRTUAL_ACCOUNT', 'FREE');
-CREATE TYPE refund_status_enum  AS ENUM ('REQUESTED', 'APPROVED', 'REJECTED');
-CREATE TYPE cert_app_status_enum AS ENUM ('SUBMITTED', 'DOC_CHECK', 'NURSE_EVAL', 'REVIEW', 'ISSUED', 'REJECTED');
-CREATE TYPE popup_target_enum   AS ENUM ('ALL', 'STUDENT', 'GUEST');
-CREATE TYPE inquiry_status_enum AS ENUM ('OPEN', 'ANSWERED', 'CLOSED');
+DO $$ BEGIN CREATE TYPE user_type_enum      AS ENUM ('STUDENT', 'STAFF'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE user_status_enum    AS ENUM ('ACTIVE', 'LOCKED', 'DORMANT', 'WITHDRAWN'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE course_type_enum    AS ENUM ('MAIN', 'TRACK'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE payment_status_enum AS ENUM ('PENDING', 'PAID', 'CANCELED', 'REFUND_REQUESTED', 'REFUNDED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE payment_method_enum AS ENUM ('BANK_TRANSFER', 'CARD', 'VIRTUAL_ACCOUNT', 'FREE'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE refund_status_enum  AS ENUM ('REQUESTED', 'APPROVED', 'REJECTED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE cert_app_status_enum AS ENUM ('SUBMITTED', 'DOC_CHECK', 'NURSE_EVAL', 'REVIEW', 'ISSUED', 'REJECTED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE popup_target_enum   AS ENUM ('ALL', 'STUDENT', 'GUEST'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE inquiry_status_enum AS ENUM ('OPEN', 'ANSWERED', 'CLOSED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- ----------------------------------------------------------------------------
 -- 1. users 변경: 역할(role) 제거 → 권한은 user_permissions 로만 관리

@@ -18,15 +18,15 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 1. 공통 ENUM 정의
 -- ============================================================================
 
-CREATE TYPE user_role_enum AS ENUM ('STUDENT', 'AGENT', 'ADMIN', 'SUPERVISOR', 'REVIEWER');
-CREATE TYPE step_type_enum AS ENUM ('THEORY_TEXT', 'PRACTICAL_VIDEO', 'MOCK_EXAM', 'FINAL_EXAM');
-CREATE TYPE question_type_enum AS ENUM ('MULTIPLE_CHOICE', 'SHORT_ANSWER', 'CASE_STUDY');
-CREATE TYPE cert_status_enum AS ENUM ('VALID', 'RENEWAL_DUE', 'EXPIRED', 'REVOKED');
-CREATE TYPE practicum_status_enum AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
-CREATE TYPE ticket_status_enum AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED');
-CREATE TYPE call_category_enum AS ENUM ('COURSE_INQUIRY', 'CERT_VERIFICATION', 'PATIENT_MATCHING', 'REFUND', 'TECHNICAL');
-CREATE TYPE curation_grade_enum AS ENUM ('A', 'B', 'C', 'X');
-CREATE TYPE video_source_enum AS ENUM ('OWN_HLS', 'YOUTUBE_EMBED', 'VIMEO');
+DO $$ BEGIN CREATE TYPE user_role_enum AS ENUM ('STUDENT', 'AGENT', 'ADMIN', 'SUPERVISOR', 'REVIEWER'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE step_type_enum AS ENUM ('THEORY_TEXT', 'PRACTICAL_VIDEO', 'MOCK_EXAM', 'FINAL_EXAM'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE question_type_enum AS ENUM ('MULTIPLE_CHOICE', 'SHORT_ANSWER', 'CASE_STUDY'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE cert_status_enum AS ENUM ('VALID', 'RENEWAL_DUE', 'EXPIRED', 'REVOKED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE practicum_status_enum AS ENUM ('PENDING', 'APPROVED', 'REJECTED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE ticket_status_enum AS ENUM ('OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE call_category_enum AS ENUM ('COURSE_INQUIRY', 'CERT_VERIFICATION', 'PATIENT_MATCHING', 'REFUND', 'TECHNICAL'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE curation_grade_enum AS ENUM ('A', 'B', 'C', 'X'); EXCEPTION WHEN duplicate_object THEN null; END $$;
+DO $$ BEGIN CREATE TYPE video_source_enum AS ENUM ('OWN_HLS', 'YOUTUBE_EMBED', 'VIMEO'); EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- ============================================================================
 -- 2. 사용자 및 인증 도메인

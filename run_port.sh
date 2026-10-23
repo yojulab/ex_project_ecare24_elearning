@@ -46,6 +46,10 @@ NC='\033[0m'
 ensure_bin_links() {
   local root_bin="${PROJECT_DIR}/node_modules/.bin"
   if [ -d "$root_bin" ]; then
+    # ts-node 루트 바이너리 링크 보장 (npm run db:init, db:reset 등 실행용)
+    if [ ! -e "${root_bin}/ts-node" ] && [ -f "${PROJECT_DIR}/backend/node_modules/ts-node/dist/bin.js" ]; then
+      ln -sf "../backend/node_modules/ts-node/dist/bin.js" "${root_bin}/ts-node" 2>/dev/null || true
+    fi
     for sub in frontend_user frontend_admin mobileApp backend; do
       if [ -d "${PROJECT_DIR}/${sub}" ]; then
         mkdir -p "${PROJECT_DIR}/${sub}/node_modules"

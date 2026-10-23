@@ -10,7 +10,7 @@
     "backend"
   ],
   "scripts": {
-    "postinstall": "for d in frontend_user frontend_admin mobileApp backend; do mkdir -p $d/node_modules && (test -e $d/node_modules/.bin || ln -sf ../../node_modules/.bin $d/node_modules/.bin); done",
+    "postinstall": "for d in frontend_user frontend_admin mobileApp backend; do mkdir -p $d/node_modules && (test -e $d/node_modules/.bin || ln -sf ../../node_modules/.bin $d/node_modules/.bin); done; (test -e node_modules/.bin/ts-node || ln -sf ../backend/node_modules/ts-node/dist/bin.js node_modules/.bin/ts-node 2>/dev/null || true)",
     "start": "bash run_port.sh all",
     "prod": "bash run_port.sh all",
     "prod:all": "bash run_port.sh all",
