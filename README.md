@@ -206,18 +206,31 @@ DB 초기화 완료 후 아래 기본 계정으로 즉시 로그인 및 기능 �
 
 3. **환경 변수 일원화 (`backend/.env`)**:
    ```env
-   # 앱 전용 접속 계정
-   DB_HOST=localhost
+   # 앱 전용 접속 계정 (운영 서버는 컨테이너 이름, 로컬 개발은 localhost/127.0.0.1)
+   DB_HOST=external_project_db_postgres
    DB_PORT=5432
    DB_NAME=ecare24
    DB_USER=ecare24_app
    DB_PASSWORD=ecare24_secret_2026
 
-   # 자동 프로비저닝용 슈퍼유저 정보 (운영/개발 일원화)
+   # 자동 프로비저닝용 슈퍼유저 정보 (운영 DB 컨테이너의 실제 슈퍼유저와 일치해야 함)
    DB_ADMIN_USER=admin
    DB_ADMIN_PASSWORD=admin123
    DB_ADMIN_NAME=db_graphrag_agent
    ```
+
+4. **`28P01 password authentication failed`의 진짜 의미**:
+   - PostgreSQL(scram/md5 인증)은 **계정이 아예 없을 때도 `28P01`(비밀번호 불일치)을 반환**합니다 (계정 존재 여부 노출 방지).
+   - 따라서 `28P01`은 ① 계정 부재 ② 비밀번호 불일치 모두를 의미하며, 두 경우 모두 자동 프로비저닝이 `CREATE ROLE` 또는 `ALTER ROLE ... PASSWORD`로 해결합니다.
+
+5. **운영 서버 `.env` 일괄 생성 (`generate_env.sh`)**:
+   - 운영 서버는 앱 컨테이너(`external_project_app_fullstack`)와 DB 컨테이너(`external_project_db_postgres`)가 **같은 도커 네트워크**에 있으므로 `DB_HOST`는 `localhost`가 아닌 **컨테이너 이름**을 사용합니다 (스크립트 기본값 적용).
+   - 운영 슈퍼유저 정보가 기본값(`admin`/`admin123`)과 다르면 실행 시 환경 변수로 덮어씁니다:
+     ```bash
+     DB_ADMIN_PASSWORD='실제_admin_비밀번호' bash generate_env.sh
+     # 필요 시: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD, DB_ADMIN_USER, DB_ADMIN_NAME 도 동일하게 지정 가능
+     ```
+   - 자동 프로비저닝 실패 시 관리자 계정별 접속 실패 사유(`➔ password authentication failed for user "admin"` 등)가 그대로 출력되므로, 원인이 슈퍼유저 정보 불일치인지 즉시 확인할 수 있습니다.
 
 ---
 

@@ -58,6 +58,19 @@ EOF
 echo "✓ mobileApp/.env 생성 완료"
 
 # 4. 백엔드 (backend/.env)
+#    운영 서버: 앱 컨테이너(external_project_app_fullstack)와 DB 컨테이너(external_project_db_postgres)는
+#    같은 도커 네트워크에 있으므로 DB_HOST 는 컨테이너 이름을 사용합니다 (localhost 는 앱 컨테이너 자신을 가리킴).
+#    값은 실행 시 환경 변수로 덮어쓸 수 있습니다. 예)
+#      DB_ADMIN_PASSWORD='실제_admin_비밀번호' bash generate_env.sh
+GEN_DB_HOST="${DB_HOST:-external_project_db_postgres}"
+GEN_DB_PORT="${DB_PORT:-5432}"
+GEN_DB_NAME="${DB_NAME:-ecare24}"
+GEN_DB_USER="${DB_USER:-ecare24_app}"
+GEN_DB_PASSWORD="${DB_PASSWORD:-ecare24_secret_2026}"
+GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-admin}"
+GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-admin123}"
+GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-db_graphrag_agent}"
+
 cat << 'EOF' > backend/.env
 NODE_ENV=production
 PORT=30014
@@ -65,18 +78,18 @@ API_PREFIX=/api/v1
 CORS_ORIGINS=https://first.axfoundly.com,https://second.axfoundly.com,https://third.axfoundly.com,https://mars.axfoundly.com,*
 
 # Database (PostgreSQL 16+ / Apache AGE Container: external_project_db_postgres)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=ecare24
-DB_USER=ecare24_app
-DB_PASSWORD=ecare24_secret_2026
+DB_HOST=__DB_HOST__
+DB_PORT=__DB_PORT__
+DB_NAME=__DB_NAME__
+DB_USER=__DB_USER__
+DB_PASSWORD=__DB_PASSWORD__
 DB_SSL=false
 DB_SYNCHRONIZE=false
 
-# Database Admin (자동 프로비저닝용 슈퍼유저 - 운영/개발 일원화)
-DB_ADMIN_USER=admin
-DB_ADMIN_PASSWORD=admin123
-DB_ADMIN_NAME=db_graphrag_agent
+# Database Admin (자동 프로비저닝용 슈퍼유저 - 계정/DB/비밀번호 불일치 시 자동 생성·동기화)
+DB_ADMIN_USER=__DB_ADMIN_USER__
+DB_ADMIN_PASSWORD=__DB_ADMIN_PASSWORD__
+DB_ADMIN_NAME=__DB_ADMIN_NAME__
 
 # Authentication & Security
 JWT_ACCESS_SECRET=ecare24_super_secure_access_token_secret_key_2026_at_least_64_characters_long_now
@@ -102,7 +115,20 @@ FILE_STORAGE_DRIVER=local
 FILE_STORAGE_PATH=./storage
 SWAGGER_ENABLED=true
 EOF
+
+# placeholder 치환 (구분자 | 사용, 값 내 특수문자 이스케이프)
+_esc() { printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'; }
+sed -i \
+  -e "s|__DB_HOST__|$(_esc "$GEN_DB_HOST")|" \
+  -e "s|__DB_PORT__|$(_esc "$GEN_DB_PORT")|" \
+  -e "s|__DB_NAME__|$(_esc "$GEN_DB_NAME")|" \
+  -e "s|__DB_USER__|$(_esc "$GEN_DB_USER")|" \
+  -e "s|__DB_PASSWORD__|$(_esc "$GEN_DB_PASSWORD")|" \
+  -e "s|__DB_ADMIN_USER__|$(_esc "$GEN_DB_ADMIN_USER")|" \
+  -e "s|__DB_ADMIN_PASSWORD__|$(_esc "$GEN_DB_ADMIN_PASSWORD")|" \
+  -e "s|__DB_ADMIN_NAME__|$(_esc "$GEN_DB_ADMIN_NAME")|" \
+  backend/.env
 chmod 600 backend/.env 2>/dev/null || true
-echo "✓ backend/.env 생성 완료"
+echo "✓ backend/.env 생성 완료 (DB_HOST=${GEN_DB_HOST}, DB_ADMIN_USER=${GEN_DB_ADMIN_USER})"
 
 echo "🎉 모든 폴더의 .env 생성이 완료되었습니다!"

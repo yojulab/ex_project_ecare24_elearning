@@ -33,32 +33,32 @@ export interface DbConnectionResult {
 }
 
 /**
- * 운영/개발 환경에서 ecare24_app 계정이나 ecare24 데이터베이스가 없을 때,
- * 슈퍼유저(admin 또는 postgres)로 자동 접속하여 전용 계정과 데이터베이스를 생성(프로비저닝)합니다.
+ * 운영/개발 환경에서 ecare24_app 계정(없음 또는 비밀번호 불일치)이나 ecare24 데이터베이스가 없을 때,
+ * 슈퍼유저(admin 또는 postgres)로 자동 접속하여 전용 계정과 데이터베이스를 생성/갱신(프로비저닝)합니다.
+ *
+ * ※ PostgreSQL(scram/md5 인증)은 존재하지 않는 계정에 대해서도 28P01(비밀번호 불일치)을 반환하므로
+ *   28P01 역시 프로비저닝 트리거 대상입니다.
  */
 async function autoProvisionRoleAndDatabase(host: string, port: number): Promise<boolean> {
   const targetUser = process.env.DB_USER || 'ecare24_app';
   const targetPassword = process.env.DB_PASSWORD || 'ecare24_secret_2026';
   const targetDb = process.env.DB_NAME || 'ecare24';
 
-  // 슈퍼유저 후보군 (운영: admin/admin123 on db_graphrag_agent 또는 postgres, 개발: postgres/postgres on postgres)
-  const adminCandidates = [
-    {
-      user: process.env.DB_ADMIN_USER || 'admin',
-      password: process.env.DB_ADMIN_PASSWORD || 'admin123',
-      database: process.env.DB_ADMIN_NAME || 'db_graphrag_agent',
-    },
-    {
-      user: 'admin',
-      password: process.env.DB_ADMIN_PASSWORD || 'admin123',
-      database: 'postgres',
-    },
-    {
-      user: 'postgres',
-      password: process.env.DB_ADMIN_PASSWORD || 'postgres',
-      database: 'postgres',
-    },
-  ];
+  // 슈퍼유저 후보군 (backend/.env 의 DB_ADMIN_* 최우선, 이후 일반적인 기본값 순차 시도)
+  const adminCandidates: { user: string; password: string; database: string }[] = [];
+  const pushCandidate = (user: string, password: string, database: string) => {
+    if (!adminCandidates.some((c) => c.user === user && c.password === password && c.database === database)) {
+      adminCandidates.push({ user, password, database });
+    }
+  };
+  const envAdminUser = process.env.DB_ADMIN_USER || 'admin';
+  const envAdminPass = process.env.DB_ADMIN_PASSWORD || 'admin123';
+  const envAdminDb = process.env.DB_ADMIN_NAME || 'db_graphrag_agent';
+  pushCandidate(envAdminUser, envAdminPass, envAdminDb);
+  pushCandidate(envAdminUser, envAdminPass, 'postgres');
+  pushCandidate('postgres', process.env.DB_ADMIN_PASSWORD || 'postgres', 'postgres');
+
+  const adminFailures: string[] = [];
 
   for (const adminCfg of adminCandidates) {
     const adminClient = new Client({
@@ -72,30 +72,35 @@ async function autoProvisionRoleAndDatabase(host: string, port: number): Promise
 
     try {
       await adminClient.connect();
+    } catch (err: any) {
+      adminFailures.push(`${adminCfg.user}@${host}/${adminCfg.database} ➔ ${err.message} (code: ${err.code || 'UNKNOWN'})`);
+      try {
+        await adminClient.end();
+      } catch (_) {}
+      continue;
+    }
+
+    try {
       console.log(`🛠️ [DB 자동 프로비저닝] 관리자 계정(${adminCfg.user}@${host}/${adminCfg.database}) 접속 성공.`);
 
-      // 1) 대상 ROLE(계정) 존재 여부 확인 및 생성/권한 부여
-      console.log(`🛠️ [DB 자동 프로비저닝] 계정 '${targetUser}' 생성/권한 갱신 중...`);
-      await adminClient.query(`
-        DO $$
-        BEGIN
-          IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '${targetUser}') THEN
-            CREATE ROLE ${targetUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD '${targetPassword}';
-          ELSE
-            ALTER ROLE ${targetUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD '${targetPassword}';
-          END IF;
-        END
-        $$;
-      `);
+      // 1) 대상 ROLE(계정) 생성 또는 비밀번호/권한 갱신 (리터럴·식별자 안전 이스케이프)
+      const qUser = adminClient.escapeIdentifier(targetUser);
+      const lUser = adminClient.escapeLiteral(targetUser);
+      const lPass = adminClient.escapeLiteral(targetPassword);
+      const roleCheck = await adminClient.query(`SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = ${lUser}`);
+      if (roleCheck.rows.length === 0) {
+        console.log(`🛠️ [DB 자동 프로비저닝] 계정 '${targetUser}' 신규 생성 중...`);
+        await adminClient.query(`CREATE ROLE ${qUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD ${lPass}`);
+      } else {
+        console.log(`🛠️ [DB 자동 프로비저닝] 계정 '${targetUser}' 이미 존재 ➔ 비밀번호/권한 동기화 중...`);
+        await adminClient.query(`ALTER ROLE ${qUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD ${lPass}`);
+      }
 
       // 2) 대상 DATABASE 존재 여부 확인 및 생성
-      const dbCheck = await adminClient.query(
-        `SELECT 1 FROM pg_database WHERE datname = $1`,
-        [targetDb]
-      );
+      const dbCheck = await adminClient.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [targetDb]);
       if (dbCheck.rows.length === 0) {
         console.log(`🛠️ [DB 자동 프로비저닝] 데이터베이스 '${targetDb}' 생성 중 (소유자: ${targetUser})...`);
-        await adminClient.query(`CREATE DATABASE "${targetDb}" OWNER "${targetUser}"`);
+        await adminClient.query(`CREATE DATABASE ${adminClient.escapeIdentifier(targetDb)} OWNER ${qUser}`);
       } else {
         console.log(`ℹ️  [DB 자동 프로비저닝] 데이터베이스 '${targetDb}'가 이미 존재합니다.`);
       }
@@ -120,13 +125,19 @@ async function autoProvisionRoleAndDatabase(host: string, port: number): Promise
       console.log(`🎉 [DB 자동 프로비저닝] '${targetUser}' 계정 및 '${targetDb}' 데이터베이스 준비 완료!`);
       return true;
     } catch (err: any) {
+      adminFailures.push(`${adminCfg.user}@${host}/${adminCfg.database} 프로비저닝 쿼리 실패 ➔ ${err.message}`);
       try {
         await adminClient.end();
       } catch (_) {}
-      // 다음 슈퍼유저 후보 시도
     }
   }
 
+  console.error(`❌ [DB 자동 프로비저닝] host='${host}' 관리자 계정 접속/프로비저닝 실패 상세:`);
+  adminFailures.forEach((f) => console.error(`     - ${f}`));
+  console.error(
+    `   👉 운영 슈퍼유저 정보가 다르면 backend/.env 의 DB_ADMIN_USER / DB_ADMIN_PASSWORD / DB_ADMIN_NAME 을 실제 값으로 수정하세요.\n` +
+      `      (generate_env.sh 실행 시: DB_ADMIN_PASSWORD='실제비번' bash generate_env.sh)`
+  );
   return false;
 }
 
@@ -173,8 +184,12 @@ export async function getConnectedClient(
   };
 
   const attemptErrors: { host: string; message: string; code?: string }[] = [];
+  // 네트워크 도달은 성공했으나 계정/DB/비밀번호 문제로 실패한 호스트 (프로비저닝 대상, 호스트당 1회)
+  const reachableHosts: string[] = [];
 
   for (const host of candidates) {
+    let reachableButDenied = false;
+
     for (let attempt = 1; attempt <= maxRetriesPerHost; attempt++) {
       const client = new Client({
         ...baseConfig,
@@ -192,39 +207,40 @@ export async function getConnectedClient(
         const errCode = err.code || 'UNKNOWN';
         attemptErrors.push({ host, message: err.message, code: errCode });
 
-        // 계정 부재(28000) 또는 DB 부재(3D000)인 경우 네트워크는 이미 정상 도달한 것임!
-        // 에러 착시 방지를 위해 화면에 명확히 출력하고 자동 프로비저닝 시도
-        if (errCode === '28000' || errCode === '3D000') {
+        // 28000(계정 부재) / 28P01(비밀번호 불일치 — 계정 부재 시에도 동일 코드 반환) / 3D000(DB 부재)
+        // ➔ 네트워크는 이미 정상 도달한 것이므로 재시도 없이 즉시 프로비저닝 단계로 이동
+        if (errCode === '28000' || errCode === '28P01' || errCode === '3D000') {
           console.warn(
-            `⚠️  [DB 접속 감지] host='${host}'에 네트워크 도달 성공했으나 계정/DB 없음: ${err.message} (code: ${errCode})`
+            `⚠️  [DB 접속 감지] host='${host}' 네트워크 도달 성공, 그러나 접속 거부: ${err.message} (code: ${errCode})\n` +
+              `     (계정 '${baseConfig.user}' 부재 / 비밀번호 불일치 / DB '${baseConfig.database}' 부재 중 하나)`
           );
-          console.log(`💡 [DB 자동 복구] 관리자 계정으로 '${baseConfig.user}' 계정 및 '${baseConfig.database}' DB 생성을 시도합니다...`);
-
-          const provisioned = await autoProvisionRoleAndDatabase(host, Number(baseConfig.port));
-          if (provisioned) {
-            // 프로비저닝 성공 후 재연결 시도
-            const retryClient = new Client({
-              ...baseConfig,
-              host,
-            });
-            try {
-              await retryClient.connect();
-              console.log(`✅ [DB 연결 성공] '${host}'에서 '${baseConfig.user}' 계정으로 연결되었습니다.`);
-              return { client: retryClient, activeHost: host, loadedEnvPath };
-            } catch (retryErr: any) {
-              try {
-                await retryClient.end();
-              } catch (_) {}
-            }
-          }
-        } else if (errCode === '28P01') {
-          console.warn(
-            `⚠️  [DB 인증 실패] host='${host}' (user: ${baseConfig.user}): 비밀번호가 일치하지 않습니다. (code: 28P01)`
-          );
+          reachableButDenied = true;
+          break;
         }
 
         if (attempt < maxRetriesPerHost) {
           await new Promise((r) => setTimeout(r, delayMs));
+        }
+      }
+    }
+
+    if (reachableButDenied) {
+      reachableHosts.push(host);
+      console.log(
+        `💡 [DB 자동 복구] host='${host}' 관리자 계정으로 '${baseConfig.user}' 계정 및 '${baseConfig.database}' DB 생성/동기화를 시도합니다...`
+      );
+      const provisioned = await autoProvisionRoleAndDatabase(host, Number(baseConfig.port));
+      if (provisioned) {
+        const retryClient = new Client({ ...baseConfig, host });
+        try {
+          await retryClient.connect();
+          console.log(`✅ [DB 연결 성공] '${host}'에서 '${baseConfig.user}' 계정으로 연결되었습니다.`);
+          return { client: retryClient, activeHost: host, loadedEnvPath };
+        } catch (retryErr: any) {
+          attemptErrors.push({ host, message: `프로비저닝 후 재접속 실패: ${retryErr.message}`, code: retryErr.code });
+          try {
+            await retryClient.end();
+          } catch (_) {}
         }
       }
     }
