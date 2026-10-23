@@ -104,3 +104,5 @@
 | **2026-10-23** | DB 초기화 환경 변수 backend/.env 최우선 로드 및 최고관리자(SEED_SUPER_ADMIN_*) 동적 주입 완비 | `backend` (db-client.helper, init-db, reset-db, seed-runner, app.module), `GEMINI.md` | 실행 위치와 무관하게 backend/.env 최우선 로드, SEED_SUPER_ADMIN_LOGIN_ID/PASSWORD 기반 최고관리자 계정 생성 및 25개 전권 부여, CLI 플래그 보존 및 db:reset:force 무결성 검증 완료 |
 | **2026-10-23** | 개발/운영 DB 일원화(에러 착시 제거 및 슈퍼유저 자동 프로비저닝 Self-Healing) 완비 | `db-client.helper.ts`, `backend/.env`, `generate_env.sh`, `README.md`, `GEMINI.md` | 호스트별 상세 에러 로깅으로 착시 방지, ecare24_app/ecare24 부재 시 admin 슈퍼유저로 자동 생성 및 age 확장 활성화, 개발·운영 무수정 통합 구동 완비 |
 | **2026-10-23** | 운영 28P01(없는 계정도 비밀번호 불일치로 응답) 대응 및 운영용 generate_env.sh 정합화 | `db-client.helper.ts`, `scripts/generate_env.sh`, `README.md`, `GEMINI.md` | 28P01도 프로비저닝 트리거(CREATE/ALTER ROLE), 관리자 계정별 실패 사유 로깅, 리터럴/식별자 안전 이스케이프, 호스트당 1회 프로비저닝, 운영 DB_HOST=컨테이너명 기본화 및 DB_ADMIN_*/DB_* 실행 시 환경변수 override 지원 |
+| **2026-10-23** | 개발/운영 DB 완벽 분기(운영 성공 문장 양식 반영 및 generate_env.sh dev/prod 분기) 완비 | `db-client.helper.ts`, `scripts/generate_env.sh`, `README.md`, `GEMINI.md` | 운영 서버 성공 문구(감지된 .env 타겟 설정/계정·DB 생성완료) 동일 양식 적용, NODE_ENV 기반 호스트/슈퍼유저 1순위 분기, generate_env.sh dev/prod 모드별 .env 동적 생성 완비 |
+

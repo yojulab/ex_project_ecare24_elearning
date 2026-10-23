@@ -26,27 +26,52 @@ else
 fi
 cd "$ROOT_DIR"
 
-echo "⚙️  각 폴더에 .env 파일을 생성합니다..."
+TARGET_MODE="${1:-prod}"
+if [ "$TARGET_MODE" = "dev" ] || [ "$TARGET_MODE" = "development" ]; then
+  IS_PROD=false
+  echo "⚙️  [개발 모드 (development)] 각 폴더에 .env 파일을 생성합니다..."
+else
+  IS_PROD=true
+  echo "⚙️  [운영 모드 (production)] 각 폴더에 .env 파일을 생성합니다..."
+fi
 
 # 1. 수강생 웹 (frontend_user/.env)
-cat << 'EOF' > frontend_user/.env
+if [ "$IS_PROD" = true ]; then
+  cat << 'EOF' > frontend_user/.env
 NEXT_PUBLIC_API_BASE_URL=https://mars.axfoundly.com/api/v1
 NEXT_PUBLIC_ADMIN_PORTAL_URL=https://second.axfoundly.com
 NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원
 EOF
+else
+  cat << 'EOF' > frontend_user/.env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:30014/api/v1
+NEXT_PUBLIC_ADMIN_PORTAL_URL=http://localhost:30011
+NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원 (개발)
+EOF
+fi
 echo "✓ frontend_user/.env 생성 완료"
 
 # 2. 관리자 웹 (frontend_admin/.env)
-cat << 'EOF' > frontend_admin/.env
+if [ "$IS_PROD" = true ]; then
+  cat << 'EOF' > frontend_admin/.env
 VITE_API_BASE_URL=https://mars.axfoundly.com/api/v1
 VITE_API_DOCS_URL=https://mars.axfoundly.com/api/docs
 VITE_USER_PORTAL_URL=https://first.axfoundly.com
 VITE_APP_NAME=eCare24 콜센터 & 통합 관리자
 EOF
+else
+  cat << 'EOF' > frontend_admin/.env
+VITE_API_BASE_URL=http://localhost:30014/api/v1
+VITE_API_DOCS_URL=http://localhost:30014/api/docs
+VITE_USER_PORTAL_URL=http://localhost:30010
+VITE_APP_NAME=eCare24 콜센터 & 통합 관리자 (개발)
+EOF
+fi
 echo "✓ frontend_admin/.env 생성 완료"
 
 # 3. 모바일 앱 (mobileApp/.env)
-cat << 'EOF' > mobileApp/.env
+if [ "$IS_PROD" = true ]; then
+  cat << 'EOF' > mobileApp/.env
 VITE_API_BASE_URL=https://mars.axfoundly.com/api/v1
 EXPO_PUBLIC_API_URL=https://mars.axfoundly.com/api/v1
 VITE_USER_PORTAL_URL=https://first.axfoundly.com
@@ -55,29 +80,53 @@ VITE_CERT_VERIFY_URL=https://first.axfoundly.com/verify
 EXPO_PUBLIC_CERT_VERIFY_URL=https://first.axfoundly.com/verify
 EXPO_PUBLIC_APP_ENV=production
 EOF
+else
+  cat << 'EOF' > mobileApp/.env
+VITE_API_BASE_URL=http://localhost:30014/api/v1
+EXPO_PUBLIC_API_URL=http://localhost:30014/api/v1
+VITE_USER_PORTAL_URL=http://localhost:30010
+EXPO_PUBLIC_USER_PORTAL_URL=http://localhost:30010
+VITE_CERT_VERIFY_URL=http://localhost:30010/verify
+EXPO_PUBLIC_CERT_VERIFY_URL=http://localhost:30010/verify
+EXPO_PUBLIC_APP_ENV=development
+EOF
+fi
 echo "✓ mobileApp/.env 생성 완료"
 
 # 4. 백엔드 (backend/.env)
-#    운영 서버: 앱 컨테이너(external_project_app_fullstack)와 DB 컨테이너(external_project_db_postgres)는
-#    같은 도커 네트워크에 있으므로 DB_HOST 는 컨테이너 이름을 사용합니다 (localhost 는 앱 컨테이너 자신을 가리킴).
-#    값은 실행 시 환경 변수로 덮어쓸 수 있습니다. 예)
-#      DB_ADMIN_PASSWORD='실제_admin_비밀번호' bash generate_env.sh
-GEN_DB_HOST="${DB_HOST:-external_project_db_postgres}"
-GEN_DB_PORT="${DB_PORT:-5432}"
-GEN_DB_NAME="${DB_NAME:-ecare24}"
-GEN_DB_USER="${DB_USER:-ecare24_app}"
-GEN_DB_PASSWORD="${DB_PASSWORD:-ecare24_secret_2026}"
-GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-admin}"
-GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-admin123}"
-GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-db_graphrag_agent}"
+if [ "$IS_PROD" = true ]; then
+  GEN_NODE_ENV="production"
+  GEN_DB_HOST="${DB_HOST:-external_project_db_postgres}"
+  GEN_DB_PORT="${DB_PORT:-5432}"
+  GEN_DB_NAME="${DB_NAME:-ecare24}"
+  GEN_DB_USER="${DB_USER:-ecare24_app}"
+  GEN_DB_PASSWORD="${DB_PASSWORD:-ecare24_secret_2026}"
+  GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-admin}"
+  GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-admin123}"
+  GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-db_graphrag_agent}"
+  GEN_CORS_ORIGINS="https://first.axfoundly.com,https://second.axfoundly.com,https://third.axfoundly.com,https://mars.axfoundly.com,*"
+  GEN_CERT_QR_URL="https://first.axfoundly.com/verify"
+else
+  GEN_NODE_ENV="development"
+  GEN_DB_HOST="${DB_HOST:-127.0.0.1}"
+  GEN_DB_PORT="${DB_PORT:-5432}"
+  GEN_DB_NAME="${DB_NAME:-ecare24}"
+  GEN_DB_USER="${DB_USER:-ecare24_app}"
+  GEN_DB_PASSWORD="${DB_PASSWORD:-ecare24_secret_2026}"
+  GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-postgres}"
+  GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-postgres}"
+  GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-postgres}"
+  GEN_CORS_ORIGINS="*"
+  GEN_CERT_QR_URL="http://localhost:30010/verify"
+fi
 
 cat << 'EOF' > backend/.env
-NODE_ENV=production
+NODE_ENV=__NODE_ENV__
 PORT=30014
 API_PREFIX=/api/v1
-CORS_ORIGINS=https://first.axfoundly.com,https://second.axfoundly.com,https://third.axfoundly.com,https://mars.axfoundly.com,*
+CORS_ORIGINS=__CORS_ORIGINS__
 
-# Database (PostgreSQL 16+ / Apache AGE Container: external_project_db_postgres)
+# Database (PostgreSQL 16+ / Apache AGE Container)
 DB_HOST=__DB_HOST__
 DB_PORT=__DB_PORT__
 DB_NAME=__DB_NAME__
@@ -101,7 +150,7 @@ BCRYPT_COST=10
 # PII & Crypto Keys (AES-256-GCM / HMAC)
 PII_ENCRYPTION_KEY=dGhpcy1pcy1hLXNhbXBsZS0zMmJ5dGUtZW5jcnlwdGlvbi1rZXk=
 HMAC_SECRET=ecare24_hmac_secret_key_for_qr_verification_2026
-CERT_QR_BASE_URL=https://first.axfoundly.com/verify
+CERT_QR_BASE_URL=__CERT_QR_URL__
 
 # Super Admin Seed
 SEED_SUPER_ADMIN_LOGIN_ID=admin
@@ -119,6 +168,9 @@ EOF
 # placeholder 치환 (구분자 | 사용, 값 내 특수문자 이스케이프)
 _esc() { printf '%s' "$1" | sed -e 's/[\\&|]/\\&/g'; }
 sed -i \
+  -e "s|__NODE_ENV__|$(_esc "$GEN_NODE_ENV")|" \
+  -e "s|__CORS_ORIGINS__|$(_esc "$GEN_CORS_ORIGINS")|" \
+  -e "s|__CERT_QR_URL__|$(_esc "$GEN_CERT_QR_URL")|" \
   -e "s|__DB_HOST__|$(_esc "$GEN_DB_HOST")|" \
   -e "s|__DB_PORT__|$(_esc "$GEN_DB_PORT")|" \
   -e "s|__DB_NAME__|$(_esc "$GEN_DB_NAME")|" \
@@ -129,6 +181,6 @@ sed -i \
   -e "s|__DB_ADMIN_NAME__|$(_esc "$GEN_DB_ADMIN_NAME")|" \
   backend/.env
 chmod 600 backend/.env 2>/dev/null || true
-echo "✓ backend/.env 생성 완료 (DB_HOST=${GEN_DB_HOST}, DB_ADMIN_USER=${GEN_DB_ADMIN_USER})"
+echo "✓ backend/.env 생성 완료 (NODE_ENV=${GEN_NODE_ENV}, DB_HOST=${GEN_DB_HOST}, DB_ADMIN_USER=${GEN_DB_ADMIN_USER})"
 
-echo "🎉 모든 폴더의 .env 생성이 완료되었습니다!"
+echo "🎉 모든 폴더의 .env 생성이 완료되었습니다! (대상: ${TARGET_MODE})"

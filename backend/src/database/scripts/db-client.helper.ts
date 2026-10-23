@@ -7,21 +7,33 @@ import * as dotenv from 'dotenv';
  * DB 초기화 및 시드 스크립트 실행 시 backend/.env 파일을 최우선 로드합니다.
  */
 export function loadBackendEnv(): string {
+  const initialNodeEnv = process.env.NODE_ENV;
+  const initialDbHost = process.env.DB_HOST;
+
   const candidates = [
     path.resolve(__dirname, '../../../.env'),
     path.resolve(process.cwd(), 'backend/.env'),
     path.resolve(process.cwd(), '.env'),
   ];
 
+  let loaded = 'default';
   for (const envPath of candidates) {
     if (fs.existsSync(envPath)) {
       dotenv.config({ path: envPath, override: true });
-      return envPath;
+      loaded = envPath;
+      break;
     }
   }
 
-  dotenv.config();
-  return process.cwd();
+  if (loaded === 'default') {
+    dotenv.config();
+  }
+
+  // CLI 등 상위 프로세스에서 명시적으로 전달된 값 우선 보존
+  if (initialNodeEnv !== undefined) process.env.NODE_ENV = initialNodeEnv;
+  if (initialDbHost !== undefined) process.env.DB_HOST = initialDbHost;
+
+  return loaded;
 }
 
 export const loadedEnvPath = loadBackendEnv();
@@ -33,30 +45,81 @@ export interface DbConnectionResult {
 }
 
 /**
- * 운영/개발 환경에서 ecare24_app 계정(없음 또는 비밀번호 불일치)이나 ecare24 데이터베이스가 없을 때,
- * 슈퍼유저(admin 또는 postgres)로 자동 접속하여 전용 계정과 데이터베이스를 생성/갱신(프로비저닝)합니다.
- *
- * ※ PostgreSQL(scram/md5 인증)은 존재하지 않는 계정에 대해서도 28P01(비밀번호 불일치)을 반환하므로
- *   28P01 역시 프로비저닝 트리거 대상입니다.
+ * 개발 환경 vs 운영 환경 여부 확인
+ */
+export function isProductionEnv(): boolean {
+  return (
+    process.env.NODE_ENV === 'production' ||
+    process.env.APP_ENV === 'production' ||
+    Boolean(process.env.DOCKER_CONTAINER)
+  );
+}
+
+/**
+ * 운영/개발 환경에 맞춘 관리자(슈퍼유저) 자동 프로비저닝 함수
+ * (운영 서버 성공 패턴 반영 및 개발/운영 명확한 구분)
  */
 async function autoProvisionRoleAndDatabase(host: string, port: number): Promise<boolean> {
-  const targetUser = process.env.DB_USER || 'ecare24_app';
-  const targetPassword = process.env.DB_PASSWORD || 'ecare24_secret_2026';
-  const targetDb = process.env.DB_NAME || 'ecare24';
+  const isProd = isProductionEnv();
 
-  // 슈퍼유저 후보군 (backend/.env 의 DB_ADMIN_* 최우선, 이후 일반적인 기본값 순차 시도)
-  const adminCandidates: { user: string; password: string; database: string }[] = [];
-  const pushCandidate = (user: string, password: string, database: string) => {
-    if (!adminCandidates.some((c) => c.user === user && c.password === password && c.database === database)) {
-      adminCandidates.push({ user, password, database });
-    }
-  };
-  const envAdminUser = process.env.DB_ADMIN_USER || 'admin';
-  const envAdminPass = process.env.DB_ADMIN_PASSWORD || 'admin123';
-  const envAdminDb = process.env.DB_ADMIN_NAME || 'db_graphrag_agent';
-  pushCandidate(envAdminUser, envAdminPass, envAdminDb);
-  pushCandidate(envAdminUser, envAdminPass, 'postgres');
-  pushCandidate('postgres', process.env.DB_ADMIN_PASSWORD || 'postgres', 'postgres');
+  // 타겟 계정 정보 (.env 및 alias 지원)
+  const targetUser = process.env.DB_USER || process.env.POSTGRES_USER || 'ecare24_app';
+  const targetPassword = process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'ecare24_secret_2026';
+  const targetDb = process.env.DB_NAME || process.env.DB_DATABASE || process.env.POSTGRES_DB || 'ecare24';
+
+  console.log(
+    `감지된 .env 타겟 설정: { user: '${targetUser}', db: '${targetDb}' } [${
+      isProd ? '운영(production)' : '개발(development)'
+    }]`
+  );
+
+  // 개발 vs 운영 구분 슈퍼유저 후보군 구성
+  const adminCandidates: { user: string; password: string; database: string; label: string }[] = [];
+
+  const envAdminUser = process.env.DB_ADMIN_USER;
+  const envAdminPass = process.env.DB_ADMIN_PASSWORD;
+  const envAdminDb = process.env.DB_ADMIN_NAME;
+
+  if (isProd) {
+    // [운영 서버 우선순위]
+    // 1) backend/.env 지정 값 또는 운영 컨테이너 기본 슈퍼유저 (admin / admin123 / db_graphrag_agent)
+    adminCandidates.push({
+      user: envAdminUser || 'admin',
+      password: envAdminPass || 'admin123',
+      database: envAdminDb || 'db_graphrag_agent',
+      label: '운영 슈퍼유저 (external_project_db_postgres)',
+    });
+    // 2) 운영 admin 계정 + postgres DB
+    adminCandidates.push({
+      user: envAdminUser || 'admin',
+      password: envAdminPass || 'admin123',
+      database: 'postgres',
+      label: '운영 관리자 (postgres DB)',
+    });
+    // 3) 표준 postgres 계정 fallback
+    adminCandidates.push({
+      user: 'postgres',
+      password: envAdminPass || 'postgres',
+      database: 'postgres',
+      label: '표준 postgres 슈퍼유저',
+    });
+  } else {
+    // [개발 환경 우선순위]
+    // 1) 로컬 postgres 기본 슈퍼유저 (postgres / postgres / postgres)
+    adminCandidates.push({
+      user: envAdminUser || 'postgres',
+      password: envAdminPass || 'postgres',
+      database: envAdminDb || 'postgres',
+      label: '로컬 개발 슈퍼유저 (postgres)',
+    });
+    // 2) backend/.env 지정 admin 계정
+    adminCandidates.push({
+      user: envAdminUser || 'admin',
+      password: envAdminPass || 'admin123',
+      database: envAdminDb || 'db_graphrag_agent',
+      label: '개발 보조 슈퍼유저 (admin)',
+    });
+  }
 
   const adminFailures: string[] = [];
 
@@ -73,7 +136,11 @@ async function autoProvisionRoleAndDatabase(host: string, port: number): Promise
     try {
       await adminClient.connect();
     } catch (err: any) {
-      adminFailures.push(`${adminCfg.user}@${host}/${adminCfg.database} ➔ ${err.message} (code: ${err.code || 'UNKNOWN'})`);
+      adminFailures.push(
+        `${adminCfg.user}@${host}/${adminCfg.database} (${adminCfg.label}) ➔ ${err.message} (code: ${
+          err.code || 'UNKNOWN'
+        })`
+      );
       try {
         await adminClient.end();
       } catch (_) {}
@@ -81,33 +148,35 @@ async function autoProvisionRoleAndDatabase(host: string, port: number): Promise
     }
 
     try {
-      console.log(`🛠️ [DB 자동 프로비저닝] 관리자 계정(${adminCfg.user}@${host}/${adminCfg.database}) 접속 성공.`);
+      console.log(
+        `🛠️ [DB 자동 프로비저닝] ${adminCfg.label} 접속 성공 (${adminCfg.user}@${host}/${adminCfg.database})`
+      );
 
-      // 1) 대상 ROLE(계정) 생성 또는 비밀번호/권한 갱신 (리터럴·식별자 안전 이스케이프)
+      // 1) 대상 ROLE(계정) 존재 여부 확인 및 생성/동기화 (사용자 성공 문장 양식 반영)
+      const r = await adminClient.query('SELECT 1 FROM pg_roles WHERE rolname = $1', [targetUser]);
       const qUser = adminClient.escapeIdentifier(targetUser);
-      const lUser = adminClient.escapeLiteral(targetUser);
       const lPass = adminClient.escapeLiteral(targetPassword);
-      const roleCheck = await adminClient.query(`SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = ${lUser}`);
-      if (roleCheck.rows.length === 0) {
-        console.log(`🛠️ [DB 자동 프로비저닝] 계정 '${targetUser}' 신규 생성 중...`);
+
+      if (r.rowCount === 0) {
         await adminClient.query(`CREATE ROLE ${qUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD ${lPass}`);
+        console.log(`✅ 계정 생성 완료: ${targetUser}`);
       } else {
-        console.log(`🛠️ [DB 자동 프로비저닝] 계정 '${targetUser}' 이미 존재 ➔ 비밀번호/권한 동기화 중...`);
         await adminClient.query(`ALTER ROLE ${qUser} WITH LOGIN SUPERUSER CREATEDB PASSWORD ${lPass}`);
+        console.log(`✅ 계정 비밀번호 및 권한 동기화 완료: ${targetUser}`);
       }
 
-      // 2) 대상 DATABASE 존재 여부 확인 및 생성
-      const dbCheck = await adminClient.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [targetDb]);
-      if (dbCheck.rows.length === 0) {
-        console.log(`🛠️ [DB 자동 프로비저닝] 데이터베이스 '${targetDb}' 생성 중 (소유자: ${targetUser})...`);
+      // 2) 대상 DATABASE 존재 여부 확인 및 생성 (사용자 성공 문장 양식 반영)
+      const dbRes = await adminClient.query('SELECT 1 FROM pg_database WHERE datname = $1', [targetDb]);
+      if (dbRes.rowCount === 0) {
         await adminClient.query(`CREATE DATABASE ${adminClient.escapeIdentifier(targetDb)} OWNER ${qUser}`);
+        console.log(`✅ 데이터베이스 생성 완료: ${targetDb}`);
       } else {
-        console.log(`ℹ️  [DB 자동 프로비저닝] 데이터베이스 '${targetDb}'가 이미 존재합니다.`);
+        console.log(`ℹ️  데이터베이스 이미 존재: ${targetDb}`);
       }
 
       await adminClient.end();
 
-      // 3) 생성된 DB에 Apache AGE 확장 활성화 (선택적)
+      // 3) Apache AGE 확장 활성화 (선택적)
       try {
         const dbAdminClient = new Client({
           host,
@@ -125,14 +194,14 @@ async function autoProvisionRoleAndDatabase(host: string, port: number): Promise
       console.log(`🎉 [DB 자동 프로비저닝] '${targetUser}' 계정 및 '${targetDb}' 데이터베이스 준비 완료!`);
       return true;
     } catch (err: any) {
-      adminFailures.push(`${adminCfg.user}@${host}/${adminCfg.database} 프로비저닝 쿼리 실패 ➔ ${err.message}`);
+      adminFailures.push(`${adminCfg.user}@${host}/${adminCfg.database} 프로비저닝 실행 실패: ${err.message}`);
       try {
         await adminClient.end();
       } catch (_) {}
     }
   }
 
-  console.error(`❌ [DB 자동 프로비저닝] host='${host}' 관리자 계정 접속/프로비저닝 실패 상세:`);
+  console.error(`❌ [DB 자동 프로비저닝 실패] host='${host}' 대상 슈퍼유저 접속/프로비저닝 불가:`);
   adminFailures.forEach((f) => console.error(`     - ${f}`));
   console.error(
     `   👉 운영 슈퍼유저 정보가 다르면 backend/.env 의 DB_ADMIN_USER / DB_ADMIN_PASSWORD / DB_ADMIN_NAME 을 실제 값으로 수정하세요.\n` +
@@ -151,18 +220,46 @@ export async function getConnectedClient(
   maxRetriesPerHost = 2,
   delayMs = 1000
 ): Promise<DbConnectionResult> {
+  const isProd = isProductionEnv();
   const envHost = process.env.DB_HOST;
-  const rawHosts = [
-    envHost,
-    'external_project_db_postgres',
-    '172.20.0.4',
-    '127.0.0.1',
-    'localhost',
-    'host.docker.internal',
-    '172.17.0.1',
-    '172.20.0.1',
-    '172.18.0.1',
-  ].filter(Boolean) as string[];
+
+  // 개발 vs 운영 구분 호스트 탐색 목록
+  let rawHosts: string[];
+  if (isProd) {
+    // [운영 서버 우선순위]
+    // 1) DB_HOST 환경 변수
+    // 2) 도커 컨테이너 이름 (external_project_db_postgres)
+    // 3) 도커 브리지 IP (172.20.0.4)
+    // 4) 로컬 루프백 (127.0.0.1)
+    rawHosts = [
+      envHost,
+      'external_project_db_postgres',
+      '172.20.0.4',
+      '127.0.0.1',
+      'localhost',
+      'host.docker.internal',
+      '172.17.0.1',
+      '172.20.0.1',
+      '172.18.0.1',
+    ].filter(Boolean) as string[];
+    console.log(`🌐 [운영 환경 DB 감지 (production)] 호스트 탐색 목록: [${rawHosts.join(', ')}]`);
+  } else {
+    // [개발 환경 우선순위]
+    // 1) DB_HOST 환경 변수
+    // 2) 로컬 루프백 (127.0.0.1 / localhost)
+    // 3) Docker Desktop 게이트웨이 (host.docker.internal)
+    // 4) 컨테이너 이름 (fallback)
+    rawHosts = [
+      envHost,
+      '127.0.0.1',
+      'localhost',
+      'host.docker.internal',
+      'external_project_db_postgres',
+      '172.17.0.1',
+      '172.20.0.1',
+    ].filter(Boolean) as string[];
+    console.log(`💻 [개발 환경 DB 감지 (development)] 호스트 탐색 목록: [${rawHosts.join(', ')}]`);
+  }
 
   // 중복 제거 및 'localhost' -> '127.0.0.1' 정규화
   const candidates: string[] = [];
@@ -175,16 +272,15 @@ export async function getConnectedClient(
 
   const baseConfig: ClientConfig = {
     port: parseInt(process.env.DB_PORT || '5432', 10),
-    database: process.env.DB_NAME || 'ecare24',
-    user: process.env.DB_USER || 'ecare24_app',
-    password: process.env.DB_PASSWORD || 'ecare24_secret_2026',
+    database: process.env.DB_NAME || process.env.DB_DATABASE || process.env.POSTGRES_DB || 'ecare24',
+    user: process.env.DB_USER || process.env.POSTGRES_USER || 'ecare24_app',
+    password: process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD || 'ecare24_secret_2026',
     ssl: process.env.DB_SSL === 'true',
     connectionTimeoutMillis: 3000,
     ...overrideConfig,
   };
 
   const attemptErrors: { host: string; message: string; code?: string }[] = [];
-  // 네트워크 도달은 성공했으나 계정/DB/비밀번호 문제로 실패한 호스트 (프로비저닝 대상, 호스트당 1회)
   const reachableHosts: string[] = [];
 
   for (const host of candidates) {
