@@ -49,7 +49,8 @@ vite.config.d.ts
 .idea/
 *.swp
 
-# 프로세스 PID 파일
+# 프로세스 PID 파일 및 백업
 *.pid
+.env_backups/
 tests/snapshots/
 scripts/.db_snapshot.json
