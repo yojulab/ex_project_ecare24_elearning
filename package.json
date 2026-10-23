@@ -1,0 +1,52 @@
+{
+  "name": "ecare24",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "frontend_user",
+    "frontend_admin",
+    "mobileApp",
+    "backend"
+  ],
+  "scripts": {
+    "postinstall": "for d in frontend_user frontend_admin mobileApp backend; do mkdir -p $d/node_modules && (test -e $d/node_modules/.bin || ln -sf ../../node_modules/.bin $d/node_modules/.bin); done",
+    "start": "bash run_port.sh all",
+    "prod": "bash run_port.sh all",
+    "prod:all": "bash run_port.sh all",
+    "dev": "bash run_port.sh dev all",
+    "dev:all": "bash run_port.sh dev all",
+    "dev:user": "bash run_port.sh dev 30010",
+    "dev:admin": "bash run_port.sh dev 30011",
+    "dev:mobile": "bash run_port.sh dev 30012",
+    "dev:api": "bash run_port.sh dev 30014",
+    "stop": "bash run_port.sh stop all",
+    "restart": "bash run_port.sh restart all",
+    "status": "bash run_port.sh status",
+    "build": "bash run_port.sh build all",
+    "build:all": "bash run_port.sh build all",
+    "build:user": "npm run build --workspace=frontend_user",
+    "build:admin": "npm run build --workspace=frontend_admin",
+    "build:mobile": "npm run build --workspace=mobileApp",
+    "build:api": "npm run build --workspace=backend",
+    "compile": "bash run_port.sh build all",
+    "compile:all": "bash run_port.sh build all",
+    "compile:user": "bash run_port.sh build 30010",
+    "compile:admin": "bash run_port.sh build 30011",
+    "compile:mobile": "bash run_port.sh build 30012",
+    "compile:api": "bash run_port.sh build 30014",
+    "db:init": "npm run db:init --workspace=backend",
+    "db:seed": "npm run db:seed --workspace=backend",
+    "db:reset": "npm run db:reset --workspace=backend",
+    "port": "bash run_port.sh",
+    "tunnel:share": "bash scripts/start_tunnels.sh",
+    "tunnel:status": "bash scripts/status_tunnels.sh",
+    "test:capture": "node tests/capture_screens.js",
+    "test:crud": "node tests/test_crud_scenarios.js"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.4.5",
+    "@playwright/test": "^1.64.1",
+    "playwright": "^1.64.1"
+  }
+}
