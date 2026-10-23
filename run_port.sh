@@ -21,6 +21,11 @@
 #   • ./run_port.sh stop all        -> 전체 서비스 일괄 중지
 #   • ./run_port.sh status          -> 현재 포트 및 PID 점검
 # ==============================================================================
+# source/dot(.) 실행 시 현재 대화형 터미널이 닫히는 현상을 방지하기 위해 서브쉘로 격리 실행
+if [ "$0" != "${BASH_SOURCE[0]}" ]; then
+  bash "${BASH_SOURCE[0]}" "$@"
+  return $? 2>/dev/null || true
+fi
 
 set -uo pipefail
 

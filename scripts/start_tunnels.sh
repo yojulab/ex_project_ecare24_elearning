@@ -1,4 +1,9 @@
 #!/usr/bin/env bash
+# source/dot(.) 실행 시 현재 대화형 터미널 닫힘 방지 가드
+if [ "$0" != "${BASH_SOURCE[0]}" ]; then
+  bash "${BASH_SOURCE[0]}" "$@"
+  return $? 2>/dev/null || true
+fi
 
 set -e
 
