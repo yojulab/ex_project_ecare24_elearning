@@ -5,11 +5,31 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
+function getDbHost(): string {
+  const host = process.env.DB_HOST || '127.0.0.1';
+  return host === 'localhost' ? '127.0.0.1' : host;
+}
+
+async function connectWithRetry(client: Client, maxRetries = 5, delayMs = 1500): Promise<void> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await client.connect();
+      return;
+    } catch (err: any) {
+      if (attempt === maxRetries || (err.code !== 'ECONNREFUSED' && err.code !== 'ETIMEDOUT')) {
+        throw err;
+      }
+      console.log(`⏳ [DB] PostgreSQL 컨테이너 연결 대기 중... (${attempt}/${maxRetries})`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 export async function runInitDb() {
   console.log('🚀 [DB:INIT] eCare24 PostgreSQL 데이터베이스 스키마 초기화 시작...');
 
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
+    host: getDbHost(),
     port: parseInt(process.env.DB_PORT || '5432', 10),
     database: process.env.DB_NAME || 'ecare24',
     user: process.env.DB_USER || 'ecare24_app',
@@ -18,7 +38,7 @@ export async function runInitDb() {
   });
 
   try {
-    await client.connect();
+    await connectWithRetry(client);
     console.log('✅ PostgreSQL 연결 성공 (user: ' + (process.env.DB_USER || 'ecare24_app') + ')');
 
     const schema1Path = path.resolve(__dirname, '../../../../docs/architecture/ddl/01_master_schema.sql');

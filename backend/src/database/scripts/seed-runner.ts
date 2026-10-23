@@ -17,13 +17,31 @@ import {
   SEED_COUNSELING_TICKETS,
 } from '../seeds/data/operational.data';
 
-dotenv.config();
+function getDbHost(): string {
+  const host = process.env.DB_HOST || '127.0.0.1';
+  return host === 'localhost' ? '127.0.0.1' : host;
+}
+
+async function connectWithRetry(client: Client, maxRetries = 5, delayMs = 1500): Promise<void> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await client.connect();
+      return;
+    } catch (err: any) {
+      if (attempt === maxRetries || (err.code !== 'ECONNREFUSED' && err.code !== 'ETIMEDOUT')) {
+        throw err;
+      }
+      console.log(`⏳ [DB] PostgreSQL 컨테이너 연결 대기 중... (${attempt}/${maxRetries})`);
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
 
 export async function runSeeds() {
   console.log('🌱 [DB:SEED] eCare24 기준 데이터 및 운영 데이터 전체 시드 주입 시작...');
 
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
+    host: getDbHost(),
     port: parseInt(process.env.DB_PORT || '5432', 10),
     database: process.env.DB_NAME || 'ecare24',
     user: process.env.DB_USER || 'ecare24_app',
@@ -32,7 +50,7 @@ export async function runSeeds() {
   });
 
   try {
-    await client.connect();
+    await connectWithRetry(client);
 
     // 1. 권한 마스터 시드 (25개)
     console.log(`🔐 [1/13] 권한 마스터 ${SEED_PERMISSIONS.length}건 주입 중...`);
