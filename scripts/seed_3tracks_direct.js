@@ -11,7 +11,7 @@ async function seedThreeTracks() {
   console.log('🚀 [SEED-DIRECT] 3개 실데이터 트랙 및 180문항 주입 시작...');
 
   const client = new Client({
-    host: process.env.DB_HOST || 'localhost',
+    host: process.env.DB_HOST || 'graphrag_agent_db_postgres',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     database: process.env.DB_NAME || 'ecare24',
     user: process.env.DB_USER || 'ecare24_app',

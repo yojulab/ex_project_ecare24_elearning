@@ -104,14 +104,14 @@ if [ "$IS_PROD" = true ]; then
   GEN_CERT_QR_URL="https://first.axfoundly.com/verify"
 else
   GEN_NODE_ENV="development"
-  GEN_DB_HOST="${DB_HOST:-127.0.0.1}"
+  GEN_DB_HOST="${DB_HOST:-graphrag_agent_db_postgres}"
   GEN_DB_PORT="${DB_PORT:-5432}"
   GEN_DB_NAME="${DB_NAME:-ecare24}"
   GEN_DB_USER="${DB_USER:-ecare24_app}"
   GEN_DB_PASSWORD="${DB_PASSWORD:-ecare24_secret_2026}"
-  GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-postgres}"
-  GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-postgres}"
-  GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-postgres}"
+  GEN_DB_ADMIN_USER="${DB_ADMIN_USER:-admin}"
+  GEN_DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-admin123}"
+  GEN_DB_ADMIN_NAME="${DB_ADMIN_NAME:-db_graphrag_agent}"
   GEN_CORS_ORIGINS="*"
   GEN_CERT_QR_URL="http://localhost:30010/verify"
 fi

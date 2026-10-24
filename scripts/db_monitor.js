@@ -7,11 +7,14 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+
+dotenv.config({ path: path.join(__dirname, '../backend/.env') });
 
 const SNAPSHOT_FILE = path.join(__dirname, '.db_snapshot.json');
 
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'graphrag_agent_db_postgres',
   port: parseInt(process.env.DB_PORT || '5432', 10),
   database: process.env.DB_NAME || 'ecare24',
   user: process.env.DB_USER || 'ecare24_app',
