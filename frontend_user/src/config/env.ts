@@ -5,17 +5,31 @@
  */
 
 function resolveApiBaseUrl(): string {
-  // 브라우저 클라이언트 환경:
-  // Next.js rewrites(/api/v1 -> :30014)를 통해 Same-Origin으로 통신하여
-  // Mixed Content 차단, CORS, 포트포워딩 누락을 100% 원천 방지합니다.
+  const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+  // 브라우저 클라이언트 환경
   if (typeof window !== 'undefined') {
+    // 1. 프로덕션 외부 HTTPS API(예: https://mars.axfoundly.com/api/v1)가 명시되어 있으면 최우선 사용
+    if (envUrl && envUrl.startsWith('https://')) {
+      return envUrl;
+    }
+    // 2. 상대 경로(/api/v1 등)로 명시된 경우
+    if (envUrl && envUrl.startsWith('/')) {
+      return envUrl;
+    }
+    // 3. 로컬 호스트(localhost, 127.0.0.1)인 경우
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return envUrl || '/api/v1';
+    }
+    // 4. 기타 터널 및 원격 환경: Next.js Same-Origin rewrites 프록시(/api/v1) 사용
     return '/api/v1';
   }
 
   // Node.js SSR 환경: 백엔드 직접 통신
   return process.env.INTERNAL_BACKEND_URL
     ? `${process.env.INTERNAL_BACKEND_URL}/api/v1`
-    : (process.env.NEXT_PUBLIC_API_BASE_URL || 'http://127.0.0.1:30014/api/v1');
+    : (envUrl || 'http://127.0.0.1:30014/api/v1');
 }
 
 export const ENV = {

@@ -1,6 +1,6 @@
 # eCare24 Playwright Headless 중요 화면 자동 캡처 검증 보고서
 
-- **검증 일시**: 2026-10-23T05:12:07.636Z
+- **검증 일시**: 2026-10-24T03:39:10.319Z
 - **실행 모드**: Playwright Headless (Chromium arm64, --no-sandbox)
 - **총 대상 화면**: 21개
 - **성공**: 21건 / **실패**: 0건
@@ -9,16 +9,16 @@
 
 | 번호 | 분류 | 화면 파일명 | HTTP | 크기 | 설명 |
 | :---: | :--- | :--- | :---: | :---: | :--- |
-| 1 | 수강생 포털 (웹) | [01_user_home.png](./01_user_home.png) | `200 OK` | 197.7 KB | 수강생 포털 메인 홈 (히어로 배너, 교육과정 안내, 10대 골든 룰) |
-| 2 | 수강생 포털 (웹) | [02_user_about.png](./02_user_about.png) | `200 OK` | 187.7 KB | 교육원 소개 페이지 (설립 이념, 연혁, 임상 교수진, 시설 안내) |
-| 3 | 수강생 포털 (웹) | [03_user_curriculum.png](./03_user_curriculum.png) | `200 OK` | 244.0 KB | 교육 체계 / 커리큘럼 (공식 제공 3대 질환 전문 자격 트랙) |
-| 4 | 수강생 포털 (웹) | [04_user_mypage_summary.png](./04_user_mypage_summary.png) | `200 OK` | 129.3 KB | 수강생 마이페이지 (학습 진행률, 최근 HeyGen 영상 이어보기) |
-| 5 | 수강생 포털 (웹) | [05_user_mypage_payments.png](./05_user_mypage_payments.png) | `200 OK` | 129.3 KB | 마이페이지 - 수강료 납부 내역 및 무통장 가상계좌 안내 |
-| 6 | 수강생 포털 (웹) | [06_user_mypage_certs.png](./06_user_mypage_certs.png) | `200 OK` | 129.3 KB | 마이페이지 - 직능원 민간자격증 발급 현황 및 뷰어 |
-| 7 | 수강생 포털 (웹) | [07_user_tv24_shorts.png](./07_user_tv24_shorts.png) | `200 OK` | 600.3 KB | 간병24TV - 숏폼 러닝 및 HeyGen AI 임상 교육 비디오 |
-| 8 | 수강생 포털 (웹) | [08_user_verify.png](./08_user_verify.png) | `200 OK` | 182.9 KB | 직능원 민간자격증 고유등록번호 진위 검증 서비스 |
-| 9 | 수강생 포털 (웹) | [09_user_course_detail.png](./09_user_course_detail.png) | `200 OK` | 194.3 KB | 과정 상세 / HeyGen AI 전문강사 영상 플레이어 |
-| 10 | 수강생 포털 (웹) | [10_user_ui_inspect_mode.png](./10_user_ui_inspect_mode.png) | `200 OK` | 164.7 KB | Alt+I 단축키 가동 후 UI inspect 일련번호 뱃지 오버레이 모드 |
+| 1 | 수강생 포털 (웹) | [01_user_home.png](./01_user_home.png) | `200 OK` | 267.3 KB | 수강생 포털 메인 홈 (히어로 배너, 교육과정 안내, 10대 골든 룰) |
+| 2 | 수강생 포털 (웹) | [02_user_about.png](./02_user_about.png) | `200 OK` | 331.5 KB | 교육원 소개 페이지 (설립 이념, 연혁, 임상 교수진, 시설 안내) |
+| 3 | 수강생 포털 (웹) | [03_user_curriculum.png](./03_user_curriculum.png) | `200 OK` | 360.7 KB | 교육 체계 / 커리큘럼 (공식 제공 3대 질환 전문 자격 트랙) |
+| 4 | 수강생 포털 (웹) | [04_user_mypage_summary.png](./04_user_mypage_summary.png) | `200 OK` | 173.3 KB | 수강생 마이페이지 (학습 진행률, 최근 HeyGen 영상 이어보기) |
+| 5 | 수강생 포털 (웹) | [05_user_mypage_payments.png](./05_user_mypage_payments.png) | `200 OK` | 173.3 KB | 마이페이지 - 수강료 납부 내역 및 무통장 가상계좌 안내 |
+| 6 | 수강생 포털 (웹) | [06_user_mypage_certs.png](./06_user_mypage_certs.png) | `200 OK` | 173.3 KB | 마이페이지 - 직능원 민간자격증 발급 현황 및 뷰어 |
+| 7 | 수강생 포털 (웹) | [07_user_tv24_shorts.png](./07_user_tv24_shorts.png) | `200 OK` | 222.7 KB | 간병24TV - 숏폼 러닝 및 HeyGen AI 임상 교육 비디오 |
+| 8 | 수강생 포털 (웹) | [08_user_verify.png](./08_user_verify.png) | `200 OK` | 262.4 KB | 직능원 민간자격증 고유등록번호 진위 검증 서비스 |
+| 9 | 수강생 포털 (웹) | [09_user_course_detail.png](./09_user_course_detail.png) | `200 OK` | 317.5 KB | 과정 상세 / HeyGen AI 전문강사 영상 플레이어 |
+| 10 | 수강생 포털 (웹) | [10_user_ui_inspect_mode.png](./10_user_ui_inspect_mode.png) | `200 OK` | 204.4 KB | Alt+I 단축키 가동 후 UI inspect 일련번호 뱃지 오버레이 모드 |
 | 11 | 관리자/CS 포털 (웹) | [11_admin_dashboard.png](./11_admin_dashboard.png) | `200 OK` | 108.8 KB | 관리자 대시보드 (KPI 통계 카드, 실시간 결제/상담 큐) |
 | 12 | 관리자/CS 포털 (웹) | [12_admin_callcenter.png](./12_admin_callcenter.png) | `200 OK` | 108.7 KB | 콜센터 CS 3분할 원스크린 포털 (고객정보/CTI, 진도율, 상담메모) |
 | 13 | 관리자/CS 포털 (웹) | [13_admin_curriculum.png](./13_admin_curriculum.png) | `200 OK` | 108.7 KB | 교육과정 관리 (공식 제공 3대 실데이터 전문 트랙 편성) |

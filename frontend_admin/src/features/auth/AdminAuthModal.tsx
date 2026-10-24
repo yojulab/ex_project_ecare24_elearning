@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, Button, Tabs, message, Tag } from 'antd';
 import { User, Lock, Phone, ShieldCheck, Sparkles } from 'lucide-react';
+import { safeFetchJson } from '@ecare24/utils';
 import { ENV } from '../../config/env';
 import { UiBadge } from '../../components/UiBadge';
 
@@ -24,25 +25,27 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
     setLoading(true);
     try {
       const executeLogin = async (baseUrl: string) => {
-        const res = await fetch(`${baseUrl}/auth/login`, {
+        const result = await safeFetchJson(`${baseUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(values),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || '로그인에 실패했습니다.');
-        return data;
+        if (!result.ok) {
+          throw new Error(result.error || '로그인에 실패했습니다.');
+        }
+        return result.data;
       };
 
       let data;
       try {
         data = await executeLogin(ENV.API_BASE_URL);
       } catch (err: any) {
-        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
-          const fallback = 'http://localhost:30014/api/v1';
-          if (ENV.API_BASE_URL !== fallback) {
+        const fallback = 'http://localhost:30014/api/v1';
+        if (ENV.API_BASE_URL !== fallback) {
+          console.warn('[eCare24] 관리자 기본 API 접속 실패, 로컬 백엔드(:30014)로 자동 Failover 시도...', err.message);
+          try {
             data = await executeLogin(fallback);
-          } else {
+          } catch {
             throw err;
           }
         } else {
@@ -74,25 +77,27 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       };
 
       const executeSignup = async (baseUrl: string) => {
-        const res = await fetch(`${baseUrl}/auth/signup`, {
+        const result = await safeFetchJson(`${baseUrl}/auth/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || '계정 생성에 실패했습니다.');
-        return data;
+        if (!result.ok) {
+          throw new Error(result.error || '계정 생성에 실패했습니다.');
+        }
+        return result.data;
       };
 
       let data;
       try {
         data = await executeSignup(ENV.API_BASE_URL);
       } catch (err: any) {
-        if (err.name === 'TypeError' || err.message?.includes('fetch')) {
-          const fallback = 'http://localhost:30014/api/v1';
-          if (ENV.API_BASE_URL !== fallback) {
+        const fallback = 'http://localhost:30014/api/v1';
+        if (ENV.API_BASE_URL !== fallback) {
+          console.warn('[eCare24] 관리자 기본 API 접속 실패, 로컬 백엔드(:30014)로 자동 Failover 시도...', err.message);
+          try {
             data = await executeSignup(fallback);
-          } else {
+          } catch {
             throw err;
           }
         } else {

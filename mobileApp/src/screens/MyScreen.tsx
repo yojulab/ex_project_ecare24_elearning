@@ -16,6 +16,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { MobileAuthModal } from '../components/MobileAuthModal';
+import { safeFetchJson } from '@ecare24/utils';
 import { ENV } from '../config/env';
 
 interface MyScreenProps {
@@ -38,11 +39,11 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
           const user = JSON.parse(stored);
           setCurrentUser(user);
           try {
-            const res = await fetch(`${ENV.API_BASE_URL}/me/summary`, {
+            const result = await safeFetchJson(`${ENV.API_BASE_URL}/me/summary`, {
               headers: { Authorization: `Bearer ${token}` },
             });
-            if (res.ok) {
-              setSummary(await res.json());
+            if (result.ok && result.data) {
+              setSummary(result.data);
             }
           } catch (e) {
             // API 오프라인 대응
@@ -334,11 +335,14 @@ export const MyScreen: React.FC<MyScreenProps> = ({ onNavigateCourse }) => {
           setCurrentUser(user);
           const token = localStorage.getItem('mobile_token');
           if (token) {
-            fetch(`${ENV.API_BASE_URL}/me/summary`, {
+            safeFetchJson(`${ENV.API_BASE_URL}/me/summary`, {
               headers: { Authorization: `Bearer ${token}` },
             })
-              .then((res) => (res.ok ? res.json() : null))
-              .then((data) => data && setSummary(data))
+              .then((result) => {
+                if (result.ok && result.data) {
+                  setSummary(result.data);
+                }
+              })
               .catch(() => {});
           }
         }}

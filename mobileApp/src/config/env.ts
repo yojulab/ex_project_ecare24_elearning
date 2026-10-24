@@ -15,10 +15,27 @@ const getEnvVar = (viteKey: string, expoKey: string, fallback: string): string =
 };
 
 function resolveApiBaseUrl(): string {
+  const envUrl = getEnvVar('VITE_API_BASE_URL', 'EXPO_PUBLIC_API_URL', '');
+
   if (typeof window !== 'undefined') {
+    // 1. 프로덕션 외부 HTTPS API가 설정되어 있는 경우 직접 통신
+    if (envUrl && envUrl.startsWith('https://')) {
+      return envUrl;
+    }
+    // 2. 상대 경로로 명시된 경우
+    if (envUrl && envUrl.startsWith('/')) {
+      return envUrl;
+    }
+    // 3. 로컬 호스트(localhost, 127.0.0.1)인 경우
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return envUrl || '/api/v1';
+    }
+    // 4. 기타 원격 환경: Vite 프록시(/api/v1) 사용
     return '/api/v1';
   }
-  return getEnvVar('VITE_API_BASE_URL', 'EXPO_PUBLIC_API_URL', 'http://127.0.0.1:30014/api/v1');
+
+  return envUrl || 'http://127.0.0.1:30014/api/v1';
 }
 
 export const ENV = {

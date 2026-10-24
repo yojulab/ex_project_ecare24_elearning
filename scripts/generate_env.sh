@@ -33,12 +33,14 @@ fi
 if [ "$IS_PROD" = true ]; then
   cat << 'EOF' > frontend_user/.env
 NEXT_PUBLIC_API_BASE_URL=https://mars.axfoundly.com/api/v1
+INTERNAL_BACKEND_URL=https://mars.axfoundly.com
 NEXT_PUBLIC_ADMIN_PORTAL_URL=https://second.axfoundly.com
 NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원
 EOF
 else
   cat << 'EOF' > frontend_user/.env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:30014/api/v1
+INTERNAL_BACKEND_URL=http://127.0.0.1:30014
 NEXT_PUBLIC_ADMIN_PORTAL_URL=http://localhost:30011
 NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원 (개발)
 EOF
