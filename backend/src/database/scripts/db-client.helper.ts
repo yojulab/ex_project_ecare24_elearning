@@ -68,7 +68,7 @@ export function getHostCandidates(): string[] {
   if (isProd) {
     // [운영 서버 우선순위]
     rawHosts = [
-      envHost,
+      envHost && envHost !== 'graphrag_agent_db_postgres' ? envHost : null,
       'external_project_db_postgres',
       '172.20.0.4',
       '127.0.0.1',
@@ -77,11 +77,12 @@ export function getHostCandidates(): string[] {
       '172.17.0.1',
       '172.20.0.1',
       '172.18.0.1',
+      'graphrag_agent_db_postgres',
     ].filter(Boolean) as string[];
   } else {
     // [개발 환경 우선순위]
     rawHosts = [
-      envHost,
+      envHost && envHost !== 'external_project_db_postgres' ? envHost : null,
       'graphrag_agent_db_postgres',
       '127.0.0.1',
       'localhost',
@@ -89,6 +90,7 @@ export function getHostCandidates(): string[] {
       '172.22.0.4',
       '172.17.0.1',
       '172.20.0.1',
+      'external_project_db_postgres',
     ].filter(Boolean) as string[];
   }
 

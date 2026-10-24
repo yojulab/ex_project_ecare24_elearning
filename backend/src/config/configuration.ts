@@ -5,9 +5,21 @@ export default () => ({
   corsOrigins: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['*'],
 
   database: {
-    host:
-      process.env.DB_HOST ||
-      (process.env.NODE_ENV === 'production' ? 'external_project_db_postgres' : 'graphrag_agent_db_postgres'),
+    host: (() => {
+      const isProd = process.env.NODE_ENV === 'production';
+      const envHost = process.env.DB_HOST;
+      if (isProd) {
+        if (!envHost || envHost === 'graphrag_agent_db_postgres') {
+          return 'external_project_db_postgres';
+        }
+        return envHost;
+      } else {
+        if (!envHost || envHost === 'external_project_db_postgres') {
+          return 'graphrag_agent_db_postgres';
+        }
+        return envHost;
+      }
+    })(),
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     database: process.env.DB_NAME || 'ecare24',
     username: process.env.DB_USER || 'ecare24_app',

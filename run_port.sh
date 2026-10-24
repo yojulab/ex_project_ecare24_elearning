@@ -87,7 +87,12 @@ get_port_pids() {
     30010) pids=$(pgrep -f "(next.*30010|next-server.*14|frontend_user)" 2>/dev/null || true) ;;
     30011) pids=$(pgrep -f "(vite.*30011|frontend_admin)" 2>/dev/null || true) ;;
     30012) pids=$(pgrep -f "(vite.*30012|mobileApp)" 2>/dev/null || true) ;;
-    30014) pids=$(pgrep -f "(dist/main|backend)" 2>/dev/null || true) ;;
+    30014)
+      pids=$(pgrep -f "(node.*dist/main|nest start|ts-node.*src/main)" 2>/dev/null || true)
+      if [ -z "$pids" ]; then
+        pids=$(pgrep -f "dist/main" 2>/dev/null || true)
+      fi
+      ;;
   esac
 
   if [ -z "$pids" ] && command -v timeout >/dev/null 2>&1 && command -v fuser >/dev/null 2>&1; then
@@ -236,29 +241,51 @@ start_service() {
   echo -e "🚀 [:${port}] ${BOLD}${title}${NC} 기동 중 (${mode} 모드)..."
   cd "${PROJECT_DIR}/${ws_name}"
 
+  local bg_pid=""
   if [ "$mode" = "prod" ]; then
     nohup env NODE_ENV=production HOSTNAME="0.0.0.0" PORT="$port" npm run start > "$log_file" 2>&1 &
+    bg_pid=$!
   else
     if [ "$port" = "30014" ]; then
       nohup env NODE_ENV=development PORT="$port" npm run start:dev > "$log_file" 2>&1 &
+      bg_pid=$!
     else
       nohup env NODE_ENV=development HOSTNAME="0.0.0.0" PORT="$port" npm run dev > "$log_file" 2>&1 &
+      bg_pid=$!
     fi
   fi
 
   cd "${PROJECT_DIR}"
   echo -e "   로그: ${log_file}"
 
-  # 포트 바인딩 확인 (최대 5초 대기)
-  for i in {1..5}; do
+  # 포트 바인딩 확인 (백엔드는 15초, 프론트엔드는 10초 대기)
+  local max_wait=10
+  if [ "$port" = "30014" ]; then
+    max_wait=15
+  fi
+
+  for ((i=1; i<=max_wait; i++)); do
+    sleep 1
     if is_port_in_use "$port"; then
       echo -e "   ${GREEN}✓ [:${port}] ONLINE 기동 성공 (PID: $(get_port_pids "$port"))${NC}\n"
       return 0
     fi
-    sleep 1
+    # 런처 프로세스가 조기 종료되고 포트/자식 PID도 없는 경우 비정상 종료 판단
+    if [ -n "$bg_pid" ] && ! kill -0 "$bg_pid" 2>/dev/null; then
+      local current_pids=$(get_port_pids "$port")
+      if [ -z "$current_pids" ]; then
+        echo -e "   ${RED}✗ [:${port}] 프로세스 비정상 종료됨 (로그: ${log_file})${NC}"
+        if [ -f "$log_file" ]; then
+          echo -e "   ${RED}[최근 에러 로그]${NC}"
+          tail -n 10 "$log_file" | sed 's/^/   /'
+        fi
+        echo ""
+        return 1
+      fi
+    fi
   done
 
-  echo -e "   ${YELLOW}⏳ [:${port}] 초기화 진행 중 (상태 확인: ./run_port.sh status)${NC}\n"
+  echo -e "   ${YELLOW}⏳ [:${port}] 포트 바인딩 대기 중 (상태 확인: ./run_port.sh status)${NC}\n"
 }
 
 cmd_start() {
@@ -302,8 +329,10 @@ cmd_status() {
     local pids
     pids=$(get_port_pids "$port")
 
-    if is_port_in_use "$port" || [ -n "$pids" ]; then
+    if is_port_in_use "$port"; then
       echo -e "  • [:${port}] ${BOLD}${title}${NC} : ${GREEN}ONLINE${NC} (PID: ${pids:-확인중}) ✓"
+    elif [ -n "$pids" ]; then
+      echo -e "  • [:${port}] ${BOLD}${title}${NC} : ${YELLOW}INITIALIZING / PORT_WAIT${NC} (PID: ${pids})"
     else
       echo -e "  • [:${port}] ${BOLD}${title}${NC} : ${RED}STOPPED${NC}"
     fi
