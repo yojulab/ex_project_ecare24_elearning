@@ -243,14 +243,14 @@ start_service() {
 
   local bg_pid=""
   if [ "$mode" = "prod" ]; then
-    nohup env NODE_ENV=production HOSTNAME="0.0.0.0" PORT="$port" npm run start > "$log_file" 2>&1 &
+    setsid env NODE_ENV=production HOSTNAME="0.0.0.0" PORT="$port" npm run start </dev/null > "$log_file" 2>&1 &
     bg_pid=$!
   else
     if [ "$port" = "30014" ]; then
-      nohup env NODE_ENV=development PORT="$port" npm run start:dev > "$log_file" 2>&1 &
+      setsid env NODE_ENV=development PORT="$port" npm run start:dev </dev/null > "$log_file" 2>&1 &
       bg_pid=$!
     else
-      nohup env NODE_ENV=development HOSTNAME="0.0.0.0" PORT="$port" npm run dev > "$log_file" 2>&1 &
+      setsid env NODE_ENV=development HOSTNAME="0.0.0.0" PORT="$port" npm run dev </dev/null > "$log_file" 2>&1 &
       bg_pid=$!
     fi
   fi

@@ -36,6 +36,7 @@ NEXT_PUBLIC_API_BASE_URL=https://mars.axfoundly.com/api/v1
 INTERNAL_BACKEND_URL=https://mars.axfoundly.com
 NEXT_PUBLIC_ADMIN_PORTAL_URL=https://second.axfoundly.com
 NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=KgTNvVcnPFFvdnNY3GZs6oQ1svmQ0FoAtbKowfAARvM=
 EOF
 else
   cat << 'EOF' > frontend_user/.env
@@ -43,6 +44,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:30014/api/v1
 INTERNAL_BACKEND_URL=http://127.0.0.1:30014
 NEXT_PUBLIC_ADMIN_PORTAL_URL=http://localhost:30011
 NEXT_PUBLIC_APP_NAME=한국돌봄종사자양성교육원 (개발)
+NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=KgTNvVcnPFFvdnNY3GZs6oQ1svmQ0FoAtbKowfAARvM=
 EOF
 fi
 echo "✓ frontend_user/.env 생성 완료"

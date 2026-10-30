@@ -1,6 +1,6 @@
 # eCare24 Playwright Headless 중요 화면 자동 캡처 검증 보고서
 
-- **검증 일시**: 2026-10-24T07:47:35.457Z
+- **검증 일시**: 2026-10-30T08:25:15.056Z
 - **실행 모드**: Playwright Headless (Chromium arm64, --no-sandbox)
 - **총 대상 화면**: 21개
 - **성공**: 21건 / **실패**: 0건
